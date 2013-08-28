@@ -18,9 +18,9 @@ module.exports = function(grunt) {
       },
       dist: {
         src: [
-          'lib/inflection.js',
           'src/json_api_serializer.js',
-          'src/json_api_adapter.js'
+          'src/json_api_adapter.js',
+          'lib/inflection.js'
         ],
         dest: 'dist/json_api_adapter.js'
       }

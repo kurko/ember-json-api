@@ -13,6 +13,16 @@ App.Store = DS.Store.extend({
 });
 ```
 
+### Build It Yourself
+
+You will need `grunt-cli` installed on your system: `npm install -g grunt-cli`. Then run:
+
+```
+$ npm install && grunt
+```
+
+The output files go in the `dist` folder.
+
 ### Untested (not working)
 - Polymorphic types
 - Embedded models

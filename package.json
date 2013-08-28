@@ -1,0 +1,20 @@
+{
+	"name": "ember-json-api",
+	"description": "Ember Data adapter for JSON API.",
+	"version": "0.0.1",
+	"homepage": "http://github.com/daliwali/ember-json-api",
+	"author": "Dali Zheng",
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/daliwali/ember-json-api"
+	},
+	"bugs": {
+		"url": "http://github.com/daliwali/ember-json-api/issues"
+	},
+	"dependencies": {
+		"grunt": "~0.4.1",
+		"grunt-contrib-concat": "~0.3.0",
+		"grunt-contrib-uglify": "~0.2.2",
+		"grunt-contrib-watch": "~0.4.4"
+	}
+}

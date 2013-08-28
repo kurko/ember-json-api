@@ -1,3 +1,9 @@
+/*! 
+ * ember-json-api
+ * Built on 2013-08-28
+ * http://github.com/daliwali/ember-json-api
+ * Copyright (c) 2013 Dali Zheng
+ */
 /*
 Copyright (c) 2010 Ryan Schuft (ryan.schuft@gmail.com)
 

@@ -14,7 +14,10 @@ module.exports = function(grunt) {
     concat: {
       options: {
         banner: '<%= meta.banner %>',
-        separator: ';'
+        process: function(src, filepath) {
+          // wrap files in an anonymous function
+          return '(function() {\n"use strict";\n' + src + '\n}).call(this);\n';
+        }
       },
       dist: {
         src: [

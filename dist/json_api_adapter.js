@@ -10,14 +10,6 @@ var get = Ember.get, isNone = Ember.isNone;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
-  pluralize: function(key) {
-    return Ember.String.pluralize(key);
-  },
-
-  singularize: function(key) {
-    return Ember.String.singularize(key);
-  },
-
   /**
    * Patch the extractSingle method, since there are no singular records
    */

@@ -4,65 +4,48 @@
 
   DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
-    serializer: DS.JsonApiSerializer,
+    serializer: DS.JsonApiSerializer.create(),
+
+    /**
+     * Underscore and pluralize the type name
+     */
+    rootForType: function(type) {
+      return Ember.String.pluralize(Ember.String.underscore(type));
+    },
 
     /**
      * Fix query URL
      */
     findMany: function(store, type, ids, owner) {
-      var root = this.rootForType(type),
-      adapter = this;
-
-      ids = this.serializeIds(ids);
-
-      return this.ajax(this.buildURL(root), "GET", {
-        data: {ids: ids.join(',')}
-      }).then(function(json) {
-        adapter.didFindMany(store, type, json);
-      }).then(null, DS.rejectionHandler);
+      return this.ajax(this.buildURL(type.typeKey), 'GET', {data: {ids: ids.join(',')}});
     },
 
     /**
-     * Cast individual record to array
+     * Cast individual record to array,
+     * and pluralize the root key
      */
     createRecord: function(store, type, record) {
-      var root = this.rootForType(type);
-      var adapter = this;
       var data = {};
+      data[Ember.String.pluralize(type.typeKey)] = [
+        store.serializerFor(type.typeKey).serialize(record, {includeId: true})
+      ];
 
-      data[root] = [this.serialize(record, { includeId: true })];
-
-      return this.ajax(this.buildURL(root), "POST", {
-        data: data
-      }).then(function(json){
-        adapter.didCreateRecord(store, type, record, json);
-      }, function(xhr) {
-        adapter.didError(store, type, record, xhr);
-        throw xhr;
-      }).then(null, DS.rejectionHandler);
+      return this.ajax(this.buildURL(type.typeKey), "POST", {data: data});
     },
 
     /**
-     * Cast individual record to array
+     * Cast individual record to array,
+     * and pluralize the root key
      */
     updateRecord: function(store, type, record) {
-      var id, root, adapter, data;
+      var data = {};
+      data[Ember.String.pluralize(type.typeKey)] = [
+        store.serializerFor(type.typeKey).serialize(record)
+      ];
 
-      id = get(record, 'id');
-      root = this.rootForType(type);
-      adapter = this;
+      var id = get(record, 'id');
 
-      data = {};
-      data[root] = [this.serialize(record)];
-
-      return this.ajax(this.buildURL(root, id, record), "PUT",{
-        data: data
-      }).then(function(json){
-        adapter.didUpdateRecord(store, type, record, json);
-      }, function(xhr) {
-        adapter.didError(store, type, record, xhr);
-        throw xhr;
-      }).then(null, DS.rejectionHandler);
+      return this.ajax(this.buildURL(type.typeKey, id), "PUT", {data: data});
     }
 
   });

@@ -29,7 +29,7 @@
       return this._super(store, primaryType, json, recordId, requestType);
     },
 
-    normalize: function(type, prop, hash) {
+    normalize: function(type, hash, prop) {
       var json = {};
       for(var key in hash) {
         if(key != 'links') {

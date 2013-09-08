@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2013-09-04
+ * Built on 2013-09-08
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2013 Dali Zheng
  */
@@ -44,7 +44,26 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   // SERIALIZATION
 
   /**
-   * Use "links" key, remove support for polymorphic type
+   * Convert attribute key to underscore
+   */
+  serializeAttribute: function(record, json, key, attribute) {
+    var attrs = get(this, 'attrs');
+    var value = get(record, key), type = attribute.type;
+
+    if(type) {
+      var transform = this.transformFor(type);
+      value = transform.serialize(value);
+    }
+
+    // if provided, use the mapping provided by `attrs` in
+    // the serializer
+    key = attrs && attrs[key] || key;
+
+    json[Ember.String.underscore(key)] = value;
+  },
+
+  /**
+   * Use "links" key, convert key to underscore, remove support for polymorphic type
    */
   serializeBelongsTo: function(record, json, relationship) {
     var key = relationship.key;
@@ -54,11 +73,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     if (isNone(belongsTo)) { return; }
 
     json.links = json.links || {};
-    json.links[key] = get(belongsTo, 'id');
+    json.links[Ember.String.underscore(key)] = get(belongsTo, 'id');
   },
 
   /**
-   * Use "links" key
+   * Use "links" key, convert key to underscore
    */
   serializeHasMany: function(record, json, relationship) {
     var key = relationship.key;
@@ -67,7 +86,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
     if (relationshipType === 'manyToNone' || relationshipType === 'manyToMany') {
       json.links = json.links || {};
-      json.links[key] = get(record, key).mapBy('id');
+      json.links[Ember.String.underscore(key)] = get(record, key).mapBy('id');
     }
   }
 

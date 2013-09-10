@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2013-09-08
+ * Built on 2013-09-09
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2013 Dali Zheng
  */
@@ -17,7 +17,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var primaryTypeName = primaryType.typeKey;
     var json = {};
     for(var key in payload) {
-      var typeName = this.singularize(key);
+      var typeName = Ember.String.singularize(key);
       if(typeName == primaryTypeName && Ember.isArray(payload[key])) {
         json[typeName] = payload[key][0];
       } else {

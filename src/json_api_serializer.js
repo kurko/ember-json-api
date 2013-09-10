@@ -33,7 +33,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
       }
     }
-    return this._super(type, prop, json);
+    return this._super(type, json, prop);
   },
 
   // SERIALIZATION

@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2013-09-09
+ * Built on 2013-09-11
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2013 Dali Zheng
  */
@@ -28,20 +28,20 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   },
 
   /**
-   * Flatten links, camelize keys
+   * Flatten links
    */
   normalize: function(type, hash, prop) {
     var json = {};
     for(var key in hash) {
       if(key != 'links') {
-        json[Ember.String.camelize(key)] = hash[key];
+        json[key] = hash[key];
       } else if(typeof hash[key] == 'object') {
         for(var link in hash[key]) {
-          json[Ember.String.camelize(link)] = hash[key][link];
+          json[key] = hash[key][link];
         }
       }
     }
-    return this._super(type, prop, json);
+    return this._super(type, json, prop);
   },
 
   // SERIALIZATION
@@ -87,10 +87,10 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   serializer: DS.JsonApiSerializer.create(),
 
   /**
-   * Underscore and pluralize the type name
+   * Pluralize the type name
    */
   rootForType: function(type) {
-    return Ember.String.pluralize(Ember.String.underscore(type));
+    return Ember.String.pluralize(type);
   },
 
   /**

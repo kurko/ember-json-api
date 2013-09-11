@@ -5,10 +5,10 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   serializer: DS.JsonApiSerializer.create(),
 
   /**
-   * Underscore and pluralize the type name
+   * Pluralize the type name
    */
   rootForType: function(type) {
-    return Ember.String.pluralize(Ember.String.underscore(type));
+    return Ember.String.pluralize(type);
   },
 
   /**

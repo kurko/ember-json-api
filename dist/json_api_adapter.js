@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2013-09-11
+ * Built on 2013-09-12
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2013 Dali Zheng
  */
@@ -84,7 +84,7 @@ var get = Ember.get;
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
-  serializer: DS.JsonApiSerializer.create(),
+  defaultSerializer: 'DS/jsonApi',
 
   /**
    * Pluralize the type name

@@ -2,7 +2,7 @@ var get = Ember.get;
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
-  serializer: DS.JsonApiSerializer.create(),
+  defaultSerializer: 'DS/jsonApi',
 
   /**
    * Pluralize the type name

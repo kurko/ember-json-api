@@ -87,13 +87,6 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
 
   /**
-   * Pluralize the type name
-   */
-  rootForType: function(type) {
-    return Ember.String.pluralize(type);
-  },
-
-  /**
    * Fix query URL
    */
   findMany: function(store, type, ids, owner) {

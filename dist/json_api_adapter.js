@@ -51,10 +51,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   serializeBelongsTo: function(record, json, relationship) {
     var key = relationship.key;
-
     var belongsTo = get(record, key);
 
-    if (isNone(belongsTo)) { return; }
+    if (isNone(belongsTo)) return;
 
     json.links = json.links || {};
     json.links[key] = get(belongsTo, 'id');
@@ -95,11 +94,11 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   /**
    * Cast individual record to array,
-   * and pluralize the root key
+   * and match the root key to the route
    */
   createRecord: function(store, type, record) {
     var data = {};
-    data[Ember.String.pluralize(type.typeKey)] = [
+    data[this.pathForType(type.typeKey)] = [
       store.serializerFor(type.typeKey).serialize(record, {includeId: true})
     ];
 
@@ -108,11 +107,11 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   /**
    * Cast individual record to array,
-   * and pluralize the root key
+   * and match the root key to the route
    */
   updateRecord: function(store, type, record) {
     var data = {};
-    data[Ember.String.pluralize(type.typeKey)] = [
+    data[this.pathForType(type.typeKey)] = [
       store.serializerFor(type.typeKey).serialize(record)
     ];
 

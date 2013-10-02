@@ -36,6 +36,58 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     return this._super(type, json, prop);
   },
 
+  /**
+   * Extract top-level "meta" & "links" before normalizing.
+   */
+  normalizePayload: function(type, payload) {
+    if(payload.meta) {
+      this.extractMeta(type, payload.meta);
+      delete payload.meta;
+    }
+    if(payload.links) {
+      this.extractLinks(type, payload.links);
+      delete payload.links;
+    }
+    return payload;
+  },
+
+  /**
+   * Override this method to parse the top-level "meta" object per type.
+   */
+  extractMeta: function(type, meta) {
+    // no op
+  },
+
+  /**
+   * Parse the top-level "links" object.
+   */
+  extractLinks: function(type, links) {
+    var link, key, value, route;
+
+    for(link in links) {
+      key = link.split('.').pop();
+      value = links[link];
+      if(typeof value === 'string') {
+        route = value;
+      } else {
+        key = value.type || key;
+        route = value.href;
+      }
+
+      // strip base url
+      if(route.substr(0, 4).toLowerCase() === 'http') {
+        route = route.split('//').pop().split('/').slice(1).join('/');
+      }
+
+      // strip prefix slash
+      if(route.charAt(0) === '/') {
+        route = route.substr(1);
+      }
+
+      DS.set('_routes.' + Ember.String.singularize(key), route);
+    }
+  },
+
   // SERIALIZATION
 
   /**

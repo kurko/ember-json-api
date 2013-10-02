@@ -1,11 +1,47 @@
 var get = Ember.get;
 
+/**
+ * Keep a record of routes to resources by type.
+ */
+DS._routes = {};
+
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   defaultSerializer: 'DS/jsonApi',
 
   /**
-   * Fix query URL
+   * Look up routes based on top-level links.
+   */
+  buildURL: function(type, id) {
+    var route = DS._routes[type];
+    if(!!route) {
+      var url = [],
+          host = get(this, 'host'),
+          prefix = this.urlPrefix(),
+          param = new RegExp('\{(.*?)\}', 'g');
+
+      if (id) {
+        if(route.match(param)) {
+          url.push(route.replace(param, id));
+        } else {
+          url.push(route, id);
+        }
+      } else {
+        url.push(route.replace(param, ''));
+      }
+
+      if (prefix) { url.unshift(prefix); }
+
+      url = url.join('/');
+      if (!host && url) { url = '/' + url; }
+
+      return url;
+    }
+    return this._super(type, id);
+  },
+
+  /**
+   * Fix query URL.
    */
   findMany: function(store, type, ids, owner) {
     return this.ajax(this.buildURL(type.typeKey), 'GET', {data: {ids: ids.join(',')}});

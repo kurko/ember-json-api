@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2013-09-17
+ * Built on 2013-10-02
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2013 Dali Zheng
  */
@@ -44,6 +44,58 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     return this._super(type, json, prop);
   },
 
+  /**
+   * Extract top-level "meta" & "links" before normalizing.
+   */
+  normalizePayload: function(type, payload) {
+    if(payload.meta) {
+      this.extractMeta(type, payload.meta);
+      delete payload.meta;
+    }
+    if(payload.links) {
+      this.extractLinks(type, payload.links);
+      delete payload.links;
+    }
+    return payload;
+  },
+
+  /**
+   * Override this method to parse the top-level "meta" object per type.
+   */
+  extractMeta: function(type, meta) {
+    // no op
+  },
+
+  /**
+   * Parse the top-level "links" object.
+   */
+  extractLinks: function(type, links) {
+    var link, key, value, route;
+
+    for(link in links) {
+      key = link.split('.').pop();
+      value = links[link];
+      if(typeof value === 'string') {
+        route = value;
+      } else {
+        key = value.type || key;
+        route = value.href;
+      }
+
+      // strip base url
+      if(route.substr(0, 4).toLowerCase() === 'http') {
+        route = route.split('//').pop().split('/').slice(1).join('/');
+      }
+
+      // strip prefix slash
+      if(route.charAt(0) === '/') {
+        route = route.substr(1);
+      }
+
+      DS.set('_routes.' + Ember.String.singularize(key), route);
+    }
+  },
+
   // SERIALIZATION
 
   /**
@@ -81,12 +133,48 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 "use strict";
 var get = Ember.get;
 
+/**
+ * Keep a record of routes to resources by type.
+ */
+DS._routes = {};
+
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   defaultSerializer: 'DS/jsonApi',
 
   /**
-   * Fix query URL
+   * Look up routes based on top-level links.
+   */
+  buildURL: function(type, id) {
+    var route = DS._routes[type];
+    if(!!route) {
+      var url = [],
+          host = get(this, 'host'),
+          prefix = this.urlPrefix(),
+          param = new RegExp('\{(.*?)\}', 'g');
+
+      if (id) {
+        if(route.match(param)) {
+          url.push(route.replace(param, id));
+        } else {
+          url.push(route, id);
+        }
+      } else {
+        url.push(route.replace(param, ''));
+      }
+
+      if (prefix) { url.unshift(prefix); }
+
+      url = url.join('/');
+      if (!host && url) { url = '/' + url; }
+
+      return url;
+    }
+    return this._super(type, id);
+  },
+
+  /**
+   * Fix query URL.
    */
   findMany: function(store, type, ids, owner) {
     return this.ajax(this.buildURL(type.typeKey), 'GET', {data: {ids: ids.join(',')}});

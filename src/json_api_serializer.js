@@ -48,7 +48,29 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       this.extractLinks(type, payload.links);
       delete payload.links;
     }
+    if(payload.linked) {
+      this.extractLinked(payload.linked);
+      delete payload.linked;
+    }
     return payload;
+  },
+
+  /**
+   * Extract top-level "linked" containing associated objects
+   */
+  extractLinked: function(linked) {
+    var link, value, relation, store = get(this, 'store');
+    for(link in linked) {
+      value = linked[link];
+      if (value.links) {
+        for(relation in value.links) {
+          value[relation]=value.links.relation;
+        }
+        delete value.links;
+      }
+      console.log(value);
+      store.pushMany(Ember.String.singularize(link), value);
+    }
   },
 
   /**

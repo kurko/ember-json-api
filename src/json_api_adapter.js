@@ -44,7 +44,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Fix query URL.
    */
   findMany: function(store, type, ids, owner) {
-    return this.ajax(this.buildURL(type.typeKey), 'GET', {data: {ids: ids.join(',')}});
+    return this.ajax(this.buildURL(type.typeKey, ids.join(',')), 'GET');
   },
 
   /**

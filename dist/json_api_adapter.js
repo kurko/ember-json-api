@@ -1,8 +1,8 @@
 /*! 
  * ember-json-api
- * Built on 2013-10-02
+ * Built on 2014-04-29
  * http://github.com/daliwali/ember-json-api
- * Copyright (c) 2013 Dali Zheng
+ * Copyright (c) 2014 Dali Zheng
  */
 (function() {
 "use strict";
@@ -56,7 +56,29 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       this.extractLinks(type, payload.links);
       delete payload.links;
     }
+    if(payload.linked) {
+      this.extractLinked(payload.linked);
+      delete payload.linked;
+    }
     return payload;
+  },
+
+  /**
+   * Extract top-level "linked" containing associated objects
+   */
+  extractLinked: function(linked) {
+    var link, value, relation, store = get(this, 'store');
+    for(link in linked) {
+      value = linked[link];
+      if (value.links) {
+        for(relation in value.links) {
+          value[relation]=value.links.relation;
+        }
+        delete value.links;
+      }
+      console.log(value);
+      store.pushMany(Ember.String.singularize(link), value);
+    }
   },
 
   /**
@@ -177,7 +199,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Fix query URL.
    */
   findMany: function(store, type, ids, owner) {
-    return this.ajax(this.buildURL(type.typeKey), 'GET', {data: {ids: ids.join(',')}});
+    return this.ajax(this.buildURL(type.typeKey, ids.join(',')), 'GET');
   },
 
   /**

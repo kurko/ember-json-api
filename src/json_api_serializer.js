@@ -39,13 +39,13 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   /**
    * Extract top-level "meta" & "links" before normalizing.
    */
-  normalizePayload: function(type, payload) {
+  normalizePayload: function(payload) {
     if(payload.meta) {
-      this.extractMeta(type, payload.meta);
+      this.extractMeta(payload.meta);
       delete payload.meta;
     }
     if(payload.links) {
-      this.extractLinks(type, payload.links);
+      this.extractLinks(payload.links);
       delete payload.links;
     }
     if(payload.linked) {
@@ -76,14 +76,14 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   /**
    * Override this method to parse the top-level "meta" object per type.
    */
-  extractMeta: function(type, meta) {
+  extractMeta: function(meta) {
     // no op
   },
 
   /**
    * Parse the top-level "links" object.
    */
-  extractLinks: function(type, links) {
+  extractLinks: function(links) {
     var link, key, value, route;
 
     for(link in links) {

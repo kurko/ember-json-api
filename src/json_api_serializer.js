@@ -39,7 +39,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   /**
    * Extract top-level "meta" & "links" before normalizing.
    */
-  normalizePayload: function(payload) {
+  normalizePayload: function(type, payload) {
     if(payload.meta) {
       this.extractMeta(payload.meta);
       delete payload.meta;

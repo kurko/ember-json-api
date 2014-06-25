@@ -1,16 +1,17 @@
-var get = Ember.get, isNone = Ember.isNone;
+var get = Ember.get;
+var isNone = Ember.isNone;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
-
   /**
    * Patch the extractSingle method, since there are no singular records
    */
   extractSingle: function(store, primaryType, payload, recordId, requestType) {
     var primaryTypeName = primaryType.typeKey;
     var json = {};
-    for(var key in payload) {
+    for (var key in payload) {
       var typeName = Ember.String.singularize(key);
-      if(typeName === primaryTypeName && Ember.isArray(payload[key])) {
+      if (typeName === primaryTypeName &&
+          Ember.isArray(payload[key])) {
         json[typeName] = payload[key][0];
       } else {
         json[key] = payload[key];
@@ -24,11 +25,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   normalize: function(type, hash, prop) {
     var json = {};
-    for(var key in hash) {
-      if(key !== 'links') {
+    for (var key in hash) {
+      if (key !== 'links') {
         json[key] = hash[key];
-      } else if(typeof hash[key] === 'object') {
-        for(var link in hash[key]) {
+      } else if (typeof hash[key] === 'object') {
+        for (var link in hash[key]) {
           json[link] = hash[key][link];
         }
       }
@@ -40,15 +41,15 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
-    if(payload.meta) {
+    if (payload.meta) {
       this.extractMeta(payload.meta);
       delete payload.meta;
     }
-    if(payload.links) {
+    if (payload.links) {
       this.extractLinks(payload.links);
       delete payload.links;
     }
-    if(payload.linked) {
+    if (payload.linked) {
       this.extractLinked(payload.linked);
       delete payload.linked;
     }
@@ -60,18 +61,17 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   extractLinked: function(linked) {
     var link, values, value, relation, store = get(this, 'store');
-    for(link in linked) {
+    for (link in linked) {
       values = linked[link];
       for (var i = values.length - 1; i >= 0; i--) {
         value = values[i];
 
         if (value.links) {
-          for(relation in value.links) {
+          for (relation in value.links) {
             value[relation] = value.links[relation];
           }
           delete value.links;
         }
-        // console.log(value);
         store.push(Ember.String.singularize(link), value);
       }
     }
@@ -90,10 +90,10 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   extractLinks: function(links) {
     var link, key, value, route;
 
-    for(link in links) {
+    for (link in links) {
       key = link.split('.').pop();
       value = links[link];
-      if(typeof value === 'string') {
+      if (typeof value === 'string') {
         route = value;
       } else {
         key = value.type || key;
@@ -101,16 +101,16 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       }
 
       // strip base url
-      if(route.substr(0, 4).toLowerCase() === 'http') {
+      if (route.substr(0, 4).toLowerCase() === 'http') {
         route = route.split('//').pop().split('/').slice(1).join('/');
       }
 
       // strip prefix slash
-      if(route.charAt(0) === '/') {
+      if (route.charAt(0) === '/') {
         route = route.substr(1);
       }
 
-      DS.set('_routes.' + Ember.String.singularize(key), route);
+      DS._routes[Ember.String.singularize(key)] = route;
     }
   },
 
@@ -137,10 +137,10 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
     var relationshipType = DS.RelationshipChange.determineRelationshipType(record.constructor, relationship);
 
-    if (relationshipType === 'manyToNone' || relationshipType === 'manyToMany') {
+    if (relationshipType === 'manyToNone' ||
+        relationshipType === 'manyToMany') {
       json.links = json.links || {};
       json.links[key] = get(record, key).mapBy('id');
     }
   }
-
 });

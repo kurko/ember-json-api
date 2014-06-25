@@ -166,13 +166,17 @@ test('extractSingle snake_case', function() {
     home_planet:   {
       id: '1',
       name: 'Umber',
-      super_villain_ids: [1]
+      links: {
+        super_villain: [1]
+      }
     },
     super_villains:  [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
-      home_planet_id: '1'
+      links: {
+        home_planet: '1'
+      }
     }]
   };
 
@@ -183,7 +187,7 @@ test('extractSingle snake_case', function() {
   deepEqual(json, {
     id: '1',
     name: 'Umber',
-    super_villain_ids: [1]
+    super_villain: [1]
   });
 
   env.store.find('superVillain', 1).then(function(minion){
@@ -200,7 +204,9 @@ test('extractSingle camelCase', function() {
       id: '1',
       firstName: 'Tom',
       lastName: 'Dale',
-      homePlanetId: '1'
+      links: {
+        homePlanet: '1'
+      }
     }]
   };
 

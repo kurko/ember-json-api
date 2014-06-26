@@ -96,6 +96,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   extractLinks: function(links) {
     var link, key, value, route;
+    var extracted = [], linkEntry, linkKey;
 
     for (link in links) {
       key = link.split('.').pop();
@@ -116,9 +117,14 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       if (route.charAt(0) === '/') {
         route = route.substr(1);
       }
-
-      DS._routes[Ember.String.singularize(key)] = route;
+      linkEntry = { };
+      linkKey = Ember.String.singularize(key);
+      linkEntry[linkKey] = route;
+      extracted.push(linkEntry);
+      DS._routes[linkKey] = route;
     }
+
+    return extracted;
   },
 
   // SERIALIZATION

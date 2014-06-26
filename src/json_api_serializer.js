@@ -6,8 +6,15 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Patch the extractSingle method, since there are no singular records
    */
   extractSingle: function(store, primaryType, payload, recordId, requestType) {
-    var primaryTypeName = primaryType.typeKey;
+    var primaryTypeName;
+    if (this.keyForAttribute) {
+      primaryTypeName = this.keyForAttribute(primaryType.typeKey);
+    } else {
+      primaryTypeName = primaryType.typeKey;
+    }
+
     var json = {};
+
     for (var key in payload) {
       var typeName = Ember.String.singularize(key);
       if (typeName === primaryTypeName &&

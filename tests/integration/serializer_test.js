@@ -120,7 +120,6 @@ test('serializeIntoHash with decamelized types', function() {
   });
 });
 
-
 test('normalize camelCased', function() {
   var superVillain_hash = {
     firstName: 'Tom',
@@ -180,14 +179,16 @@ test('extractSingle snake_case', function() {
     }]
   };
 
-  var json = Ember.run(function() {
-    return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
-  });
+  env.serializer.keyForAttribute = function(key) {
+    return Ember.String.decamelize(key);
+  }
 
-  deepEqual(json, {
-    id: '1',
-    name: 'Umber',
-    super_villain: [1]
+  env.serializer.keyForRelationship = function(key, relationshipKind) {
+    return Ember.String.decamelize(key);
+  }
+
+  Ember.run(function() {
+    return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
   });
 
   env.store.find('superVillain', 1).then(function(minion){
@@ -199,7 +200,11 @@ test('extractSingle camelCase', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planet:   {id: '1', name: 'Umber', super_villain_ids: [1]},
+    home_planet:   {
+      id: '1',
+      name: 'Umber',
+      super_villain_ids: [1]
+    },
     super_villains:  [{
       id: '1',
       firstName: 'Tom',
@@ -210,14 +215,8 @@ test('extractSingle camelCase', function() {
     }]
   };
 
-  var json = Ember.run(function() {
+  Ember.run(function() {
     return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
-  });
-
-  deepEqual(json, {
-    id: '1',
-    name: 'Umber',
-    super_villain_ids: [1]
   });
 
   env.store.find('superVillain', 1).then(function(minion){
@@ -226,7 +225,7 @@ test('extractSingle camelCase', function() {
 });
 
 
-test('extractArray', function() {
+test('extractArray snakeCase', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
@@ -243,15 +242,43 @@ test('extractArray', function() {
     }]
   };
 
-  var array = Ember.run(function() {
-    return env.serializer.extractArray(env.store, HomePlanet, json_hash);
+  env.serializer.keyForAttribute = function(key) {
+    return Ember.String.decamelize(key);
+  }
+
+  env.serializer.keyForRelationship = function(key, relationshipKind) {
+    return Ember.String.decamelize(key);
+  }
+
+  Ember.run(function() {
+    env.serializer.extractArray(env.store, HomePlanet, json_hash);
   });
 
-  deepEqual(array, [{
-    id: '1',
-    name: 'Umber',
-    super_villain_ids: [1]
-  }]);
+  env.store.find('superVillain', 1).then(function(minion){
+    equal(minion.get('firstName'), 'Tom');
+  });
+});
+
+test('extractArray camelCase', function() {
+  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+
+  var json_hash = {
+    home_planets: [{
+      id: '1',
+      name: 'Umber',
+      superVillainIds: [1]
+    }],
+    super_villains: [{
+      id: '1',
+      firstName: 'Tom',
+      lastName: 'Dale',
+      homePlanetId: '1'
+    }]
+  };
+
+  Ember.run(function() {
+    env.serializer.extractArray(env.store, HomePlanet, json_hash);
+  });
 
   env.store.find('superVillain', 1).then(function(minion){
     equal(minion.get('firstName'), 'Tom');

@@ -3,25 +3,24 @@ var get = Ember.get;
 /**
  * Keep a record of routes to resources by type.
  */
-DS._routes = {};
+
+DS._routes = Ember.create(null);
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
-
   defaultSerializer: 'DS/jsonApi',
-
   /**
    * Look up routes based on top-level links.
    */
-  buildURL: function(type, id) {
-    var route = DS._routes[type];
-    if(!!route) {
-      var url = [],
-          host = get(this, 'host'),
-          prefix = this.urlPrefix(),
-          param = new RegExp('\{(.*?)\}', 'g');
+  buildURL: function(typeName, id) {
+    var route = DS._routes[typeName];
+    if (!!route) {
+      var url = [];
+      var host = get(this, 'host');
+      var prefix = this.urlPrefix();
+      var param = /\{(.*?)\}/g;
 
       if (id) {
-        if(route.match(param)) {
+        if (param.test(route)) {
           url.push(route.replace(param, id));
         } else {
           url.push(route, id);
@@ -37,7 +36,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
       return url;
     }
-    return this._super(type, id);
+
+    return this._super(typeName, id);
   },
 
   /**
@@ -53,11 +53,16 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   createRecord: function(store, type, record) {
     var data = {};
+
     data[this.pathForType(type.typeKey)] = [
-      store.serializerFor(type.typeKey).serialize(record, {includeId: true})
+      store.serializerFor(type.typeKey).serialize(record, {
+        includeId: true
+      })
     ];
 
-    return this.ajax(this.buildURL(type.typeKey), "POST", {data: data});
+    return this.ajax(this.buildURL(type.typeKey), 'POST', {
+        data: data
+      });
   },
 
   /**
@@ -72,7 +77,9 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
     var id = get(record, 'id');
 
-    return this.ajax(this.buildURL(type.typeKey, id), "PUT", {data: data});
+    return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
+        data: data
+      });
   },
 
   _tryParseErrorResponse:  function(responseText) {
@@ -82,6 +89,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       return "Something went wrong";
     }
   },
+
   ajaxError: function(jqXHR) {
     var error = this._super(jqXHR);
     var response;
@@ -92,7 +100,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
       if (response &&
           typeof response === 'object' &&
-          response.errors !== undefined) {
+            response.errors !== undefined) {
 
         Ember.A(Ember.keys(response.errors)).forEach(function(key) {
           errors[Ember.String.camelize(key)] =response.errors[key];
@@ -108,21 +116,19 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       return error;
     }
   },
-      /**
-        Underscores the JSON root keys when serializing.
+  /**
+    Underscores the JSON root keys when serializing.
 
-        @method serializeIntoHash
-        @param {Object} hash
-        @param {subclass of DS.Model} type
-        @param {DS.Model} record
-        @param {Object} options
-      */
-      serializeIntoHash: function(data, type, record, options) {
-        var root = underscore(decamelize(type.typeKey));
-        data[root] = this.serialize(record, options);
-      },
-
-
+    @method serializeIntoHash
+    @param {Object} hash
+    @param {subclass of DS.Model} type
+    @param {DS.Model} record
+    @param {Object} options
+    */
+  serializeIntoHash: function(data, type, record, options) {
+    var root = underscore(decamelize(type.typeKey));
+    data[root] = this.serialize(record, options);
+  }
 });
 
 function ServerError(status, message, xhr) {
@@ -135,4 +141,5 @@ function ServerError(status, message, xhr) {
 
 ServerError.prototype = Ember.create(Error.prototype);
 ServerError.constructor = ServerError;
+
 DS.JsonApiAdapter.ServerError = ServerError;

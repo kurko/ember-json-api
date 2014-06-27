@@ -166,7 +166,7 @@ test('extractSingle snake_case', function() {
       id: '1',
       name: 'Umber',
       links: {
-        super_villain: [1]
+        super_villains: [1]
       }
     },
     super_villains:  [{
@@ -203,16 +203,20 @@ test('extractSingle camelCase', function() {
     home_planet:   {
       id: '1',
       name: 'Umber',
-      super_villain_ids: [1]
-    },
-    super_villains:  [{
-      id: '1',
-      firstName: 'Tom',
-      lastName: 'Dale',
       links: {
-        homePlanet: '1'
+        super_villains: [1]
       }
-    }]
+    },
+    linked: {
+      super_villains:  [{
+        id: '1',
+        firstName: 'Tom',
+        lastName: 'Dale',
+        links: {
+          homePlanet: '1'
+        }
+      }]
+    }
   };
 
   Ember.run(function() {
@@ -224,22 +228,27 @@ test('extractSingle camelCase', function() {
   });
 });
 
-
-test('extractArray snakeCase', function() {
+test('extractArray snake_case', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planets: [{
-      id: '1',
-      name: 'Umber',
-      super_villain_ids: [1]
-    }],
-    super_villains: [{
-      id: '1',
-      first_name: 'Tom',
-      last_name: 'Dale',
-      home_planet_id: '1'
-    }]
+      home_planets: [{
+        id: '1',
+        name: 'Umber',
+        links: {
+          super_villains: [1]
+        }
+      }],
+      linked: {
+        super_villains: [{
+          id: '1',
+          first_name: 'Tom',
+          last_name: 'Dale',
+          links: {
+            home_planet: '1'
+          }
+        }]
+      }
   };
 
   env.serializer.keyForAttribute = function(key) {
@@ -258,23 +267,38 @@ test('extractArray snakeCase', function() {
     equal(minion.get('firstName'), 'Tom');
   });
 });
+// TODO: test something that utilizes the flattening of links in normalize
 
-test('extractArray camelCase', function() {
+test('extractArray', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planets: [{
-      id: '1',
-      name: 'Umber',
-      superVillainIds: [1]
-    }],
-    super_villains: [{
-      id: '1',
-      firstName: 'Tom',
-      lastName: 'Dale',
-      homePlanetId: '1'
-    }]
+      home_planets: [{
+        id: '1',
+        name: 'Umber',
+        links: {
+          super_villains: [1]
+        }
+      }],
+      linked: {
+        super_villains: [{
+          id: '1',
+          first_name: 'Tom',
+          last_name: 'Dale',
+          links: {
+            home_planet: '1'
+          }
+        }]
+      }
   };
+
+  env.serializer.keyForAttribute = function(key) {
+    return Ember.String.decamelize(key);
+  }
+
+  env.serializer.keyForRelationship = function(key, relationshipKind) {
+    return Ember.String.decamelize(key);
+  }
 
   Ember.run(function() {
     env.serializer.extractArray(env.store, HomePlanet, json_hash);

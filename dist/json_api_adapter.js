@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2014-06-26
+ * Built on 2014-06-27
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2014 Dali Zheng
  */
@@ -75,7 +75,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "linked" containing associated objects
    */
   extractLinked: function(linked) {
-    var link, values, value, relation, store = get(this, 'store');
+    var link, values, value, relation;
+    var store = get(this, 'store');
+
     for (link in linked) {
       values = linked[link];
       for (var i = values.length - 1; i >= 0; i--) {
@@ -87,9 +89,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
           }
           delete value.links;
         }
-        store.push(Ember.String.singularize(link), value);
       }
     }
+    store.pushPayload(linked);
   },
 
   /**
@@ -184,6 +186,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Look up routes based on top-level links.
    */
   buildURL: function(typeName, id) {
+    // TODO: this basically only works in the simplest of scenarios
     var route = DS._routes[typeName];
     if (!!route) {
       var url = [];

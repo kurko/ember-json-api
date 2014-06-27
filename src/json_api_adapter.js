@@ -12,6 +12,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Look up routes based on top-level links.
    */
   buildURL: function(typeName, id) {
+    // TODO: this basically only works in the simplest of scenarios
     var route = DS._routes[typeName];
     if (!!route) {
       var url = [];

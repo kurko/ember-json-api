@@ -181,11 +181,11 @@ test('extractSingle snake_case', function() {
 
   env.serializer.keyForAttribute = function(key) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   env.serializer.keyForRelationship = function(key, relationshipKind) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   Ember.run(function() {
     return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
@@ -253,11 +253,11 @@ test('extractArray snake_case', function() {
 
   env.serializer.keyForAttribute = function(key) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   env.serializer.keyForRelationship = function(key, relationshipKind) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   Ember.run(function() {
     env.serializer.extractArray(env.store, HomePlanet, json_hash);
@@ -294,11 +294,11 @@ test('extractArray', function() {
 
   env.serializer.keyForAttribute = function(key) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   env.serializer.keyForRelationship = function(key, relationshipKind) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   Ember.run(function() {
     env.serializer.extractArray(env.store, HomePlanet, json_hash);
@@ -313,38 +313,42 @@ test('looking up a belongsTo association', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-      home_planets: [{
-        id: '1',
-        name: 'Umber',
-        links: {
-          super_villain: 1
-        }
-      }],
-      linked: {
-        super_villains: [{
-          id: '1',
-          first_name: 'Tom',
-          last_name: 'Dale',
-          links: {
-            home_planet: '1'
-          }
-        }]
+    home_planets: [{
+      id: '1',
+      name: 'Umber',
+      links: {
+        super_villains: [1]
       }
+    }],
+    linked: {
+      super_villains: [{
+        id: '1',
+        first_name: 'Tom',
+        last_name: 'Dale',
+        links: {
+          home_planet: '1'
+        }
+      }]
+    }
   };
 
   env.serializer.keyForAttribute = function(key) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   env.serializer.keyForRelationship = function(key, relationshipKind) {
     return Ember.String.decamelize(key);
-  }
+  };
 
   Ember.run(function() {
-    env.serializer.extractArray(env.store, HomePlanet, json_hash);
+    env.store.pushMany('homePlanet', env.serializer.extractArray(env.store, HomePlanet, json_hash));
   });
 
-  env.store.find('homePlanet', 1).then(function(planet){
-    equal(planet.get('superVillain.id'), 1);
+  Ember.run(function() {
+    env.store.find('homePlanet', 1).then(function(planet){
+      return planet.get('superVillains').then(function(villains) {
+        equal(villains.get('firstObject').get('id'), 1);
+      });
+    });
   });
 });

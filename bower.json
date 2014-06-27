@@ -1,0 +1,24 @@
+{
+  "name": "ember-json-api",
+  "version": "0.0.5",
+  "homepage": "https://github.com/plyfe/ember-json-api",
+  "authors": [
+    "Dali Zheng <dali@series.ac>",
+    "Stefan Penner <stefan.penner@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ember-data": "^v1.0.0-beta.8",
+    "ember": "^v1.6.0-beta.5"
+  },
+  "devDependencies": {
+    "qunit": "~1.14.0"
+  }
+}

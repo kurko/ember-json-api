@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QUnit Example</title>
+  <link rel="stylesheet" href="../bower_components/qunit/qunit/qunit.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+
+  <script>
+    window.ENV = {
+      FEATURES: {
+        'ember-runtime-test-friendly-promises': true
+      }
+    };
+  </script>
+  <script src='../bower_components/qunit/qunit/qunit.js'></script>
+  <script src='../bower_components/jquery/dist/jquery.js'></script>
+  <script src='../bower_components/handlebars/handlebars.js'></script>
+  <script src='../bower_components/ember/ember.js'></script>
+  <script src='../bower_components/ember-data/ember-data.js'></script>
+  <script src='helpers/begin.js'></script>
+  <script src='helpers/setup_store.js'></script>
+  <script src='../src/json_api_adapter.js'></script>
+  <script src='../src/json_api_serializer.js'></script>
+  <script src='unit/adapter/ajax_error_test.js'></script>
+  <script src='unit/adapter/build_url_test.js'></script>
+  <script src='unit/serializer/extract_links_test.js'></script>
+  <script src='integration/serializer_test.js'></script>
+  <script src="/testem.js"></script>
+</body>
+</html>

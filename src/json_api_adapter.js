@@ -4,6 +4,8 @@ var get = Ember.get;
  * Keep a record of routes to resources by type.
  */
 
+// null prototype in es5 browsers wont allow collisions with things on the
+// global Object.prototype.
 DS._routes = Ember.create(null);
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({

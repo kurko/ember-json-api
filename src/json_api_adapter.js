@@ -87,7 +87,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   _tryParseErrorResponse:  function(responseText) {
     try {
-      return response = Ember.$.parseJSON(responseText)
+      return Ember.$.parseJSON(responseText);
     } catch(e) {
       return "Something went wrong";
     }
@@ -99,14 +99,14 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
     if (jqXHR && typeof jqXHR === 'object') {
       response = this._tryParseErrorResponse(jqXHR.responseText);
-      errors = {};
+      var errors = {};
 
       if (response &&
           typeof response === 'object' &&
             response.errors !== undefined) {
 
         Ember.A(Ember.keys(response.errors)).forEach(function(key) {
-          errors[Ember.String.camelize(key)] =response.errors[key];
+          errors[Ember.String.camelize(key)] = response.errors[key];
         });
       }
 

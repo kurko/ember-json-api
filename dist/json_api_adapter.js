@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2014-06-27
+ * Built on 2014-07-03
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2014 Dali Zheng
  */
@@ -178,6 +178,8 @@ var get = Ember.get;
  * Keep a record of routes to resources by type.
  */
 
+// null prototype in es5 browsers wont allow collisions with things on the
+// global Object.prototype.
 DS._routes = Ember.create(null);
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
@@ -259,7 +261,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   _tryParseErrorResponse:  function(responseText) {
     try {
-      return response = Ember.$.parseJSON(responseText)
+      return Ember.$.parseJSON(responseText);
     } catch(e) {
       return "Something went wrong";
     }
@@ -271,14 +273,14 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
     if (jqXHR && typeof jqXHR === 'object') {
       response = this._tryParseErrorResponse(jqXHR.responseText);
-      errors = {};
+      var errors = {};
 
       if (response &&
           typeof response === 'object' &&
             response.errors !== undefined) {
 
         Ember.A(Ember.keys(response.errors)).forEach(function(key) {
-          errors[Ember.String.camelize(key)] =response.errors[key];
+          errors[Ember.String.camelize(key)] = response.errors[key];
         });
       }
 

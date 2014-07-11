@@ -81,6 +81,43 @@ test('serialize camelcase', function() {
   });
 });
 
+test('serialize into snake_case', function() {
+  var tom;
+
+  Ember.run(function() {
+    league = env.store.createRecord(HomePlanet, {
+      name: 'Villain League',
+      id: '123'
+    });
+
+    tom = env.store.createRecord(SuperVillain, {
+      firstName: 'Tom',
+      lastName: 'Dale',
+      homePlanet: league
+    });
+  });
+
+  env.serializer.keyForAttribute = function(key) {
+    return Ember.String.decamelize(key);
+  };
+
+  env.serializer.keyForRelationship = function(key, relationshipKind) {
+    return Ember.String.decamelize(key);
+  };
+
+  var json = Ember.run(function(){
+    return env.serializer.serialize(tom);
+  });
+
+  deepEqual(json, {
+    first_name: 'Tom',
+    last_name: 'Dale',
+    links: {
+      home_planet: get(league, 'id')
+    }
+  });
+});
+
 test('serializeIntoHash', function() {
   var json = {};
 

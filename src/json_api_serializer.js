@@ -2,6 +2,9 @@ var get = Ember.get;
 var isNone = Ember.isNone;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
+  keyForRelationship: function(key) {
+    return key;
+  },
   /**
    * Patch the extractSingle method, since there are no singular records
    */
@@ -135,8 +138,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Use "links" key, remove support for polymorphic type
    */
   serializeBelongsTo: function(record, json, relationship) {
-    var key = relationship.key;
-    var belongsTo = get(record, key);
+    var attr = relationship.key;
+    var belongsTo = get(record, attr);
+    var key = this.keyForRelationship(attr);
 
     if (isNone(belongsTo)) return;
 
@@ -148,14 +152,15 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Use "links" key
    */
   serializeHasMany: function(record, json, relationship) {
-    var key = relationship.key;
+    var attr = relationship.key;
+    var key = this.keyForRelationship(attr);
 
     var relationshipType = DS.RelationshipChange.determineRelationshipType(record.constructor, relationship);
 
     if (relationshipType === 'manyToNone' ||
         relationshipType === 'manyToMany') {
       json.links = json.links || {};
-      json.links[key] = get(record, key).mapBy('id');
+      json.links[key] = get(record, attr).mapBy('id');
     }
   }
 });

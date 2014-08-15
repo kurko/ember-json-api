@@ -52,6 +52,60 @@ module('integration/ember-json-api-adapter - serializer', {
   }
 });
 
+test("superVillain.evilMinions.firstObject.superVillain should equal superVillain", function() {
+  var record, operation, payload;
+  var adapterPayload = {
+    linked: {
+      evilMinions: [
+        {
+          id: 3,
+          name: "Ray",
+          links: {
+            superVillain: 1
+          }
+        }
+      ]
+    },
+    superVillains: [
+      {
+        id: 1,
+        name: "Denis",
+        links: {
+          evilMinions: [3]
+        }
+      }
+    ]
+  };
+  var SuperVillainAdapter = DS.RESTAdapter.extend({
+    find: function() {
+      return new Ember.RSVP.Promise(function(resolve, reject) { return; }); // don't fulfill
+    }
+  });
+  env.container.register('adapter:superVillain', SuperVillainAdapter);
+
+  Ember.run(function() {
+    operation = "createRecord";
+    record = env.store.createRecord(SuperVillain, {
+      name: "Denis"
+    });
+    record.adapterWillCommit();
+    payload = env.serializer.extract(env.store, SuperVillain, adapterPayload, Ember.get(record, 'id'), operation);
+    env.store.didSaveRecord(record, payload);
+  });
+
+  Ember.run(function() {
+    var sameRecord = record.get('evilMinions.firstObject.superVillain');
+
+    // passing
+    equal(record.get('id'), sameRecord.get('id'), "ids match")
+    equal(record.constructor, sameRecord.constructor, "types match")
+
+    // failing
+    equal(record.toString(), sameRecord.toString(), "toString() matches");
+    ok(record === sameRecord, "record object is the same object");
+  });
+});
+
 test('serialize camelcase', function() {
   var tom;
 

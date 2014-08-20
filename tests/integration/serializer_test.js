@@ -89,7 +89,7 @@ test("superVillain.evilMinions.firstObject.superVillain should equal superVillai
       name: "Denis"
     });
     record.adapterWillCommit();
-    payload = env.serializer.extract(env.store, SuperVillain, adapterPayload, Ember.get(record, 'id'), operation);
+    payload = env.serializer.extract(env.store, SuperVillain, adapterPayload, Ember.get(record, 'id'), operation, record);
     env.store.didSaveRecord(record, payload);
   });
 

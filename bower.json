@@ -15,7 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "ember-data": "^v1.0.0-beta.8",
+    "ember-data": "https://s3.amazonaws.com/asset-staging-playground/ember-data-1.0.0-patch2-beta.8.tar.gz",
     "ember": "^v1.6.0-beta.5"
   },
   "devDependencies": {

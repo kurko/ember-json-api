@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2014-08-21
+ * Built on 2014-08-28
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2014 Dali Zheng
  */
@@ -93,7 +93,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
       }
 
-      payload[link] = linked[link];
+      if (payload[link]){
+        payload[link].pushObjects(linked[link]);
+      }else{
+        payload[link] = linked[link];
+      }
+
       delete linked[link];
     }
     delete payload.linked;

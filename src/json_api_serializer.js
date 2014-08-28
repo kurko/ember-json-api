@@ -85,7 +85,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
       }
 
-      payload[link] = linked[link];
+      if (payload[link]){
+        payload[link].pushObjects(linked[link]);
+      }else{
+        payload[link] = linked[link];
+      }
+
       delete linked[link];
     }
     delete payload.linked;

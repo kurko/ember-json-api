@@ -7,6 +7,9 @@
   "contributors": [{
     "name": "Alexandre de Oliveira",
     "email": "chavedomundo@gmail.com"
+  }, {
+    "name": "Stefan Penner",
+    "email": "stefan.penner@gmail.com"
   }],
   "main": "dist/json_api_adapter.js"
   "repository": {

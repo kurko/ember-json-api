@@ -2,14 +2,19 @@
   "name": "ember-json-api",
   "description": "Ember Data adapter for JSON API.",
   "version": "0.0.8",
-  "homepage": "http://github.com/daliwali/ember-json-api",
+  "homepage": "http://github.com/kurko/ember-json-api",
   "author": "Dali Zheng",
+  "contributors": [{
+    "name": "Alexandre de Oliveira",
+    "email": "chavedomundo@gmail.com"
+  }],
+  "main": "dist/json_api_adapter.js"
   "repository": {
     "type": "git",
-    "url": "http://github.com/daliwali/ember-json-api"
+    "url": "http://github.com/kurko/ember-json-api"
   },
   "bugs": {
-    "url": "http://github.com/daliwali/ember-json-api/issues"
+    "url": "http://github.com/kurko/ember-json-api/issues"
   },
   "scripts": {
     "test": "testem ci -P 5",
@@ -23,5 +28,6 @@
   },
   "devDependencies": {
     "testem": "^0.6.16"
-  }
+  },
+  "license": "MIT"
 }

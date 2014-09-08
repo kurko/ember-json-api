@@ -52,6 +52,115 @@ module('integration/ember-json-api-adapter - serializer', {
   }
 });
 
+test("linked with same name as root shouldn't collide", function(){
+  var store = env.store;
+  var adapterPayload = {
+    evilMinions: [
+      {
+        id: 1,
+        name: "Ray",
+        links: {
+          superVillain: 1
+        }
+      }
+    ],
+    linked: {
+      superVillains: [
+        {
+          id: 1,
+          name: "Denis",
+          links: {
+            evilMinions: [1, 2]
+          }
+        }
+      ],
+      evilMinions: [
+        {
+          id: 2,
+          name: "Luke",
+          links: {
+            superVillain: 1
+          }
+        }
+      ]
+    }
+  }
+  var EvilMinionAdapter = DS.RESTAdapter.extend({
+    find: function() {
+      return new Ember.RSVP.Promise(function(resolve, reject) { return; }); // don't fulfill
+    }
+  });
+  env.container.register('adapter:evilMinion', EvilMinionAdapter);
+
+  Ember.run(function() {
+    store.find('evilMinion');
+    var payload = env.serializer.extract(store, EvilMinion, adapterPayload, null, 'findAll');
+
+    store.pushMany(EvilMinion, payload);
+    store.didUpdateAll(EvilMinion);
+    var records = store.all(EvilMinion);
+    var firstMinion = store.getById(EvilMinion, 1);
+    var secondMinion = store.getById(EvilMinion, 2);
+
+    equal(secondMinion.get('name'), 'Luke', 'Second minion name correct');
+    equal(firstMinion.get('name'), 'Ray', 'First minion name correct');
+  });
+});
+
+test("superVillain.evilMinions.firstObject.superVillain should equal superVillain", function() {
+  var record, operation, payload;
+  var adapterPayload = {
+    linked: {
+      evilMinions: [
+        {
+          id: 3,
+          name: "Ray",
+          links: {
+            superVillain: 1
+          }
+        }
+      ]
+    },
+    superVillains: [
+      {
+        id: 1,
+        name: "Denis",
+        links: {
+          evilMinions: [3]
+        }
+      }
+    ]
+  };
+  var SuperVillainAdapter = DS.RESTAdapter.extend({
+    find: function() {
+      return new Ember.RSVP.Promise(function(resolve, reject) { return; }); // don't fulfill
+    }
+  });
+  env.container.register('adapter:superVillain', SuperVillainAdapter);
+
+  Ember.run(function() {
+    operation = "createRecord";
+    record = env.store.createRecord(SuperVillain, {
+      name: "Denis"
+    });
+    record.adapterWillCommit();
+    payload = env.serializer.extract(env.store, SuperVillain, adapterPayload, Ember.get(record, 'id'), operation, record);
+    env.store.didSaveRecord(record, payload);
+  });
+
+  Ember.run(function() {
+    var sameRecord = record.get('evilMinions.firstObject.superVillain');
+
+    // passing
+    equal(record.get('id'), sameRecord.get('id'), "ids match")
+    equal(record.constructor, sameRecord.constructor, "types match")
+
+    // failing
+    equal(record.toString(), sameRecord.toString(), "toString() matches");
+    ok(record === sameRecord, "record object is the same object");
+  });
+});
+
 test('serialize camelcase', function() {
   var tom;
 

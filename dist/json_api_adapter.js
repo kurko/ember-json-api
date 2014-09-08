@@ -1,6 +1,6 @@
 /*! 
  * ember-json-api
- * Built on 2014-07-03
+ * Built on 2014-08-28
  * http://github.com/daliwali/ember-json-api
  * Copyright (c) 2014 Dali Zheng
  */
@@ -10,10 +10,13 @@ var get = Ember.get;
 var isNone = Ember.isNone;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
+  keyForRelationship: function(key) {
+    return key;
+  },
   /**
    * Patch the extractSingle method, since there are no singular records
    */
-  extractSingle: function(store, primaryType, payload, recordId, requestType) {
+  extractSingle: function(store, primaryType, payload, recordId, requestType, record) {
     var primaryTypeName;
     if (this.keyForAttribute) {
       primaryTypeName = this.keyForAttribute(primaryType.typeKey);
@@ -32,7 +35,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         json[key] = payload[key];
       }
     }
-    return this._super(store, primaryType, json, recordId, requestType);
+    return this._super(store, primaryType, json, recordId, requestType, record);
   },
 
   /**
@@ -65,8 +68,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       delete payload.links;
     }
     if (payload.linked) {
-      this.extractLinked(payload.linked);
-      delete payload.linked;
+      this.extractLinked(payload);
     }
     return payload;
   },
@@ -74,8 +76,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   /**
    * Extract top-level "linked" containing associated objects
    */
-  extractLinked: function(linked) {
-    var link, values, value, relation;
+  extractLinked: function(payload) {
+    var link, values, value, relation, linked = payload.linked;
     var store = get(this, 'store');
 
     for (link in linked) {
@@ -90,8 +92,16 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
           delete value.links;
         }
       }
+
+      if (payload[link]){
+        payload[link].pushObjects(linked[link]);
+      }else{
+        payload[link] = linked[link];
+      }
+
+      delete linked[link];
     }
-    store.pushPayload(linked);
+    delete payload.linked;
   },
 
   /**
@@ -143,8 +153,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Use "links" key, remove support for polymorphic type
    */
   serializeBelongsTo: function(record, json, relationship) {
-    var key = relationship.key;
-    var belongsTo = get(record, key);
+    var attr = relationship.key;
+    var belongsTo = get(record, attr);
+    var key = this.keyForRelationship(attr);
 
     if (isNone(belongsTo)) return;
 
@@ -156,14 +167,15 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Use "links" key
    */
   serializeHasMany: function(record, json, relationship) {
-    var key = relationship.key;
+    var attr = relationship.key;
+    var key = this.keyForRelationship(attr);
 
     var relationshipType = DS.RelationshipChange.determineRelationshipType(record.constructor, relationship);
 
     if (relationshipType === 'manyToNone' ||
         relationshipType === 'manyToMany') {
       json.links = json.links || {};
-      json.links[key] = get(record, key).mapBy('id');
+      json.links[key] = get(record, attr).mapBy('id');
     }
   }
 });

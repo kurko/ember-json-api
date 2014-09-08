@@ -11,9 +11,9 @@ and JSON API are both works in progress, use with caution.
 
 ### Usage
 
-    ```js
-    App.ApplicationAdapter = DS.JsonApiAdapter;
-    ```
+```js
+App.ApplicationAdapter = DS.JsonApiAdapter;
+```
 
 ### Tests & Build
 
@@ -31,7 +31,8 @@ resource, it will not work as expected.
 
 ### Thanks
 
-A huge thanks goes to Dali Zheng who initially maintained the adapter.
+A huge thanks goes to [Dali Zheng](https://github.com/daliwali) who initially 
+maintained the adapter.
 
 ### License
 

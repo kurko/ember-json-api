@@ -11,7 +11,7 @@
     "name": "Stefan Penner",
     "email": "stefan.penner@gmail.com"
   }],
-  "main": "dist/json_api_adapter.js"
+  "main": "dist/json_api_adapter.js",
   "repository": {
     "type": "git",
     "url": "http://github.com/kurko/ember-json-api"
@@ -20,8 +20,10 @@
     "url": "http://github.com/kurko/ember-json-api/issues"
   },
   "scripts": {
-    "test": "testem ci -P 5",
-    "test-server": "testem"
+    "postinstall": "npm install --save-dev broccoli && npm install --global broccoli-cli",
+    "test": "rm -rf test_build && ./node_modules/broccoli-cli/bin/broccoli build test_build && phantomjs test_build/tests/runner.js test_build/tests/index.html",
+    "test-server": "testem",
+    "build": "rm -rf dist && BROCCOLI_ENV=production broccoli build dist"
   },
   "dependencies": {
     "grunt": "~0.4.1",
@@ -30,6 +32,16 @@
     "grunt-contrib-watch": "~0.4.4"
   },
   "devDependencies": {
+    "bower": "",
+    "broccoli": "^0.12.3",
+    "broccoli-bower": "^0.2.0",
+    "broccoli-cli": "0.0.1",
+    "broccoli-env": "^0.0.1",
+    "broccoli-es6-concatenator": "^0.1.4",
+    "broccoli-es6-transpiler": "^0.1.0",
+    "broccoli-merge-trees": "^0.1.3",
+    "broccoli-static-compiler": "^0.1.4",
+    "broccoli-template": "^0.1.0",
     "testem": "^0.6.16"
   },
   "license": "MIT"

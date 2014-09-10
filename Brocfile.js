@@ -1,5 +1,6 @@
-var pickFiles = require('broccoli-static-compiler')
-var mergeTrees = require('broccoli-merge-trees')
+var uglifyJavaScript = require('broccoli-uglify-js');
+var pickFiles = require('broccoli-static-compiler');
+var mergeTrees = require('broccoli-merge-trees');
 var env = require('broccoli-env').getEnv();
 var compileES6 = require('broccoli-es6-concatenator');
 var findBowerTrees = require('broccoli-bower');
@@ -18,7 +19,22 @@ if (env === 'production') {
     outputFile: '/ember-json-api.js'
   });
 
+  var jsMinified = compileES6('src', {
+    loaderFile: '../vendor/no_loader.js',
+    inputFiles: [
+      '**/*.js'
+    ],
+    wrapInEval: false,
+    outputFile: '/ember-json-api.min.js'
+  });
+
+  var ugly = uglifyJavaScript(jsMinified, {
+    mangle: true,
+    compress: true
+  });
+
   sourceTrees = sourceTrees.concat(js);
+  sourceTrees = sourceTrees.concat(ugly);
 
 } else if (env === 'development') {
 

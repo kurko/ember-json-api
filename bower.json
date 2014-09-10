@@ -15,8 +15,8 @@
     "tests"
   ],
   "dependencies": {
-    "ember-data": "^v1.0.0-beta.8",
-    "ember": "^v1.6.0-beta.5"
+    "ember-data": "v1.0.0-beta.8",
+    "ember": "v1.7.0"
   },
   "devDependencies": {
     "qunit": "~1.14.0"

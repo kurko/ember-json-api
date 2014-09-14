@@ -14,7 +14,7 @@ Considering you're using Ember CLI, add this to your `bower.json` file:
 ```json
 {
   "dependencies": {
-    "ember-json-api": "http://raw.github.com/kurko/ember-json-api/master/dist/json_api_adapter.js"
+    "ember-json-api": "http://raw.github.com/kurko/ember-json-api/master/dist/ember-json-api.js"
   }
 }
 ```
@@ -22,9 +22,11 @@ Considering you're using Ember CLI, add this to your `bower.json` file:
 Then define the following in your `Brocfile.js`:
 
 ```js
-app.import('vendor/ember-json-api/dist/ember-json-api.js', {
-  'json_api_adapter': [ 'default' ],
-  'json_api_serializer': [ 'default' ]
+app.import('bower_components/ember-json-api/index.js', {
+  exports: {
+    'json_api_adapter': [ 'default' ],
+    'json_api_serializer': [ 'default' ]
+  }
 });
 ```
 

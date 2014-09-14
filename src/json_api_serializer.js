@@ -164,3 +164,5 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     }
   }
 });
+
+export default DS.JsonApiSerializer;

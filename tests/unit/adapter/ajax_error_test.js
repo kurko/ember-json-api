@@ -1,3 +1,6 @@
+var JsonApiAdapter = require('src/json_api_adapter').default,
+    JsonApiSerializer = require('src/json_api_serializer').default;
+
 var env, store, adapter, SuperUser;
 var originalAjax, passedUrl, passedVerb, passedHash;
 
@@ -7,8 +10,8 @@ module('unit/ember-json-api-adapter - adapter', {
 
     env = setupStore({
       superUser: SuperUser,
-      adapter: DS.JsonApiAdapter,
-      serializer: DS.JsonApiSerializer
+      adapter: JsonApiAdapter,
+      serializer: JsonApiSerializer
     });
 
     store = env.store;
@@ -53,7 +56,7 @@ test('ajaxError - invalid error has camelized keys', function() {
 });
 
 test('ajaxError - returns ServerError error if not 422 response', function() {
-  var error  = new DS.JsonApiAdapter.ServerError(500, "Something went wrong");
+  var error  = new JsonApiAdapter.ServerError(500, "Something went wrong");
 
   var jqXHR = {
     status: 500,

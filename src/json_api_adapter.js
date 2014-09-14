@@ -146,3 +146,5 @@ ServerError.prototype = Ember.create(Error.prototype);
 ServerError.constructor = ServerError;
 
 DS.JsonApiAdapter.ServerError = ServerError;
+
+export default DS.JsonApiAdapter;

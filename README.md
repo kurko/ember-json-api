@@ -4,24 +4,52 @@ This is a [JSON API](http://jsonapi.org) adapter for [Ember Data](http://github.
 1.0 beta 3, that extends the built-in REST adapter. Please note that Ember Data
 and JSON API are both works in progress, use with caution.
 
-### Download
-
-- [json_api_adapter.js](http://raw.github.com/kurko/ember-json-api/master/dist/json_api_adapter.js) (5.0 kb)
-- [json_api_adapter.min.js](http://raw.github.com/kurko/ember-json-api/master/dist/json_api_adapter.min.js) (2.3 kb)
+**Important:** this is under heavy development. For the lastest stable release,
+use the `stable` branch.
 
 ### Usage
 
+Considering you're using Ember CLI, add this to your `bower.json` file:
+
+```json
+{
+  "dependencies": {
+    "ember-json-api": "http://raw.github.com/kurko/ember-json-api/master/dist/json_api_adapter.js"
+  }
+}
+```
+
+Then define the following in your `Brocfile.js`:
+
 ```js
-App.ApplicationAdapter = DS.JsonApiAdapter;
+app.import('vendor/ember-json-api/dist/ember-json-api.js', {
+  'json_api_adapter': [ 'default' ],
+  'json_api_serializer': [ 'default' ]
+});
+```
+
+Next, define the adapter and serializer:
+
+```js
+// app/adapters/application.js
+import { default as JsonApiAdapter } from 'json_api_adapter';
+export default JsonApiAdapter;
+
+// app/serializers/application.js
+import { default as JsonApiSerializer } from 'json_api_serializer';
+export default JsonApiSerializer;
 ```
 
 ### Tests & Build
 
-Install `grunt-cli`: `npm install -g grunt-cli`, then run:
+First, install depdendencies with `npm install && bower install`. Then run
+`npm run serve` and visit `http://localhost:4200/tests`.
 
-    $ npm install && grunt
+If you prefer, use `npm run test` in your terminal, which will run tests
+without a browser. You need to have PhantomJS installed.
 
-The output files go in the `dist` folder.
+To build a new version, just run `npm run build`. The build will be
+available in the `dist/` directory.
 
 ### Issues
 
@@ -31,7 +59,7 @@ resource, it will not work as expected.
 
 ### Thanks
 
-A huge thanks goes to [Dali Zheng](https://github.com/daliwali) who initially 
+A huge thanks goes to [Dali Zheng](https://github.com/daliwali) who initially
 maintained the adapter.
 
 ### License

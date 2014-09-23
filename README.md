@@ -14,7 +14,7 @@ Considering you're using Ember CLI, add this to your `bower.json` file:
 ```json
 {
   "dependencies": {
-    "ember-json-api": "http://raw.github.com/kurko/ember-json-api/master/dist/json_api_adapter.js"
+    "ember-json-api": "https://rawgit.com/kurko/ember-json-api/master/dist/ember-json-api.js"
   }
 }
 ```

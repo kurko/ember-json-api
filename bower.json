@@ -15,7 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "ember-data": "v1.0.0-beta.8",
+    "ember-data": "v1.0.0-beta.10",
     "ember": "v1.7.0"
   },
   "devDependencies": {

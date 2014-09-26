@@ -2,7 +2,9 @@ var stubServer = function() {
   var pretender = new Pretender();
 
   pretender.unhandledRequest = function(verb, path, request) {
-    console.log("Pretender: non-existing "+verb+" "+path, request);
+    var string = "Pretender: non-existing "+verb+" "+path, request
+    console.error(string);
+    throw(string);
   };
 
   return {

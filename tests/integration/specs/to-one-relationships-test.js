@@ -65,6 +65,7 @@ asyncTest('GET /posts/1 with sync linked resources', function() {
   env = setupStore(models);
 
   fakeServer.get('/posts/1', responses.posts_no_linked);
+  fakeServer.get('/authors/2', responses.authors);
 
   env.store.find('post', '1').then(function(record) {
     var authorId;

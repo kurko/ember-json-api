@@ -76,6 +76,7 @@ test('serialize camelcase', function() {
     firstName: 'Tom',
     lastName: 'Dale',
     links: {
+      evilMinions: [],
       homePlanet: get(league, 'id')
     }
   });
@@ -113,6 +114,7 @@ test('serialize into snake_case', function() {
     first_name: 'Tom',
     last_name: 'Dale',
     links: {
+      evil_minions: [],
       home_planet: get(league, 'id')
     }
   });
@@ -132,7 +134,10 @@ test('serializeIntoHash', function() {
 
   deepEqual(json, {
     homePlanet: {
-      name: 'Umber'
+      name: 'Umber',
+      links: {
+        superVillains: []
+      }
     }
   });
 });
@@ -152,7 +157,10 @@ test('serializeIntoHash with decamelized types', function() {
 
   deepEqual(json, {
     homePlanet: {
-      name: 'Umber'
+      name: 'Umber',
+      links: {
+        superVillains: []
+      }
     }
   });
 });

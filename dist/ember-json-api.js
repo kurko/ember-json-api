@@ -315,10 +315,7 @@
         var attr = relationship.key;
         var key = this.keyForRelationship(attr);
 
-        var relationshipType = DS.RelationshipChange.determineRelationshipType(record.constructor, relationship);
-
-        if (relationshipType === 'manyToNone' ||
-            relationshipType === 'manyToMany') {
+        if (relationship.kind === 'hasMany') {
           json.links = json.links || {};
           json.links[key] = get(record, attr).mapBy('id');
         }

@@ -1,9 +1,11 @@
 var get = Ember.get, set = Ember.set;
 var env;
-var responses, pretender;
+var responses, fakeServer;
 
 module('integration/specs/resource-collection-representations', {
   setup: function() {
+    fakeServer = stubServer();
+
     responses = {
       posts_list: {
         'posts': [{
@@ -24,12 +26,12 @@ module('integration/specs/resource-collection-representations', {
 
   teardown: function() {
     Ember.run(env.store, 'destroy');
-    shutdownPretender();
+    shutdownFakeServer(fakeServer);
   }
 });
 
 asyncTest('GET /posts', function() {
-  pretender = stubResponse('get', '/posts', responses.posts_list);
+  fakeServer.get('/posts', responses.posts_list);
 
   env.store.find('post').then(function(record) {
     var post1 = record.get("firstObject"),

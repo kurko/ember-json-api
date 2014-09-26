@@ -1,10 +1,21 @@
 var Post, Comment, Author;
 
-function setModels() {
+function setModels(params) {
+  var options;
+
+  if (!params) {
+    params = {}
+  }
+
+  options = {
+    authorAsync: params.authorAsync || false,
+    commentAsync: params.commentAsync || false
+  }
+
   Post = DS.Model.extend({
     title:    DS.attr('string'),
-    comments: DS.hasMany('comment'),
-    author:   DS.belongsTo('author')
+    comments: DS.hasMany('comment',  { async: options.commentAsync }),
+    author:   DS.belongsTo('author', { async: options.authorAsync })
   });
 
   Author = DS.Model.extend({

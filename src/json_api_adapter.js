@@ -135,6 +135,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 });
 
 function ServerError(status, message, xhr) {
+  console.log(message);
   this.status = status;
   this.message = message;
   this.xhr = xhr;

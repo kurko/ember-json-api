@@ -1,36 +1,42 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Ember Data JSONApi Adapter</title>
-  <link rel="stylesheet" href="../qunit.css" type="text/css" charset="utf-8">
-  <script>
-    window.TEST = true;
-    window.ENV = {
-      FEATURES: {
-        'ember-runtime-test-friendly-promises': true
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Dummy Tests</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {{content-for 'head'}}
+
+    <link rel="stylesheet" href="assets/vendor.css">
+    <link rel="stylesheet" href="assets/dummy.css">
+    <link rel="stylesheet" href="assets/test-support.css">
+    <style>
+      #ember-testing-container {
+        position: absolute;
+        background: white;
+        bottom: 0;
+        right: 0;
+        width: 640px;
+        height: 384px;
+        overflow: auto;
+        z-index: 9999;
+        border: 1px solid #ccc;
       }
-    };
-  </script>
-</head>
-<body>
-  <div id="qunit"></div>
-  <div id="qunit-fixture"></div>
+      #ember-testing {
+        zoom: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
 
-  <!-- adapter -->
-  <script src="../assets/app.js"></script>
-
-  <!-- tests -->
-  <script src='../tests/helpers/begin.js'></script>
-  <script src='../tests/helpers/setup_store.js'></script>
-
-  <script src='../tests/unit/adapter/ajax_error_test.js'></script>
-  <script src='../tests/unit/adapter/build_url_test.js'></script>
-  <script src='../tests/unit/serializer/extract_links_test.js'></script>
-  <script src='../tests/integration/serializer_test.js'></script>
-
-  <!-- previous code
-  <script src="../vendor/testem.js"></script>
-  -->
-</body>
+    <script src="assets/vendor.js"></script>
+    <script src="assets/test-support.js"></script>
+    <script src="assets/dummy.js"></script>
+    <script src="testem.js"></script>
+    <script src="assets/test-loader.js"></script>
+  </body>
 </html>

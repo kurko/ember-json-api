@@ -1,5 +1,6 @@
-var JsonApiAdapter = require('src/json_api_adapter').default,
-    JsonApiSerializer = require('src/json_api_serializer').default;
+import JsonApiAdapter from 'ember-json-api/adapters/json-api';
+import JsonApiSerializer from 'ember-json-api/serializers/json-api';
+import setupStore from '../../helpers/setup-store';
 
 var env, store, adapter, SuperUser;
 var originalAjax, passedUrl, passedVerb, passedHash;

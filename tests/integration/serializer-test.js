@@ -1,3 +1,10 @@
+import Ember from 'ember';
+import DS from 'ember-data';
+import JsonApiAdapter from 'ember-json-api/adapters/json-api';
+import JsonApiSerializer from 'ember-json-api/serializers/json-api';
+import '../helpers/begin';
+import setupStore from '../helpers/setup-store';
+
 var get = Ember.get, set = Ember.set;
 var HomePlanet, league, SuperVillain, superVillain, EvilMinion, YellowMinion, DoomsdayDevice, MediocreVillain, env;
 module('integration/ember-json-api-adapter - serializer', {

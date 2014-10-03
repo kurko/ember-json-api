@@ -1,3 +1,7 @@
+import Ember from 'ember';
+import DS from 'ember-data';
+import JsonApiAdapter from 'ember-json-api/adapters/json-api';
+
 var adapter;
 var User = DS.Model.extend({
   firstName: DS.attr()
@@ -6,7 +10,7 @@ var User = DS.Model.extend({
 module('unit/ember-json-api-adapter - buildUrl', {
   setup: function() {
     DS._routes = Ember.create(null);
-    adapter = DS.JsonApiAdapter.create();
+    adapter = JsonApiAdapter.create();
   },
   tearDown: function() {
     DS._routes = Ember.create(null);

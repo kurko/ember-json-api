@@ -1,11 +1,16 @@
-window.setupStore = function(options) {
+import Ember from 'ember';
+import DS from 'ember-data';
+import JsonApiAdapter from 'ember-json-api/adapters/json-api';
+import JsonApiSerializer from 'ember-json-api/serializers/json-api';
+
+export default function(options) {
   var env = {};
   options = options || {};
 
   var container = env.container = new Ember.Container();
 
-  var adapter = env.adapter = options.adapter || DS.JsonApiAdapter;
-  var serializer = env.serializer = options.serializer || DS.JsonApiSerializer;
+  var adapter = env.adapter = options.adapter || JsonApiAdapter;
+  var serializer = env.serializer = options.serializer || JsonApiSerializer;
 
   delete options.adapter;
   delete options.serializer;
@@ -27,4 +32,4 @@ window.setupStore = function(options) {
   env.adapter = env.store.get('defaultAdapter');
 
   return env;
-};
+}

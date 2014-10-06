@@ -7,6 +7,12 @@ and JSON API are both works in progress, use with caution.
 **Important:** this is under heavy development. For the lastest stable release,
 use the `stable-*` branch.
 
+### Specification coverage
+
+To see details on how much of the JSONAPI.org spec this adapter covers, read the
+tests under `tests/integration/specs/`. Each field tests one section of the
+standard.
+
 ### Usage
 
 Considering you're using Ember CLI, add this to your `bower.json` file:

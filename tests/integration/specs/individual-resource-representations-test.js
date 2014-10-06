@@ -7,10 +7,16 @@ module('integration/specs/individual-resource-representations', {
     fakeServer = stubServer();
 
     responses = {
-      lone_post: {
-        'posts': {
+      lone_post_in_singular: {
+        'post': {
           id: '1',
           title: 'Rails is Omakase'
+        }
+      },
+      lone_post_in_plural: {
+        'posts': {
+          id: '2',
+          title: 'TDD Is Dead lol'
         }
       }
     };
@@ -27,12 +33,22 @@ module('integration/specs/individual-resource-representations', {
   }
 });
 
-asyncTest('GET /posts/1 with single resource', function() {
-  fakeServer.get('/posts/1', responses.lone_post);
+asyncTest('GET /posts/1 with single resource interprets singular root key', function() {
+  fakeServer.get('/posts/1', responses.lone_post_in_singular);
 
   env.store.find('post', '1').then(function(record) {
     equal(record.get('id'), '1', 'id is correct');
     equal(record.get('title'), 'Rails is Omakase', 'title is correct');
+    start();
+  });
+});
+
+asyncTest('GET /posts/2 with single resource interprets plural root key', function() {
+  fakeServer.get('/posts/2', responses.lone_post_in_plural);
+
+  env.store.find('post', '2').then(function(record) {
+    equal(record.get('id'), '2', 'id is correct');
+    equal(record.get('title'), 'TDD Is Dead lol', 'title is correct');
     start();
   });
 });

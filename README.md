@@ -17,25 +17,10 @@ standard.
 
 ### Usage
 
-Considering you're using Ember CLI, add this to your `bower.json` file:
+To install:
 
-```json
-{
-  "dependencies": {
-    "ember-json-api": "http://raw.github.com/kurko/ember-json-api/master/dist/ember-json-api.js"
-  }
-}
 ```
-
-Then define the following in your `Brocfile.js`:
-
-```js
-app.import('bower_components/ember-json-api/index.js', {
-  exports: {
-    'json_api_adapter': [ 'default' ],
-    'json_api_serializer': [ 'default' ]
-  }
-});
+npm install --save-dev ember-json-api
 ```
 
 Next, define the adapter and serializer:

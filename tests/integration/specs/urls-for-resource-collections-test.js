@@ -26,6 +26,12 @@ module('integration/specs/urls-for-resource-collections', {
           'title': 'bad article',
           'body': "doesn't run Crysis"
         }]
+      },
+      underscore_resource: {
+        'some_resource': {
+          'id': '1',
+          'title': 'wow'
+        }
       }
     };
 
@@ -40,7 +46,7 @@ module('integration/specs/urls-for-resource-collections', {
   }
 });
 
-asyncTest('GET /posts/1 calls later GET /comments/2,3', function() {
+asyncTest('GET /posts/1 calls later GET /comments/2,3 when Posts has async comments', function() {
   var models = setModels({
     commentAsync: true
   });
@@ -65,5 +71,20 @@ asyncTest('GET /posts/1 calls later GET /comments/2,3', function() {
       equal(comment2.get('body'), "doesn't run Crysis", 'comment2 body');
       start();
     });
+  });
+});
+
+asyncTest('GET /some_resource, not camelCase', function() {
+  var models = setModels({
+    commentAsync: true
+  });
+  env = setupStore(models);
+
+  fakeServer.get('/some_resources/1', responses.underscore_resource);
+
+  env.store.find('someResource', '1').then(function(record) {
+    equal(record.get('id'), '1', 'id is correct');
+    equal(record.get('title'), 'wow', 'title is correct');
+    start();
   });
 });

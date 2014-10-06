@@ -39,7 +39,6 @@ var stubServer = function() {
         var responseForRequest = _this.responseForRequest('post', request);
 
         var string = JSON.stringify(responseForRequest);
-        console.log(string);
         return [201, {"Content-Type": "application/json"}, string]
       });
     },

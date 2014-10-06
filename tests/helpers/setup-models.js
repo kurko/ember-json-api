@@ -27,9 +27,14 @@ function setModels(params) {
     body:  DS.attr('string')
   });
 
+  SomeResource = DS.Model.extend({
+    title: DS.attr('string')
+  });
+
   return {
     'post': Post,
     'author': Author,
-    'comment': Comment
+    'comment': Comment,
+    'someResource': SomeResource
   }
 }

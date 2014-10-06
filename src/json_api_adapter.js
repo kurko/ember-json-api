@@ -129,6 +129,11 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   serializeIntoHash: function(data, type, record, options) {
     var root = underscore(decamelize(type.typeKey));
     data[root] = this.serialize(record, options);
+  },
+
+  pathForType: function(type) {
+    var decamelized = Ember.String.decamelize(type);
+    return Ember.String.pluralize(decamelized);
   }
 });
 

@@ -1,3 +1,6 @@
+import Ember from 'ember';
+import DS from 'ember-data';
+
 var get = Ember.get;
 var isNone = Ember.isNone;
 
@@ -92,7 +95,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   /**
    * Override this method to parse the top-level "meta" object per type.
    */
-  extractMeta: function(meta) {
+  extractMeta: function(/*meta*/) {
     // no op
   },
 
@@ -142,7 +145,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var belongsTo = get(record, attr);
     var key = this.keyForRelationship(attr);
 
-    if (isNone(belongsTo)) return;
+    if (isNone(belongsTo)) {
+      return;
+    }
 
     json.links = json.links || {};
     json.links[key] = get(belongsTo, 'id');

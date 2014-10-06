@@ -1,83 +1,20 @@
-var uglifyJavaScript = require('broccoli-uglify-js');
-var pickFiles = require('broccoli-static-compiler');
-var mergeTrees = require('broccoli-merge-trees');
-var env = require('broccoli-env').getEnv();
-var compileES6 = require('broccoli-es6-concatenator');
-var findBowerTrees = require('broccoli-bower');
+/* global require, module */
 
-var sourceTrees = [];
+var EmberAddon = require('ember-cli/lib/broccoli/ember-addon');
 
-if (env === 'production') {
+var app = new EmberAddon();
 
-  // Build file
-  var js = compileES6('src', {
-    loaderFile: '../vendor/no_loader.js',
-    inputFiles: [
-      '**/*.js'
-    ],
-    wrapInEval: false,
-    outputFile: '/ember-json-api.js'
-  });
+// Use `app.import` to add additional libraries to the generated
+// output files.
+//
+// If you need to use different assets in different
+// environments, specify an object as the first parameter. That
+// object's keys should be the environment name and the values
+// should be the asset to use in that environment.
+//
+// If the library that you are including contains AMD or ES6
+// modules that you would like to import into your application
+// please specify an object with the list of modules as keys
+// along with the exports of each module as its value.
 
-  var jsMinified = compileES6('src', {
-    loaderFile: '../vendor/no_loader.js',
-    inputFiles: [
-      '**/*.js'
-    ],
-    wrapInEval: false,
-    outputFile: '/ember-json-api.min.js'
-  });
-
-  var ugly = uglifyJavaScript(jsMinified, {
-    mangle: true,
-    compress: true
-  });
-
-  sourceTrees = sourceTrees.concat(js);
-  sourceTrees = sourceTrees.concat(ugly);
-
-} else if (env === 'development') {
-
-  var src, vendor;
-  src = pickFiles('src', {
-    srcDir: '/',
-    destDir: '/src'
-  });
-  vendor = pickFiles('vendor', {
-    srcDir: '/',
-    destDir: '/vendor'
-  });
-
-  sourceTrees = sourceTrees.concat(src);
-  sourceTrees = sourceTrees.concat(findBowerTrees());
-  sourceTrees = sourceTrees.concat(vendor);
-  var js = new mergeTrees(sourceTrees, { overwrite: true });
-
-  js = compileES6(js, {
-    loaderFile: 'vendor/loader.js',
-    inputFiles: [
-      'src/**/*.js'
-    ],
-    legacyFilesToAppend: [
-      'jquery.js',
-      'qunit.js',
-      'handlebars.js',
-      'ember.js',
-      'ember-data.js'
-    ],
-    wrapInEval: true,
-    outputFile: '/assets/app.js'
-  });
-
-  sourceTrees = sourceTrees.concat(js);
-
-  var tests = pickFiles('tests', {
-    srcDir: '/',
-    destDir: '/tests'
-  })
-  sourceTrees.push(tests)
-
-  sourceTrees = sourceTrees.concat(tests);
-
-}
-module.exports = mergeTrees(sourceTrees, { overwrite: true });
+module.exports = app.toTree();

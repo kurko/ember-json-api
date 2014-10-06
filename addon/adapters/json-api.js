@@ -1,4 +1,9 @@
+import Ember from 'ember';
+import DS from 'ember-data';
+
 var get = Ember.get;
+var underscore = Ember.String.underscore;
+var decamelize = Ember.String.decamelize;
 
 /**
  * Keep a record of routes to resources by type.
@@ -46,7 +51,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   /**
    * Fix query URL.
    */
-  findMany: function(store, type, ids, owner) {
+  findMany: function(store, type, ids/*, owner*/) {
     return this.ajax(this.buildURL(type.typeKey, ids.join(',')), 'GET');
   },
 
@@ -89,7 +94,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     try {
       return Ember.$.parseJSON(responseText);
     } catch(e) {
-      return "Something went wrong";
+      return 'Something went wrong';
     }
   },
 

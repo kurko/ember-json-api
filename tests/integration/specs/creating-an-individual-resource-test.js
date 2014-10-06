@@ -27,7 +27,7 @@ module('integration/specs/creating-an-individual-resource', {
   }
 });
 
-asyncTest("Creating a single resource won't push an array", function() {
+asyncTest("POST /posts/1 won't push an array", function() {
   var request = {
     posts: {
       title: 'Rails is Omakase',

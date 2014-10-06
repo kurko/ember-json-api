@@ -72,15 +72,13 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   updateRecord: function(store, type, record) {
     var data = {};
-    data[this.pathForType(type.typeKey)] = [
-      store.serializerFor(type.typeKey).serialize(record)
-    ];
+    data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(record, {includeId: true});
 
     var id = get(record, 'id');
 
     return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
-        data: data
-      });
+      data: data
+    });
   },
 
   _tryParseErrorResponse:  function(responseText) {

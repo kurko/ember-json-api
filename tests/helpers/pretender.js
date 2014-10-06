@@ -43,6 +43,25 @@ var stubServer = function() {
       });
     },
 
+    put: function(url, expectedRequest, response) {
+      var _this = this;
+
+      this.validatePayload(expectedRequest, 'PUT', url);
+      this.validatePayload(response, 'PUT', url);
+
+      this.availableRequests.put.push({
+        request: expectedRequest,
+        response: response
+      });
+
+      this.pretender.put(url, function(request){
+        var responseForRequest = _this.responseForRequest('put', request);
+
+        var string = JSON.stringify(responseForRequest);
+        return [200, {"Content-Type": "application/json"}, string]
+      });
+    },
+
     /**
      * We have a set of expected requests. Each one returns a particular
      * response. Here, we check that what's being requests exists in

@@ -1,7 +1,7 @@
 {
   "name": "ember-json-api",
   "description": "Ember Data adapter for JSON API.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "homepage": "http://github.com/kurko/ember-json-api",
   "author": "Dali Zheng",
   "contributors": [
@@ -24,9 +24,10 @@
   },
   "scripts": {
     "postinstall": "npm install --save-dev broccoli && npm install --global broccoli-cli",
-    "test": "rm -rf test_build && ./node_modules/broccoli-cli/bin/broccoli build test_build && phantomjs test_build/tests/runner.js test_build/tests/index.html",
-    "test-server": "broccoli serve",
     "build": "rm -rf dist && BROCCOLI_ENV=production broccoli build dist",
+    "build-test": "rm -rf test_build && ./node_modules/broccoli-cli/bin/broccoli build test_build",
+    "test": "npm run build-test && phantomjs test_build/tests/runner.js test_build/tests/index.html && rm -rf test_build",
+    "test-server": "broccoli serve",
     "serve": "broccoli serve"
   },
   "devDependencies": {

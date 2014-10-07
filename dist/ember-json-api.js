@@ -62,15 +62,13 @@
       createRecord: function(store, type, record) {
         var data = {};
 
-        data[this.pathForType(type.typeKey)] = [
-          store.serializerFor(type.typeKey).serialize(record, {
-            includeId: true
-          })
-        ];
+        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(record, {
+          includeId: true
+        });
 
         return this.ajax(this.buildURL(type.typeKey), 'POST', {
-            data: data
-          });
+          data: data
+        });
       },
 
       /**
@@ -79,15 +77,13 @@
        */
       updateRecord: function(store, type, record) {
         var data = {};
-        data[this.pathForType(type.typeKey)] = [
-          store.serializerFor(type.typeKey).serialize(record)
-        ];
+        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(record, {includeId: true});
 
         var id = get(record, 'id');
 
         return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
-            data: data
-          });
+          data: data
+        });
       },
 
       _tryParseErrorResponse:  function(responseText) {
@@ -136,6 +132,11 @@
       serializeIntoHash: function(data, type, record, options) {
         var root = underscore(decamelize(type.typeKey));
         data[root] = this.serialize(record, options);
+      },
+
+      pathForType: function(type) {
+        var decamelized = Ember.String.decamelize(type);
+        return Ember.String.pluralize(decamelized);
       }
     });
 

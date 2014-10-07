@@ -16,16 +16,19 @@ module('integration/specs/urls-for-resource-collections', {
           }
         }
       },
-      comments: {
-        'comments': [{
+      comments_2: {
+        'comments': {
           'id': '2',
           'title': 'good article',
           'body': 'ideal for my startup'
-        }, {
+        }
+      },
+      comments_3: {
+        'comments': {
           'id': '3',
           'title': 'bad article',
           'body': "doesn't run Crysis"
-        }]
+        }
       },
       underscore_resource: {
         'some_resource': {
@@ -53,23 +56,26 @@ asyncTest('GET /posts/1 calls later GET /comments/2,3 when Posts has async comme
   env = setupStore(models);
 
   fakeServer.get('/posts/1', responses.posts_not_compound);
-  fakeServer.get('/comments/2,3', responses.comments);
+  fakeServer.get('/comments/2', responses.comments_2);
+  fakeServer.get('/comments/3', responses.comments_3);
 
-  env.store.find('post', '1').then(function(record) {
-    equal(record.get('id'), '1', 'id is correct');
-    equal(record.get('title'), 'Rails is Omakase', 'title is correct');
+  Em.run(function() {
+    env.store.find('post', '1').then(function(record) {
+      equal(record.get('id'), '1', 'id is correct');
+      equal(record.get('title'), 'Rails is Omakase', 'title is correct');
 
-    record.get('comments').then(function(comments) {
-      var comment1 = comments.objectAt(0);
-      var comment2 = comments.objectAt(1);
+      record.get('comments').then(function(comments) {
+        var comment1 = comments.objectAt(0);
+        var comment2 = comments.objectAt(1);
 
-      equal(comments.get('length'), 2, 'there are 2 comments');
+        equal(comments.get('length'), 2, 'there are 2 comments');
 
-      equal(comment1.get('title'), 'good article', 'comment1 title');
-      equal(comment1.get('body'), 'ideal for my startup', 'comment1 body');
-      equal(comment2.get('title'), 'bad article', 'comment2 title');
-      equal(comment2.get('body'), "doesn't run Crysis", 'comment2 body');
-      start();
+        equal(comment1.get('title'), 'good article', 'comment1 title');
+        equal(comment1.get('body'), 'ideal for my startup', 'comment1 body');
+        equal(comment2.get('title'), 'bad article', 'comment2 title');
+        equal(comment2.get('body'), "doesn't run Crysis", 'comment2 body');
+        start();
+      });
     });
   });
 });
@@ -82,9 +88,11 @@ asyncTest('GET /some_resource, not camelCase', function() {
 
   fakeServer.get('/some_resources/1', responses.underscore_resource);
 
-  env.store.find('someResource', '1').then(function(record) {
-    equal(record.get('id'), '1', 'id is correct');
-    equal(record.get('title'), 'wow', 'title is correct');
-    start();
+  Em.run(function() {
+    env.store.find('someResource', '1').then(function(record) {
+      equal(record.get('id'), '1', 'id is correct');
+      equal(record.get('title'), 'wow', 'title is correct');
+      start();
+    });
   });
 });

@@ -201,7 +201,13 @@
             json[key] = hash[key];
           } else if (typeof hash[key] === 'object') {
             for (var link in hash[key]) {
-              json[link] = hash[key][link];
+              var linkValue = hash[key][link];
+              if (typeof linkValue === 'object' && linkValue.href) {
+                json.links = json.links || {};
+                json.links[link] = linkValue.href;
+              } else {
+                json[link] = linkValue;
+              }
             }
           }
         }

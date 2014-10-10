@@ -1,5 +1,7 @@
 # ember-json-api
 
+[](https://travis-ci.org/kurko/ember-json-api.svg?branch=master)
+
 This is a [JSON API](http://jsonapi.org) adapter for [Ember Data](http://github.com/emberjs/data)
 1.0 beta 10, that extends the built-in REST adapter. Please note that Ember Data
 and JSON API are both works in progress, use with caution.

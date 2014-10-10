@@ -33,16 +33,16 @@
   "devDependencies": {
     "bower": "",
     "broccoli": "^0.13.1",
-    "broccoli-bower": "^0.2.0",
+    "broccoli-bower": "0.2.0",
     "broccoli-cli": "0.0.1",
     "broccoli-env": "^0.0.1",
-    "broccoli-es6-concatenator": "^0.1.4",
-    "broccoli-es6-transpiler": "^0.1.0",
-    "broccoli-merge-trees": "^0.1.3",
-    "broccoli-static-compiler": "^0.1.4",
-    "broccoli-template": "^0.1.0",
-    "broccoli-uglify-js": "^0.1.3",
-    "testem": "^0.6.16"
+    "broccoli-es6-concatenator": "0.1.4",
+    "broccoli-es6-transpiler": "0.1.0",
+    "broccoli-merge-trees": "0.1.3",
+    "broccoli-static-compiler": "0.1.4",
+    "broccoli-template": "0.1.0",
+    "broccoli-uglify-js": "0.1.3",
+    "testem": "0.6.16"
   },
   "license": "MIT"
 }

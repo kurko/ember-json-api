@@ -11,7 +11,7 @@ if (env === 'production') {
 
   // Build file
   var js = compileES6('src', {
-    loaderFile: '../vendor/no_loader.js',
+    loaderFile: '../vendor/no-loader.js',
     inputFiles: [
       '**/*.js'
     ],
@@ -20,7 +20,7 @@ if (env === 'production') {
   });
 
   var jsMinified = compileES6('src', {
-    loaderFile: '../vendor/no_loader.js',
+    loaderFile: '../vendor/no-loader.js',
     inputFiles: [
       '**/*.js'
     ],

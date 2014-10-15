@@ -1,5 +1,5 @@
-var JsonApiAdapter = require('src/json_api_adapter').default,
-    JsonApiSerializer = require('src/json_api_serializer').default;
+var JsonApiAdapter = require('src/json-api-adapter').default,
+    JsonApiSerializer = require('src/json-api-serializer').default;
 
 var env, store, adapter, SuperUser;
 var originalAjax, passedUrl, passedVerb, passedHash;

@@ -1,4 +1,4 @@
-define("json_api_adapter", 
+define("json-api-adapter", 
   ["exports"],
   function(__exports__) {
     "use strict";
@@ -153,7 +153,7 @@ define("json_api_adapter",
     DS.JsonApiAdapter.ServerError = ServerError;
 
     __exports__["default"] = DS.JsonApiAdapter;
-  });define("json_api_serializer", 
+  });define("json-api-serializer", 
   ["exports"],
   function(__exports__) {
     "use strict";

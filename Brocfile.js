@@ -38,7 +38,7 @@ if (env === 'production') {
 
 } else if (env === 'development') {
 
-  var src, vendor;
+  var src, vendor, bowerComponents;
   src = pickFiles('src', {
     srcDir: '/',
     destDir: '/src'
@@ -47,14 +47,20 @@ if (env === 'production') {
     srcDir: '/',
     destDir: '/vendor'
   });
+  loaderJs = pickFiles('bower_components/loader.js', {
+    srcDir: '/',
+    files: ['loader.js'],
+    destDir: '/vendor/loader.js'
+  });
 
   sourceTrees = sourceTrees.concat(src);
   sourceTrees = sourceTrees.concat(findBowerTrees());
   sourceTrees = sourceTrees.concat(vendor);
+  sourceTrees = sourceTrees.concat(loaderJs);
   var js = new mergeTrees(sourceTrees, { overwrite: true });
 
   js = compileES6(js, {
-    loaderFile: 'vendor/loader.js',
+    loaderFile: 'vendor/loader.js/loader.js',
     inputFiles: [
       'src/**/*.js'
     ],

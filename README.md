@@ -27,11 +27,11 @@ Next, define the adapter and serializer:
 
 ```js
 // app/adapters/application.js
-import { default as JsonApiAdapter } from 'json_api_adapter';
+import JsonApiAdapter from 'ember-json-api/json_api_adapter';
 export default JsonApiAdapter;
 
 // app/serializers/application.js
-import { default as JsonApiSerializer } from 'json_api_serializer';
+import JsonApiSerializer from 'ember-json-api/json_api_serializer';
 export default JsonApiSerializer;
 ```
 

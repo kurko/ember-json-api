@@ -1,5 +1,5 @@
 var get = Ember.get, set = Ember.set;
-var HomePlanet, league, SuperVillain, superVillain, EvilMinion, YellowMinion, DoomsdayDevice, MediocreVillain, env;
+var HomePlanet, league, SuperVillain, superVillain, EvilMinion, YellowMinion, MaleMinion, FemaleMinion, env;
 module('integration/ember-json-api-adapter - serializer', {
   setup: function() {
     SuperVillain = DS.Model.extend({
@@ -7,6 +7,12 @@ module('integration/ember-json-api-adapter - serializer', {
       lastName:      DS.attr('string'),
       homePlanet:    DS.belongsTo('homePlanet'),
       evilMinions:   DS.hasMany('evilMinion')
+    });
+
+    MegaVillain = DS.Model.extend({
+      firstName:     DS.attr('string'),
+      lastName:      DS.attr('string'),
+      minions:   DS.hasMany('blueMinion'),
     });
 
     HomePlanet = DS.Model.extend({
@@ -20,31 +26,33 @@ module('integration/ember-json-api-adapter - serializer', {
     });
 
     YellowMinion = EvilMinion.extend();
-    DoomsdayDevice = DS.Model.extend({
-      name:         DS.attr('string'),
-      evilMinion:   DS.belongsTo('evilMinion')
+    BlueMinion = DS.Model.extend({
+      superVillain: DS.belongsTo('megaVillain')
     });
 
-    MediocreVillain = DS.Model.extend({
-      name:         DS.attr('string'),
-      evilMinions:  DS.hasMany('evilMinion')
+    MaleMinion = DS.Model.extend({
+      wife: DS.belongsTo('femaleMinion')
+    });
+
+    FemaleMinion = DS.Model.extend({
+      husband: DS.belongsTo('maleMinion')
     });
 
     env = setupStore({
       superVillain:   SuperVillain,
+      megaVillain:    MegaVillain,
       homePlanet:     HomePlanet,
       evilMinion:     EvilMinion,
       yellowMinion:   YellowMinion,
-      doomsdayDevice: DoomsdayDevice,
-      mediocreVillain: MediocreVillain
+      blueMinion:     BlueMinion,
+      maleMinion:     MaleMinion,
+      femaleMinion:   FemaleMinion
     });
 
     env.store.modelFor('superVillain');
     env.store.modelFor('homePlanet');
     env.store.modelFor('evilMinion');
     env.store.modelFor('yellowMinion');
-    env.store.modelFor('doomsdayDevice');
-    env.store.modelFor('mediocreVillain');
   },
 
   teardown: function() {
@@ -160,6 +168,70 @@ test('serializeIntoHash with decamelized types', function() {
       name: 'Umber',
       links: {
         superVillains: []
+      }
+    }
+  });
+});
+
+test('serialize has many relationships', function() {
+  var minime, minime2, drevil;
+
+  Ember.run(function() {
+    drevil = env.store.createRecord(MegaVillain, {
+      firstName: 'Dr',
+      lastName: 'Evil'
+    });
+
+    minime = env.store.createRecord(BlueMinion, {
+      id: '123',
+      name: 'Mini me',
+      superVillain: drevil
+    });
+
+    minime2 = env.store.createRecord(BlueMinion, {
+      id: '345',
+      name: 'Mini me 2',
+      superVillain: drevil
+    });
+  });
+
+  var json = Ember.run(function(){
+    return env.serializer.serialize(drevil);
+  });
+
+  deepEqual(json, {
+    firstName: 'Dr',
+    lastName: 'Evil',
+    links: {
+      minions: {
+        ids: ['123', '345'],
+        type: 'blueMinion'
+      }
+    }
+  });
+});
+
+test('serialize belongs to relationships', function() {
+  var male, female;
+
+  Ember.run(function() {
+    // Of course they belong to each other
+    female = env.store.createRecord(FemaleMinion);
+    male = env.store.createRecord(MaleMinion, {
+      id: 2,
+      wife: female
+    });
+  });
+
+  var json = Ember.run(function(){
+    return env.serializer.serialize(female);
+  });
+
+  deepEqual(json, {
+    links: {
+      husband: {
+        id: '2',
+        type: 'maleMinion'
       }
     }
   });

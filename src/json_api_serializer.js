@@ -44,6 +44,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
           if (linkValue && typeof linkValue === 'object' && linkValue.href) {
             json.links = json.links || {};
             json.links[link] = linkValue.href;
+          } else if(typeof linkValue === 'object' && linkValue.ids) {
+            json[link] = linkValue.ids;
           } else {
             json[link] = linkValue;
           }
@@ -134,7 +136,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       extracted.push(linkEntry);
       DS._routes[linkKey] = route;
     }
-
     return extracted;
   },
 
@@ -146,12 +147,13 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   serializeBelongsTo: function(record, json, relationship) {
     var attr = relationship.key;
     var belongsTo = get(record, attr);
+    var type = this.keyForRelationship(relationship.type.typeKey);
     var key = this.keyForRelationship(attr);
 
     if (isNone(belongsTo)) return;
 
     json.links = json.links || {};
-    json.links[key] = get(belongsTo, 'id');
+    json.links[key] = belongsToLink(key, type, get(belongsTo, 'id'));
   },
 
   /**
@@ -159,13 +161,36 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   serializeHasMany: function(record, json, relationship) {
     var attr = relationship.key;
+    var type = this.keyForRelationship(relationship.type.typeKey);
     var key = this.keyForRelationship(attr);
 
     if (relationship.kind === 'hasMany') {
       json.links = json.links || {};
-      json.links[key] = get(record, attr).mapBy('id');
+      json.links[key] = hasManyLink(key, type, record, attr);
     }
   }
 });
+
+function belongsToLink(key, type, value) {
+  var link = value;
+  if (link && key !== type) {
+    link = {
+      id: link,
+      type: type
+    };
+  }
+  return link;
+}
+
+function hasManyLink(key, type, record, attr) {
+  var link = get(record, attr).mapBy('id');
+  if (link && key !== Ember.String.pluralize(type)) {
+    link = {
+      ids: link,
+      type: type
+    };
+  }
+  return link;
+}
 
 export default DS.JsonApiSerializer;

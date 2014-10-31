@@ -44,6 +44,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
           if (typeof linkValue === 'object' && linkValue.href) {
             json.links = json.links || {};
             json.links[link] = linkValue.href;
+          } else if(typeof linkValue === 'object' && linkValue.ids) {
+            json[link] = linkValue.ids;
           } else {
             json[link] = linkValue;
           }
@@ -134,7 +136,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       extracted.push(linkEntry);
       DS._routes[linkKey] = route;
     }
-
     return extracted;
   },
 

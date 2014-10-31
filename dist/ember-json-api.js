@@ -1,5 +1,4 @@
-
-;define("json_api_adapter", 
+define("json_api_adapter", 
   ["exports"],
   function(__exports__) {
     "use strict";
@@ -154,8 +153,7 @@
     DS.JsonApiAdapter.ServerError = ServerError;
 
     __exports__["default"] = DS.JsonApiAdapter;
-  });
-;define("json_api_serializer", 
+  });define("json_api_serializer", 
   ["exports"],
   function(__exports__) {
     "use strict";
@@ -202,9 +200,11 @@
           } else if (typeof hash[key] === 'object') {
             for (var link in hash[key]) {
               var linkValue = hash[key][link];
-              if (typeof linkValue === 'object' && linkValue.href) {
+              if (linkValue && typeof linkValue === 'object' && linkValue.href) {
                 json.links = json.links || {};
                 json.links[link] = linkValue.href;
+              } else if(typeof linkValue === 'object' && linkValue.ids) {
+                json[link] = linkValue.ids;
               } else {
                 json[link] = linkValue;
               }
@@ -295,7 +295,6 @@
           extracted.push(linkEntry);
           DS._routes[linkKey] = route;
         }
-
         return extracted;
       },
 
@@ -307,12 +306,13 @@
       serializeBelongsTo: function(record, json, relationship) {
         var attr = relationship.key;
         var belongsTo = get(record, attr);
+        var type = this.keyForRelationship(relationship.type.typeKey);
         var key = this.keyForRelationship(attr);
 
         if (isNone(belongsTo)) return;
 
         json.links = json.links || {};
-        json.links[key] = get(belongsTo, 'id');
+        json.links[key] = belongsToLink(key, type, get(belongsTo, 'id'));
       },
 
       /**
@@ -320,14 +320,37 @@
        */
       serializeHasMany: function(record, json, relationship) {
         var attr = relationship.key;
+        var type = this.keyForRelationship(relationship.type.typeKey);
         var key = this.keyForRelationship(attr);
 
         if (relationship.kind === 'hasMany') {
           json.links = json.links || {};
-          json.links[key] = get(record, attr).mapBy('id');
+          json.links[key] = hasManyLink(key, type, record, attr);
         }
       }
     });
+
+    function belongsToLink(key, type, value) {
+      var link = value;
+      if (link && key !== type) {
+        link = {
+          id: link,
+          type: type
+        };
+      }
+      return link;
+    }
+
+    function hasManyLink(key, type, record, attr) {
+      var link = get(record, attr).mapBy('id');
+      if (link && key !== Ember.String.pluralize(type)) {
+        link = {
+          ids: link,
+          type: type
+        };
+      }
+      return link;
+    }
 
     __exports__["default"] = DS.JsonApiSerializer;
   });

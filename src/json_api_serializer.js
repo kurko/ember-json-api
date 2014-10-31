@@ -41,7 +41,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       } else if (typeof hash[key] === 'object') {
         for (var link in hash[key]) {
           var linkValue = hash[key][link];
-          if (typeof linkValue === 'object' && linkValue.href) {
+          if (linkValue && typeof linkValue === 'object' && linkValue.href) {
             json.links = json.links || {};
             json.links[link] = linkValue.href;
           } else {

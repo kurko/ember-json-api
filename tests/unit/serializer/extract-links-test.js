@@ -1,6 +1,6 @@
 var serializer;
 
-module('unit/ember-json-api-adapter - serializer - extract_links_test', {
+module('unit/ember-json-api-adapter - serializer - extract-links-test', {
   setup: function() {
     // TODO remove global
     DS._routes = Ember.create(null);

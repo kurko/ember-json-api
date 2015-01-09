@@ -30,7 +30,7 @@ module('integration/specs/href-link-for-resource-collection-test', {
             'title': 'bad article',
             'body': 'doesn\'t run Crysis'
           }
-        ] 
+        ]
       }
     };
 
@@ -66,6 +66,56 @@ asyncTest('GET /posts/1 calls later GET /posts/1/comments when Posts has async c
         equal(comment1.get('body'), 'ideal for my startup', 'comment1 body');
         equal(comment2.get('title'), 'bad article', 'comment2 title');
         equal(comment2.get('body'), "doesn't run Crysis", 'comment2 body');
+        start();
+      });
+    });
+  });
+});
+
+asyncTest('GET /posts/1 calls later GET /posts/1/some_resources when Posts has async someResources (camelized)', function() {
+  var models = setModels();
+  // Add hasMany someResources relation to Post
+  models['post'].reopen({
+    someResources: DS.hasMany('someResources', { async: true })
+  })
+
+  env = setupStore(models);
+
+  fakeServer.get('/posts/1', {
+    'posts': {
+      id: '1',
+      title: 'Rails is Omakase',
+      links: {
+        'some_resources': {
+          href: '/posts/1/some_resources'
+        }
+      }
+    }
+  });
+
+  fakeServer.get('/posts/1/some_resources', {
+    'some_resources': [
+      {
+        id: 1,
+        title: 'Something 1',
+      },
+      {
+        id: 2,
+        title: 'Something 2'
+      }
+    ]
+  });
+
+  Em.run(function() {
+    env.store.find('post', '1').then(function(record) {
+      record.get('someResources').then(function(someResources) {
+        var something1 = someResources.objectAt(0);
+        var something2 = someResources.objectAt(1);
+
+        equal(someResources.get('length'), 2, 'there are 2 someResources');
+
+        equal(something1.get('title'), 'Something 1', 'something1 title');
+        equal(something2.get('title'), 'Something 2', 'something2 title');
         start();
       });
     });

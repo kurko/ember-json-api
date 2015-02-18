@@ -95,7 +95,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
       }
     }
-    store.pushPayload(linked);
+    this.pushPayload(store, linked);
   },
 
   /**

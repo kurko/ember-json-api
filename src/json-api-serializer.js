@@ -98,13 +98,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   },
 
   /**
-   * Override this method to parse the top-level "meta" object per type.
-   */
-  extractMeta: function(meta) {
-    // no op
-  },
-
-  /**
    * Parse the top-level "links" object.
    */
   extractLinks: function(links) {

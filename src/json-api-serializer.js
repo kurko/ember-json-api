@@ -140,7 +140,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   serializeBelongsTo: function(record, json, relationship) {
     var attr = relationship.key;
-    var belongsTo = get(record, attr);
+    var belongsTo = record.belongsTo(attr);
     var type = this.keyForRelationship(relationship.type.typeKey);
     var key = this.keyForRelationship(attr);
 
@@ -177,7 +177,7 @@ function belongsToLink(key, type, value) {
 }
 
 function hasManyLink(key, type, record, attr) {
-  var link = get(record, attr).mapBy('id');
+  var link = record.hasMany(attr).mapBy('id');
   if (link && key !== Ember.String.pluralize(type)) {
     link = {
       ids: link,

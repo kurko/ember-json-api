@@ -61,7 +61,8 @@ define("json-api-adapter",
       createRecord: function(store, type, record) {
         var data = {};
 
-        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(record, {
+        var snapshot = record._createSnapshot();
+        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
           includeId: true
         });
 
@@ -76,7 +77,10 @@ define("json-api-adapter",
        */
       updateRecord: function(store, type, record) {
         var data = {};
-        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(record, {includeId: true});
+        var snapshot = record._createSnapshot();
+        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
+          includeId: true
+        });
 
         var id = get(record, 'id');
 
@@ -130,7 +134,8 @@ define("json-api-adapter",
         */
       serializeIntoHash: function(data, type, record, options) {
         var root = underscore(decamelize(type.typeKey));
-        data[root] = this.serialize(record, options);
+        var snapshot = record._createSnapshot();
+        data[root] = this.serialize(snapshot, options);
       },
 
       pathForType: function(type) {
@@ -200,10 +205,11 @@ define("json-api-adapter",
           } else if (typeof hash[key] === 'object') {
             for (var link in hash[key]) {
               var linkValue = hash[key][link];
+              link = Ember.String.camelize(link);
               if (linkValue && typeof linkValue === 'object' && linkValue.href) {
                 json.links = json.links || {};
                 json.links[link] = linkValue.href;
-              } else if(typeof linkValue === 'object' && linkValue.ids) {
+              } else if (linkValue && typeof linkValue === 'object' && linkValue.ids) {
                 json[link] = linkValue.ids;
               } else {
                 json[link] = linkValue;
@@ -257,13 +263,6 @@ define("json-api-adapter",
       },
 
       /**
-       * Override this method to parse the top-level "meta" object per type.
-       */
-      extractMeta: function(meta) {
-        // no op
-      },
-
-      /**
        * Parse the top-level "links" object.
        */
       extractLinks: function(links) {
@@ -305,7 +304,7 @@ define("json-api-adapter",
        */
       serializeBelongsTo: function(record, json, relationship) {
         var attr = relationship.key;
-        var belongsTo = get(record, attr);
+        var belongsTo = record.belongsTo(attr);
         var type = this.keyForRelationship(relationship.type.typeKey);
         var key = this.keyForRelationship(attr);
 
@@ -342,7 +341,7 @@ define("json-api-adapter",
     }
 
     function hasManyLink(key, type, record, attr) {
-      var link = get(record, attr).mapBy('id');
+      var link = record.hasMany(attr).mapBy('id');
       if (link && key !== Ember.String.pluralize(type)) {
         link = {
           ids: link,

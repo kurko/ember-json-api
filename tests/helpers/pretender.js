@@ -92,7 +92,7 @@ var stubServer = function() {
       if (respectiveResponse) {
         return respectiveResponse;
       } else {
-        var error = "No "+verb+" request defined for request";
+        var error = "No response defined for "+verb+" request";
         console.error(error, currentRequest);
 
         if (availableRequests.length) {

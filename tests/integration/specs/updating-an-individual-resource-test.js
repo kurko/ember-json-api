@@ -16,7 +16,8 @@ module('integration/specs/updating-an-individual-resource', {
       postAfterUpdate: {
         post: {
           id: '1',
-          title: 'TDD Is Dead lol'
+          title: 'TDD Is Dead lol',
+          postSummary: 'summary'
         }
       }
     };
@@ -38,6 +39,7 @@ asyncTest("PUT /posts/1 won't push an array", function() {
     posts: {
       id: '1',
       title: 'TDD Is Dead lol',
+      postSummary: null,
       links: {
         comments: []
       }
@@ -54,6 +56,7 @@ asyncTest("PUT /posts/1 won't push an array", function() {
       post.save().then(function(record) {
         equal(record.get('id'), '1', 'id is correct');
         equal(record.get('title'), 'TDD Is Dead lol', 'title is correct');
+        equal(record.get('postSummary'), 'summary', 'summary is correct');
 
         start();
       });

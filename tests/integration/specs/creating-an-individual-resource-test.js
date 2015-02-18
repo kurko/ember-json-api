@@ -10,7 +10,8 @@ module('integration/specs/creating-an-individual-resource', {
       post: {
         posts: {
           id: '1',
-          title: 'Rails is Omakase'
+          title: 'Rails is Omakase',
+          post_summary: 'summary'
         }
       }
     };
@@ -31,6 +32,7 @@ asyncTest("POST /posts/1 won't push an array", function() {
   var request = {
     posts: {
       title: 'Rails is Omakase',
+      postSummary: null,
       links: {
         comments: []
       }
@@ -45,6 +47,7 @@ asyncTest("POST /posts/1 won't push an array", function() {
     post.save().then(function(record) {
       equal(record.get('id'), '1', 'id is correct');
       equal(record.get('title'), 'Rails is Omakase', 'title is correct');
+      equal(record.get('postSummary'), 'summary', 'summary is correct');
 
       start();
     });

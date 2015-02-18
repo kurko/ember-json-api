@@ -37,7 +37,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var json = {};
     for (var key in hash) {
       if (key !== 'links') {
-        json[key] = hash[key];
+        var camelizedKey = Ember.String.camelize(key);
+        json[camelizedKey] = hash[key];
       } else if (typeof hash[key] === 'object') {
         for (var link in hash[key]) {
           var linkValue = hash[key][link];

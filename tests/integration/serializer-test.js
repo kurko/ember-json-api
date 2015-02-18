@@ -77,7 +77,8 @@ test('serialize camelcase', function() {
   });
 
   var json = Ember.run(function(){
-    return env.serializer.serialize(tom);
+    var snapshot = tom._createSnapshot();
+    return env.serializer.serialize(snapshot);
   });
 
   deepEqual(json, {
@@ -114,8 +115,9 @@ test('serialize into snake_case', function() {
     return Ember.String.decamelize(key);
   };
 
-  var json = Ember.run(function(){
-    return env.serializer.serialize(tom);
+  var json = Ember.run(function() {
+    var snapshot = tom._createSnapshot();
+    return env.serializer.serialize(snapshot);
   });
 
   deepEqual(json, {
@@ -137,7 +139,8 @@ test('serializeIntoHash', function() {
       id: '123'
     });
 
-   env.serializer.serializeIntoHash(json, HomePlanet, league);
+   var snapshot = league._createSnapshot();
+   env.serializer.serializeIntoHash(json, HomePlanet, snapshot);
   });
 
   deepEqual(json, {
@@ -160,7 +163,8 @@ test('serializeIntoHash with decamelized types', function() {
       id: '123'
     });
 
-    env.serializer.serializeIntoHash(json, HomePlanet, league);
+    var snapshot = league._createSnapshot();
+    env.serializer.serializeIntoHash(json, HomePlanet, snapshot);
   });
 
   deepEqual(json, {
@@ -196,7 +200,8 @@ test('serialize has many relationships', function() {
   });
 
   var json = Ember.run(function(){
-    return env.serializer.serialize(drevil);
+    var snapshot = drevil._createSnapshot();
+    return env.serializer.serialize(snapshot);
   });
 
   deepEqual(json, {
@@ -224,7 +229,8 @@ test('serialize belongs to relationships', function() {
   });
 
   var json = Ember.run(function(){
-    return env.serializer.serialize(female);
+    var snapshot = female._createSnapshot();
+    return env.serializer.serialize(snapshot);
   });
 
   deepEqual(json, {

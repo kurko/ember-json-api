@@ -68,7 +68,7 @@ if (env === 'production') {
       'jquery.js',
       'qunit.js',
       'handlebars.js',
-      'ember.js',
+      'ember.debug.js',
       'ember-data.js'
     ],
     wrapInEval: true,

@@ -57,7 +57,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   createRecord: function(store, type, record) {
     var data = {};
 
-    data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(record, {
+    var snapshot = record._createSnapshot();
+    data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
       includeId: true
     });
 
@@ -72,7 +73,10 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   updateRecord: function(store, type, record) {
     var data = {};
-    data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(record, {includeId: true});
+    var snapshot = record._createSnapshot();
+    data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
+      includeId: true
+    });
 
     var id = get(record, 'id');
 
@@ -126,7 +130,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     */
   serializeIntoHash: function(data, type, record, options) {
     var root = underscore(decamelize(type.typeKey));
-    data[root] = this.serialize(record, options);
+    var snapshot = record._createSnapshot();
+    data[root] = this.serialize(snapshot, options);
   },
 
   pathForType: function(type) {

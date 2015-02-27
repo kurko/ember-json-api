@@ -5,35 +5,17 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   keyForRelationship: function(key) {
     return key;
   },
-  /**
-   * Patch the extractSingle method, since there are no singular records
-   */
-  extractSingle: function(store, primaryType, payload, recordId, requestType) {
-    var primaryTypeName;
-    if (this.keyForAttribute) {
-      primaryTypeName = this.keyForAttribute(primaryType.typeKey);
-    } else {
-      primaryTypeName = primaryType.typeKey;
-    }
 
-    var json = {};
-
-    for (var key in payload) {
-      var typeName = Ember.String.singularize(key);
-      if (typeName === primaryTypeName &&
-          Ember.isArray(payload[key])) {
-        json[typeName] = payload[key][0];
-      } else {
-        json[key] = payload[key];
-      }
-    }
-    return this._super(store, primaryType, json, recordId, requestType);
+  extractSingle: function() {
+    console.log('extractSingle', arguments);
+    return this._super.apply(this, arguments);
   },
 
   /**
    * Flatten links
    */
   normalize: function(type, hash, prop) {
+    console.log('normalize', arguments);
     var json = {};
     for (var key in hash) {
       if (key !== 'links') {
@@ -61,77 +43,114 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
+    console.log('PAYLOAD', payload);
+    var data = payload.data;
+    if (data) {
+      if(Ember.isArray(data)) {
+        this.extractArrayData(data, payload);
+      } else {
+        this.extractSingleData(data, payload);
+      }
+      delete payload.data;
+    }
     if (payload.meta) {
       this.extractMeta(payload.meta);
       delete payload.meta;
     }
     if (payload.links) {
-      this.extractLinks(payload.links);
+      this.extractLinks(payload.links, payload);
       delete payload.links;
     }
     if (payload.linked) {
       this.extractLinked(payload.linked);
       delete payload.linked;
     }
+    console.log('normalizePayload', payload);
     return payload;
+  },
+
+  /**
+   * Extract top-level "data" containing a single primary data
+   */
+  extractSingleData: function(data, payload) {
+    if(data.links) {
+      this.extractLinks(data.links, data);
+      delete data.links;
+    }
+    payload[data.type] = data;
+  },
+
+  /**
+   * Extract top-level "data" containing a single primary data
+   */
+  extractArrayData: function(data, payload) {
+    var type = data.length > 0 ? data[0].type : null;
+    data.forEach(function(item) {
+      if(item.links) {
+        this.extractLinks(data.links, data);
+        delete data.links;
+      }
+    }.bind(this));
+
+    payload[type] = data;
   },
 
   /**
    * Extract top-level "linked" containing associated objects
    */
   extractLinked: function(linked) {
-    var link, values, value, relation;
-    var store = get(this, 'store');
+    var store = get(this, 'store'), models = {};
 
-    for (link in linked) {
-      values = linked[link];
-      for (var i = values.length - 1; i >= 0; i--) {
-        value = values[i];
-
-        if (value.links) {
-          for (relation in value.links) {
-            value[relation] = value.links[relation];
-          }
-          delete value.links;
-        }
+    linked.forEach(function(link) {
+      var type = link.type;
+      delete link.type;
+      if(!models[type]) {
+        models[type] = [];
       }
-    }
-    this.pushPayload(store, linked);
+      models[type].push(link);
+    });
+    console.log('pushing payload', models);
+    this.pushPayload(store, models);
   },
 
   /**
    * Parse the top-level "links" object.
    */
-  extractLinks: function(links) {
-    var link, key, value, route;
-    var extracted = [], linkEntry, linkKey;
+  extractLinks: function(links, resource) {
+    console.log('extractLinks', links, resource);
+    var link, association, id, route, linkKey;
 
     for (link in links) {
-      key = link.split('.').pop();
-      value = links[link];
-      if (typeof value === 'string') {
-        route = value;
+      association = links[link];
+      if(typeof association === 'string') {
+        console.log('links is string');
+        if(association.indexOf('/') > -1) {
+          route = association;
+          id = null;
+        } else {
+          route = null;
+          id = association;
+        }
       } else {
-        key = value.type || key;
-        route = value.href;
+        route = association.resource || association.self;
+        id = association.id || association.ids;
+
+        console.log('links is object', route, id);
       }
 
+    }
+    if(route) {
       // strip base url
       if (route.substr(0, 4).toLowerCase() === 'http') {
         route = route.split('//').pop().split('/').slice(1).join('/');
       }
-
       // strip prefix slash
       if (route.charAt(0) === '/') {
         route = route.substr(1);
       }
-      linkEntry = { };
-      linkKey = Ember.String.singularize(key);
-      linkEntry[linkKey] = route;
-      extracted.push(linkEntry);
-      DS._routes[linkKey] = route;
+      DS._routes[link] = route;
     }
-    return extracted;
+    resource[link] = id;
   },
 
   // SERIALIZATION

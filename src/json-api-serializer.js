@@ -1,6 +1,15 @@
 var get = Ember.get;
 var isNone = Ember.isNone;
 
+function sysout(title) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  console.groupCollapsed(title);
+  args.forEach(function(arg) {
+    console.dir(arg);
+  });
+  console.groupEnd();
+}
+
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
   keyForRelationship: function(key) {
     return key;
@@ -15,27 +24,19 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Flatten links
    */
   normalize: function(type, hash, prop) {
-    console.log('normalize', arguments);
+    sysout('normalize start ' + type.typeKey, hash);
     var json = {};
     for (var key in hash) {
-      if (key !== 'links') {
-        var camelizedKey = Ember.String.camelize(key);
-        json[camelizedKey] = hash[key];
-      } else if (typeof hash[key] === 'object') {
-        for (var link in hash[key]) {
-          var linkValue = hash[key][link];
-          link = Ember.String.camelize(link);
-          if (linkValue && typeof linkValue === 'object' && linkValue.href) {
-            json.links = json.links || {};
-            json.links[link] = linkValue.href;
-          } else if (linkValue && typeof linkValue === 'object' && linkValue.ids) {
-            json[link] = linkValue.ids;
-          } else {
-            json[link] = linkValue;
-          }
-        }
+      // This is already normalized
+      if (key === 'links') {
+        json[key] = hash[key];
+        continue;
       }
+
+      var camelizedKey = Ember.String.camelize(key);
+      json[camelizedKey] = hash[key];
     }
+    sysout('normalize end ' + type.typeKey, json);
     return this._super(type, json, prop);
   },
 
@@ -43,7 +44,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
-    console.log('PAYLOAD', payload);
+    console.log('PAYLOAD', Ember.$.extend({}, payload));
     var data = payload.data;
     if (data) {
       if(Ember.isArray(data)) {
@@ -59,13 +60,15 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     }
     if (payload.links) {
       this.extractLinks(payload.links, payload);
-      delete payload.links;
+      console.log('deleting links from payload');
+      delete data.links;
     }
     if (payload.linked) {
       this.extractLinked(payload.linked);
+      console.log('deleting payload links');
       delete payload.linked;
     }
-    console.log('normalizePayload', payload);
+    console.log('normalizePayload', Ember.$.extend({}, payload));
     return payload;
   },
 
@@ -74,10 +77,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   extractSingleData: function(data, payload) {
     if(data.links) {
+      console.log('extracting links for single data');
       this.extractLinks(data.links, data);
-      delete data.links;
+      //delete data.links;
     }
     payload[data.type] = data;
+    delete data.type;
   },
 
   /**
@@ -88,7 +93,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     data.forEach(function(item) {
       if(item.links) {
         this.extractLinks(data.links, data);
-        delete data.links;
+        //delete data.links;
       }
     }.bind(this));
 
@@ -117,13 +122,15 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Parse the top-level "links" object.
    */
   extractLinks: function(links, resource) {
-    console.log('extractLinks', links, resource);
+    sysout('extractLinks start', resource);
     var link, association, id, route, linkKey;
+
+    // Clear the old format
+    delete resource.links;
 
     for (link in links) {
       association = links[link];
       if(typeof association === 'string') {
-        console.log('links is string');
         if(association.indexOf('/') > -1) {
           route = association;
           id = null;
@@ -134,12 +141,15 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       } else {
         route = association.resource || association.self;
         id = association.id || association.ids;
-
-        console.log('links is object', route, id);
       }
 
     }
     if(route) {
+      if(!resource.links) {
+        resource.links = {};
+      }
+      resource.links[link] = route;
+
       // strip base url
       if (route.substr(0, 4).toLowerCase() === 'http') {
         route = route.split('//').pop().split('/').slice(1).join('/');
@@ -148,9 +158,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       if (route.charAt(0) === '/') {
         route = route.substr(1);
       }
+
       DS._routes[link] = route;
     }
     resource[link] = id;
+    sysout('extractLinks end', resource);
   },
 
   // SERIALIZATION

@@ -88,7 +88,8 @@ asyncTest('GET /posts/1 calls later GET /posts/1/some_resources when Posts has a
   env = setupStore(models);
 
   fakeServer.get('/posts/1', {
-    'posts': {
+    data: {
+      type: 'posts',
       id: '1',
       title: 'Rails is Omakase',
       links: {

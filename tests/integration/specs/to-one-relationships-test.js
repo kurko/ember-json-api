@@ -52,7 +52,6 @@ asyncTest('GET /posts/1 with async linked resources', function() {
 
   Em.run(function() {
     env.store.find('post', '1').then(function(record) {
-      var authorId;
       equal(record.get('id'), '1', 'id is correct');
       equal(record.get('title'), 'Rails is Omakase', 'title is correct');
 

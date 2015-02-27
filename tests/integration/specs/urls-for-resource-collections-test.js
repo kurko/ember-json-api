@@ -20,22 +20,29 @@ module('integration/specs/urls-for-resource-collections', {
           }
         }
       },
-      linked: [{
-        type: 'comments',
-        'id': '2',
-        'title': 'good article',
-        'body': 'ideal for my startup'
-      }, {
-        type: 'comments',
-        id: '3',
-        title: 'bad article',
-        body: "doesn't run Crysis"
+      comments_2: {
+        data: {
+          type: 'comments',
+          'id': '2',
+          'title': 'good article',
+          'body': 'ideal for my startup'
+        }
       },
-      {
-        type: 'some_resource',
-        id: '1',
-        title: 'wow'
-      }]
+      comments_3: {
+        data: {
+          type: 'comments',
+          id: '3',
+          title: 'bad article',
+          body: "doesn't run Crysis"
+        }
+      },
+      underscore_resource: {
+        data: {
+          type: 'some_resource',
+          id: '1',
+          title: 'wow'
+        }
+      }
     };
 
     env = setupStore(setModels());

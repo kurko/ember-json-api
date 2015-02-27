@@ -20,18 +20,22 @@ module('integration/specs/to-many-relationships', {
           }
         }
       },
-      linked: [{
-        type: 'comments',
-        id: '2',
-        title: 'good article',
-        body: 'ideal for my startup'
+      comments_2: {
+        data: {
+          type: 'comments',
+          id: '2',
+          title: 'good article',
+          body: 'ideal for my startup'
+        }
       },
-      {
-        type: 'comments',
-        id: '3',
-        title: 'bad article',
-        body: "doesn't run Crysis"
-      }]
+      comments_3: {
+        data: {
+          type: 'comments',
+          id: '3',
+          title: 'bad article',
+          body: "doesn't run Crysis"
+        }
+      }
     };
 
     env = setupStore(setModels());

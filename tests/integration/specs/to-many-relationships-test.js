@@ -8,28 +8,30 @@ module('integration/specs/to-many-relationships', {
 
     responses = {
       posts_not_compound: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            'comments': ['2', '3']
+            comments: {
+              type: 'comments',
+              ids: ['2', '3']
+            }
           }
         }
       },
-      comments_2: {
-        'comments': {
-          'id': '2',
-          'title': 'good article',
-          'body': 'ideal for my startup'
-        }
+      linked: [{
+        type: 'comments',
+        id: '2',
+        title: 'good article',
+        body: 'ideal for my startup'
       },
-      comments_3: {
-        'comments': {
-          'id': '3',
-          'title': 'bad article',
-          'body': "doesn't run Crysis"
-        }
-      }
+      {
+        type: 'comments',
+        id: '3',
+        title: 'bad article',
+        body: "doesn't run Crysis"
+      }]
     };
 
     env = setupStore(setModels());

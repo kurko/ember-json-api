@@ -8,7 +8,8 @@ module('integration/specs/to-one-relationships', {
 
     responses = {
       posts_no_linked: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
@@ -16,12 +17,11 @@ module('integration/specs/to-one-relationships', {
           }
         }
       },
-      authors: {
-        'authors': {
-          'id': '2',
-          'name': 'dhh'
-        }
-      }
+      linked: [{
+        type: 'authors',
+        id: '2',
+        name: 'dhh'
+      }]
     };
 
     env = setupStore(setModels());

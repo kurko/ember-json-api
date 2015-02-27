@@ -8,10 +8,12 @@ module('integration/specs/resource-collection-representations', {
 
     responses = {
       posts_list: {
-        'posts': [{
+        data: [{
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase'
         }, {
+          type: 'posts',
           id: '2',
           title: 'Ember.js Handlebars'
         }]

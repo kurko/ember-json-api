@@ -8,27 +8,30 @@ module('integration/specs/href-link-for-resource-collection-test', {
 
     responses = {
       posts_not_compound: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            'comments': {
-              href: '/posts/1/comments'
+            comments: {
+              self: '/posts/1/comments'
             }
           }
         }
       },
       post_1_comments: {
-        'comments': [
+        data: [
           {
-            'id': '1',
-            'title': 'good article',
-            'body': 'ideal for my startup'
+            type: 'comments',
+            id: '1',
+            title: 'good article',
+            body: 'ideal for my startup'
           },
           {
-            'id': '2',
-            'title': 'bad article',
-            'body': 'doesn\'t run Crysis'
+            type: 'comments',
+            id: '2',
+            title: 'bad article',
+            body: 'doesn\'t run Crysis'
           }
         ]
       }
@@ -94,12 +97,14 @@ asyncTest('GET /posts/1 calls later GET /posts/1/some_resources when Posts has a
   });
 
   fakeServer.get('/posts/1/some_resources', {
-    'some_resources': [
+    data: [
       {
+        type: 'some_resources',
         id: 1,
-        title: 'Something 1',
+        title: 'Something 1'
       },
       {
+        type: 'some_resources',
         id: 2,
         title: 'Something 2'
       }

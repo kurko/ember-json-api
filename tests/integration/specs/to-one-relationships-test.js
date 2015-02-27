@@ -13,15 +13,20 @@ module('integration/specs/to-one-relationships', {
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            'author': '2'
+            author: {
+              type: 'authors',
+              id: '2'
+            }
           }
         }
       },
-      linked: [{
-        type: 'authors',
-        id: '2',
-        name: 'dhh'
-      }]
+      authors: {
+        data: {
+          type: 'authors',
+          id: '2',
+          name: 'dhh'
+        }
+      }
     };
 
     env = setupStore(setModels());

@@ -131,8 +131,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     for (link in links) {
       association = links[link];
       link = Ember.String.camelize(link);
-      if(typeof association === 'string') {
-        if(association.indexOf('/') > -1) {
+      if (typeof association === 'string') {
+        if (association.indexOf('/') > -1) {
           route = association;
           id = null;
         } else {
@@ -143,26 +143,26 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         route = association.resource || association.self;
         id = association.id || association.ids;
       }
+      console.log('link', link, route, id);
+      if (route) {
+        if (!resource.links) {
+          resource.links = {};
+        }
+        resource.links[link] = route;
 
+        // strip base url
+        if (route.substr(0, 4).toLowerCase() === 'http') {
+          route = route.split('//').pop().split('/').slice(1).join('/');
+        }
+        // strip prefix slash
+        if (route.charAt(0) === '/') {
+          route = route.substr(1);
+        }
+
+        DS._routes[link] = route;
+      }
+      resource[link] = id;
     }
-    if(route) {
-      if(!resource.links) {
-        resource.links = {};
-      }
-      resource.links[link] = route;
-
-      // strip base url
-      if (route.substr(0, 4).toLowerCase() === 'http') {
-        route = route.split('//').pop().split('/').slice(1).join('/');
-      }
-      // strip prefix slash
-      if (route.charAt(0) === '/') {
-        route = route.substr(1);
-      }
-
-      DS._routes[link] = route;
-    }
-    resource[link] = id;
     sysout('extractLinks end', resource);
   },
 

@@ -32,15 +32,15 @@ module('integration/specs/creating-an-individual-resource', {
 asyncTest("POST /posts/1 won't push an array", function() {
   var request = {
     data: {
-      type: 'posts',
       title: 'Rails is Omakase',
       postSummary: null,
       links: {
         comments: {
-          type: 'comments',
-          ids: []
+          ids: [],
+          type: 'comments'
         }
-      }
+      },
+      type: 'posts',
     }
   };
 

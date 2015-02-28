@@ -131,6 +131,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     for (link in links) {
       association = links[link];
       link = Ember.String.camelize(link);
+      if(!association) { continue; }
       if (typeof association === 'string') {
         if (association.indexOf('/') > -1) {
           route = association;

@@ -268,8 +268,14 @@ test('normalize camelCased', function() {
     firstName: 'Tom',
     lastName: 'Dale',
     links: {
-      homePlanet: '123',
-      evilMinions: [1,2]
+      homePlanet: {
+        id: '123',
+        type: 'homePlanets'
+      },
+      evilMinions: {
+        ids: [1,2],
+        type: 'evilMinions'
+      }
     }
   };
 
@@ -277,18 +283,20 @@ test('normalize camelCased', function() {
     return env.serializer.normalize(SuperVillain, superVillain_hash, 'superVillain');
   });
 
-  deepEqual({
+  deepEqual(json, {
     firstName: 'Tom',
     lastName: 'Dale',
-    homePlanet: {
-      id: '123',
-      type: 'homePlanets'
-    },
-    evilMinions: {
-      ids: [1,2],
-      type: 'evilMinions'
+    links: {
+      homePlanet: {
+        id: '123',
+        type: 'homePlanets'
+      },
+      evilMinions: {
+        ids: [1, 2],
+        type: 'evilMinions'
+      }
     }
-  }, json);
+  });
 });
 
 test('normalize links camelized', function() {
@@ -349,31 +357,23 @@ test('extractSingle camelCase', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    data:   {
+    home_planet:   {
       id: '1',
       name: 'Umber',
       links: {
-        super_villains: {
-          ids: ['1'],
-          type: 'super_villains'
-        }
-      },
-      type: 'home_planets'
+        super_villains: [1]
+      }
     },
-    linked: [{
+    super_villains:  [{
       id: '1',
-      firstName: 'Tom',
-      lastName: 'Dale',
+      first_name: 'Tom',
+      last_name: 'Dale',
       links: {
-        homePlanet: {
-          id: '1',
-          type: 'homePlanets'
-        }
-      },
-      type: 'super_villains'
+        home_planet: '1'
+      }
     }]
   };
-console.log('here');
+
   Ember.run(function() {
     return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
   });
@@ -387,23 +387,21 @@ test('extractArray snake_case', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-      home_planets: [{
-        id: '1',
-        name: 'Umber',
-        links: {
-          super_villains: [1]
-        }
-      }],
-      linked: {
-        super_villains: [{
-          id: '1',
-          first_name: 'Tom',
-          last_name: 'Dale',
-          links: {
-            home_planet: '1'
-          }
-        }]
+    home_planet:   [{
+      id: '1',
+      name: 'Umber',
+      links: {
+        super_villains: [1]
       }
+    }],
+    super_villains:  [{
+      id: '1',
+      first_name: 'Tom',
+      last_name: 'Dale',
+      links: {
+        home_planet: '1'
+      }
+    }]
   };
 
   env.serializer.keyForAttribute = function(key) {
@@ -428,23 +426,21 @@ test('extractArray', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-      home_planets: [{
-        id: '1',
-        name: 'Umber',
-        links: {
-          super_villains: [1]
-        }
-      }],
-      linked: {
-        super_villains: [{
-          id: '1',
-          first_name: 'Tom',
-          last_name: 'Dale',
-          links: {
-            home_planet: '1'
-          }
-        }]
+    home_planet:   [{
+      id: '1',
+      name: 'Umber',
+      links: {
+        super_villains: [1]
       }
+    }],
+    super_villains:  [{
+      id: '1',
+      first_name: 'Tom',
+      last_name: 'Dale',
+      links: {
+        home_planet: '1'
+      }
+    }]
   };
 
   env.serializer.keyForAttribute = function(key) {
@@ -468,23 +464,21 @@ test('looking up a belongsTo association', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planets: [{
+    home_planet:   [{
       id: '1',
       name: 'Umber',
       links: {
         super_villains: [1]
       }
     }],
-    linked: {
-      super_villains: [{
-        id: '1',
-        first_name: 'Tom',
-        last_name: 'Dale',
-        links: {
-          home_planet: '1'
-        }
-      }]
-    }
+    super_villains:  [{
+      id: '1',
+      first_name: 'Tom',
+      last_name: 'Dale',
+      links: {
+        home_planet: '1'
+      }
+    }]
   };
 
   env.serializer.keyForAttribute = function(key) {

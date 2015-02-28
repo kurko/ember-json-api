@@ -93,7 +93,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var type = data.length > 0 ? data[0].type : null;
     data.forEach(function(item) {
       if(item.links) {
-        this.extractLinks(data.links, data);
+        this.extractLinks(item.links, item);
         //delete data.links;
       }
     }.bind(this));

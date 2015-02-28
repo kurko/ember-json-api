@@ -89,6 +89,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "data" containing a single primary data
    */
   extractArrayData: function(data, payload) {
+    console.log('extractArrayData');
     var type = data.length > 0 ? data[0].type : null;
     data.forEach(function(item) {
       if(item.links) {
@@ -122,15 +123,17 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Parse the top-level "links" object.
    */
   extractLinks: function(links, resource) {
-    sysout('extractLinks start', resource);
+    sysout('extractLinks start', links, resource);
     var link, association, id, route, linkKey;
+    // Used in unit test
+    var extractedLinks = [], linkEntry;
 
     // Clear the old format
     delete resource.links;
 
     for (link in links) {
       association = links[link];
-      link = Ember.String.camelize(link);
+      link = Ember.String.camelize(link.split('.').pop());
       if(!association) { continue; }
       if (typeof association === 'string') {
         if (association.indexOf('/') > -1) {
@@ -161,10 +164,14 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
 
         DS._routes[link] = route;
+        linkEntry = {};
+        linkEntry[link] = route;
+        extractedLinks.push(linkEntry)
       }
       resource[link] = id;
     }
     sysout('extractLinks end', resource);
+    return extractedLinks;
   },
 
   // SERIALIZATION

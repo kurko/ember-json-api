@@ -168,10 +168,21 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
   // SERIALIZATION
 
+  serializeIntoHash: function(hash, type, snapshot, options) {
+    console.log('hashing');
+    var pluralType = Ember.String.pluralize(type.typeKey),
+      data = this.serialize(snapshot, options);
+    if(!data.hasOwnProperty('type')) {
+      data.type = pluralType;
+    }
+    hash[pluralType] = data;
+  },
+
   /**
    * Use "links" key, remove support for polymorphic type
    */
   serializeBelongsTo: function(record, json, relationship) {
+    sysout('serializeBelongsTo', json);
     var attr = relationship.key;
     var belongsTo = record.belongsTo(attr);
     var type = this.keyForRelationship(relationship.type.typeKey);
@@ -187,6 +198,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Use "links" key
    */
   serializeHasMany: function(record, json, relationship) {
+    sysout('serializeHasMany', json);
     var attr = relationship.key;
     var type = this.keyForRelationship(relationship.type.typeKey);
     var key = this.keyForRelationship(attr);
@@ -199,6 +211,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 });
 
 function belongsToLink(key, type, value) {
+  sysout('belongsToLink', key, type, value);
   var link = value;
   if (link && key !== type) {
     link = {
@@ -210,11 +223,12 @@ function belongsToLink(key, type, value) {
 }
 
 function hasManyLink(key, type, record, attr) {
+  sysout('hasManyLink', key, type, record, attr);
   var link = record.hasMany(attr).mapBy('id');
-  if (link && key !== Ember.String.pluralize(type)) {
+  if (link) {
     link = {
       ids: link,
-      type: type
+      type: Ember.String.pluralize(type)
     };
   }
   return link;

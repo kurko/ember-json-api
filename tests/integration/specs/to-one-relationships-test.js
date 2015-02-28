@@ -8,18 +8,23 @@ module('integration/specs/to-one-relationships', {
 
     responses = {
       posts_no_linked: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            'author': '2'
+            author: {
+              type: 'authors',
+              id: '2'
+            }
           }
         }
       },
       authors: {
-        'authors': {
-          'id': '2',
-          'name': 'dhh'
+        data: {
+          type: 'authors',
+          id: '2',
+          name: 'dhh'
         }
       }
     };
@@ -47,7 +52,6 @@ asyncTest('GET /posts/1 with async linked resources', function() {
 
   Em.run(function() {
     env.store.find('post', '1').then(function(record) {
-      var authorId;
       equal(record.get('id'), '1', 'id is correct');
       equal(record.get('title'), 'Rails is Omakase', 'title is correct');
 

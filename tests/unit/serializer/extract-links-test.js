@@ -16,7 +16,7 @@ module('unit/ember-json-api-adapter - serializer - extract-links-test', {
 test("no links", function() {
   var links = serializer.extractLinks({
 
-  });
+  }, {});
 
   deepEqual(links, []);
 });
@@ -24,19 +24,19 @@ test("no links", function() {
 test("basic", function() {
   var links = serializer.extractLinks({
     "posts.comments": "http://example.com/posts/{posts.id}/comments"
-  });
+  }, {});
 
   deepEqual(links, [{
-    "comment": "posts/{posts.id}/comments"
+    "comments": "posts/{posts.id}/comments"
   }]);
 });
 
 test("exploding", function() {
   var links = serializer.extractLinks({
     "posts.comments": "http://example.com/comments/{posts.comments}"
-  });
+  }, {});
 
   deepEqual(links, [{
-    "comment": "comments/{posts.comments}"
+    "comments": "comments/{posts.comments}"
   }]);
 });

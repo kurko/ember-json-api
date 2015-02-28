@@ -8,13 +8,15 @@ module('integration/specs/updating-an-individual-resource', {
 
     responses = {
       post: {
-        posts: {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase'
         }
       },
       postAfterUpdate: {
-        post: {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'TDD Is Dead lol',
           postSummary: 'summary'
@@ -36,13 +38,17 @@ module('integration/specs/updating-an-individual-resource', {
 
 asyncTest("PUT /posts/1 won't push an array", function() {
   var request = {
-    posts: {
+    data: {
       id: '1',
       title: 'TDD Is Dead lol',
       postSummary: null,
       links: {
-        comments: []
-      }
+        comments: {
+          ids: [],
+          type: 'comments'
+        }
+      },
+      type: 'posts'
     }
   };
 

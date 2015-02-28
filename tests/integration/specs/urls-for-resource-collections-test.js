@@ -8,32 +8,39 @@ module('integration/specs/urls-for-resource-collections', {
 
     responses = {
       posts_not_compound: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            'comments': ['2', '3']
+            comments: {
+              type: 'comments',
+              ids: ['2', '3']
+            }
           }
         }
       },
       comments_2: {
-        'comments': {
+        data: {
+          type: 'comments',
           'id': '2',
           'title': 'good article',
           'body': 'ideal for my startup'
         }
       },
       comments_3: {
-        'comments': {
-          'id': '3',
-          'title': 'bad article',
-          'body': "doesn't run Crysis"
+        data: {
+          type: 'comments',
+          id: '3',
+          title: 'bad article',
+          body: "doesn't run Crysis"
         }
       },
       underscore_resource: {
-        'some_resource': {
-          'id': '1',
-          'title': 'wow'
+        data: {
+          type: 'some_resource',
+          id: '1',
+          title: 'wow'
         }
       }
     };

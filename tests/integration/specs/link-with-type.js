@@ -8,35 +8,39 @@ module('integration/specs/link-with-type', {
 
     responses = {
       post: {
-        post: {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
             observations: {
               ids: ['2', '3'],
-              type: 'comment'
+              type: 'comments'
             },
             writer: {
               id: '1',
-              type: 'author'
+              type: 'authors'
             }
           }
         }
       },
       comments_2: {
-        comments: {
+        data: {
+          type: 'comments',
           id: 2,
           title: 'good article'
         }
       },
       comments_3: {
-        comments: {
+        data: {
+          type: 'comments',
           id: 3,
           title: 'bad article'
         }
       },
       author: {
-        author: {
+        data: {
+          type: 'authors',
           id: 1,
           name: 'Tomster'
         }

@@ -24,21 +24,27 @@ module('integration/specs/link-with-type', {
           }
         }
       },
-      linked: [{
-        type: 'comments',
-        id: 2,
-        title: 'good article'
+      comments_2: {
+        data: {
+          type: 'comments',
+          id: 2,
+          title: 'good article'
+        }
       },
-      {
-        type: 'comments',
-        id: 3,
-        title: 'bad article'
+      comments_3: {
+        data: {
+          type: 'comments',
+          id: 3,
+          title: 'bad article'
+        }
       },
-      {
-        type: 'authors',
-        id: 1,
-        name: 'Tomster'
-      }]
+      author: {
+        data: {
+          type: 'authors',
+          id: 1,
+          name: 'Tomster'
+        }
+      }
     };
 
     Post = DS.Model.extend({

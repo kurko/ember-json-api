@@ -39,16 +39,16 @@ module('integration/specs/updating-an-individual-resource', {
 asyncTest("PUT /posts/1 won't push an array", function() {
   var request = {
     data: {
-      type: 'posts',
       id: '1',
       title: 'TDD Is Dead lol',
       postSummary: null,
       links: {
         comments: {
-          type: 'comments',
-          ids: []
+          ids: [],
+          type: 'comments'
         }
-      }
+      },
+      type: 'posts'
     }
   };
 

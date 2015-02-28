@@ -1,30 +1,15 @@
 var get = Ember.get;
 var isNone = Ember.isNone;
 
-function sysout(title) {
-  var args = Array.prototype.slice.call(arguments, 1);
-  console.groupCollapsed(title);
-  args.forEach(function(arg) {
-    console.dir(arg);
-  });
-  console.groupEnd();
-}
-
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
   keyForRelationship: function(key) {
     return key;
-  },
-
-  extractSingle: function() {
-    console.log('extractSingle', arguments);
-    return this._super.apply(this, arguments);
   },
 
   /**
    * Flatten links
    */
   normalize: function(type, hash, prop) {
-    sysout('normalize start ' + type.typeKey, hash);
     var json = {};
     for (var key in hash) {
       // This is already normalized
@@ -36,7 +21,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       var camelizedKey = Ember.String.camelize(key);
       json[camelizedKey] = hash[key];
     }
-    sysout('normalize end ' + type.typeKey, json);
+
     return this._super(type, json, prop);
   },
 
@@ -44,7 +29,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
-    console.log('PAYLOAD', Ember.$.extend({}, payload));
     var data = payload.data;
     if (data) {
       if(Ember.isArray(data)) {
@@ -60,15 +44,13 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     }
     if (payload.links) {
       this.extractLinks(payload.links, payload);
-      console.log('deleting links from payload');
       delete data.links;
     }
     if (payload.linked) {
       this.extractLinked(payload.linked);
-      console.log('deleting payload links');
       delete payload.linked;
     }
-    console.log('normalizePayload', Ember.$.extend({}, payload));
+
     return payload;
   },
 
@@ -77,7 +59,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   extractSingleData: function(data, payload) {
     if(data.links) {
-      console.log('extracting links for single data');
       this.extractLinks(data.links, data);
       //delete data.links;
     }
@@ -89,7 +70,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "data" containing a single primary data
    */
   extractArrayData: function(data, payload) {
-    console.log('extractArrayData');
     var type = data.length > 0 ? data[0].type : null;
     data.forEach(function(item) {
       if(item.links) {
@@ -115,7 +95,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       }
       models[type].push(link);
     });
-    console.log('pushing payload', models);
+
     this.pushPayload(store, models);
   },
 
@@ -123,7 +103,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Parse the top-level "links" object.
    */
   extractLinks: function(links, resource) {
-    sysout('extractLinks start', links, resource);
     var link, association, id, route, linkKey;
     // Used in unit test
     var extractedLinks = [], linkEntry;
@@ -147,7 +126,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         route = association.resource || association.self;
         id = association.id || association.ids;
       }
-      console.log('link', link, route, id);
+
       if (route) {
         if (!resource.links) {
           resource.links = {};
@@ -170,14 +149,13 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       }
       resource[link] = id;
     }
-    sysout('extractLinks end', resource);
+
     return extractedLinks;
   },
 
   // SERIALIZATION
 
   serializeIntoHash: function(hash, type, snapshot, options) {
-    console.log('hashing');
     var pluralType = Ember.String.pluralize(type.typeKey),
       data = this.serialize(snapshot, options);
     if(!data.hasOwnProperty('type')) {
@@ -190,7 +168,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Use "links" key, remove support for polymorphic type
    */
   serializeBelongsTo: function(record, json, relationship) {
-    sysout('serializeBelongsTo', json);
     var attr = relationship.key;
     var belongsTo = record.belongsTo(attr);
     var type = this.keyForRelationship(relationship.type.typeKey);
@@ -210,7 +187,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       type = this.keyForRelationship(relationship.type.typeKey),
       key = this.keyForRelationship(attr);
 
-    sysout('serializeHasMany', attr, type, key, record, relationship);
     if (relationship.kind === 'hasMany') {
       json.links = json.links || {};
       json.links[key] = hasManyLink(key, type, record, attr);
@@ -219,7 +195,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 });
 
 function belongsToLink(key, type, value) {
-  sysout('belongsToLink', key, type, value);
   var link = value;
   if (link) {
     link = {
@@ -231,7 +206,6 @@ function belongsToLink(key, type, value) {
 }
 
 function hasManyLink(key, type, record, attr) {
-  sysout('hasManyLink', key, type, record, attr);
   var link = record.hasMany(attr).mapBy('id');
   if (link) {
     link = {

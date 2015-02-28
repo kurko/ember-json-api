@@ -305,7 +305,8 @@ test('normalize links camelized', function() {
     name: 'Umber',
     links: {
       superVillains: '/api/super_villians/1'
-    }
+    },
+    type: 'homePlanets'
   };
 
   var json = Ember.run(function() {
@@ -319,20 +320,25 @@ test('extractSingle snake_case', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planet:   {
+    data: {
       id: '1',
       name: 'Umber',
       links: {
-        super_villains: [1]
-      }
+        super_villains: {
+          ids: [1],
+          type: 'super_villains'
+        }
+      },
+      type: 'home_planets'
     },
-    super_villains:  [{
+    linked: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
         home_planet: '1'
-      }
+      },
+      type: 'super_villains'
     }]
   };
 
@@ -357,27 +363,32 @@ test('extractSingle camelCase', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planet:   {
+    data: {
       id: '1',
       name: 'Umber',
       links: {
-        super_villains: [1]
-      }
+        super_villains: {
+          ids: [1],
+          type: 'super_villains'
+        }
+      },
+      type: 'home_planets'
     },
-    super_villains:  [{
+    linked: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
         home_planet: '1'
-      }
+      },
+      type: 'super_villains'
     }]
   };
 
   Ember.run(function() {
     return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
   });
-  console.log('here2');
+
   env.store.find('superVillain', 1).then(function(minion){
     equal(minion.get('firstName'), 'Tom');
   });
@@ -387,20 +398,25 @@ test('extractArray snake_case', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planet:   [{
+    data: [{
       id: '1',
       name: 'Umber',
       links: {
-        super_villains: [1]
-      }
+        super_villains: {
+          ids: [1],
+          type: 'super_villains'
+        }
+      },
+      type: 'home_planets'
     }],
-    super_villains:  [{
+    linked: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
         home_planet: '1'
-      }
+      },
+      type: 'super_villains'
     }]
   };
 
@@ -426,20 +442,25 @@ test('extractArray', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planet:   [{
+    data: [{
       id: '1',
       name: 'Umber',
       links: {
-        super_villains: [1]
-      }
+        super_villains: {
+          ids: [1],
+          type: 'super_villains'
+        }
+      },
+      type: 'home_planets'
     }],
-    super_villains:  [{
+    linked: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
         home_planet: '1'
-      }
+      },
+      type: 'super_villains'
     }]
   };
 
@@ -464,20 +485,25 @@ test('looking up a belongsTo association', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planet:   [{
+    data: [{
       id: '1',
       name: 'Umber',
       links: {
-        super_villains: [1]
-      }
+        super_villains: {
+          ids: [1],
+          type: 'super_villains'
+        }
+      },
+      type: 'home_planets'
     }],
-    super_villains:  [{
+    linked: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
         home_planet: '1'
-      }
+      },
+      type: 'super_villains'
     }]
   };
 

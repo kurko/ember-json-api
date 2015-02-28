@@ -183,7 +183,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     if(!data.hasOwnProperty('type')) {
       data.type = pluralType;
     }
-    hash[pluralType] = data;
+    hash[type.typeKey] = data;
   },
 
   /**
@@ -206,11 +206,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Use "links" key
    */
   serializeHasMany: function(record, json, relationship) {
-    sysout('serializeHasMany', json);
-    var attr = relationship.key;
-    var type = this.keyForRelationship(relationship.type.typeKey);
-    var key = this.keyForRelationship(attr);
+    var attr = relationship.key,
+      type = this.keyForRelationship(relationship.type.typeKey),
+      key = this.keyForRelationship(attr);
 
+    sysout('serializeHasMany', attr, type, key, record, relationship);
     if (relationship.kind === 'hasMany') {
       json.links = json.links || {};
       json.links[key] = hasManyLink(key, type, record, attr);
@@ -221,10 +221,10 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 function belongsToLink(key, type, value) {
   sysout('belongsToLink', key, type, value);
   var link = value;
-  if (link && key !== type) {
+  if (link) {
     link = {
       id: link,
-      type: type
+      type: Ember.String.pluralize(type)
     };
   }
   return link;

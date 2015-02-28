@@ -85,8 +85,14 @@ test('serialize camelcase', function() {
     firstName: 'Tom',
     lastName: 'Dale',
     links: {
-      evilMinions: [],
-      homePlanet: get(league, 'id')
+      evilMinions: {
+        ids: [],
+        type: 'evilMinions'
+      },
+      homePlanet: {
+        id: get(league, 'id'),
+        type: 'homePlanets'
+      }
     }
   });
 });
@@ -124,8 +130,14 @@ test('serialize into snake_case', function() {
     first_name: 'Tom',
     last_name: 'Dale',
     links: {
-      evil_minions: [],
-      home_planet: get(league, 'id')
+      evil_minions: {
+        ids: [],
+        type: 'evil_minions'
+      },
+      home_planet: {
+        id: get(league, 'id'),
+        type: 'home_planets'
+      }
     }
   });
 });
@@ -134,7 +146,7 @@ test('serializeIntoHash', function() {
   var json = {};
 
   Ember.run(function(){
-    league = env.store.createRecord(HomePlanet, {
+    var league = env.store.createRecord(HomePlanet, {
       name: 'Umber',
       id: '123'
     });
@@ -147,8 +159,12 @@ test('serializeIntoHash', function() {
     homePlanet: {
       name: 'Umber',
       links: {
-        superVillains: []
-      }
+        superVillains: {
+          ids: [],
+          type: 'superVillains'
+        }
+      },
+      type: 'homePlanets'
     }
   });
 });
@@ -171,8 +187,12 @@ test('serializeIntoHash with decamelized types', function() {
     homePlanet: {
       name: 'Umber',
       links: {
-        superVillains: []
-      }
+        superVillains: {
+          ids: [],
+          type: 'superVillains'
+        }
+      },
+      type: 'homePlanets'
     }
   });
 });
@@ -210,7 +230,7 @@ test('serialize has many relationships', function() {
     links: {
       minions: {
         ids: ['123', '345'],
-        type: 'blueMinion'
+        type: 'blueMinions'
       }
     }
   });
@@ -237,7 +257,7 @@ test('serialize belongs to relationships', function() {
     links: {
       husband: {
         id: '2',
-        type: 'maleMinion'
+        type: 'maleMinions'
       }
     }
   });
@@ -257,12 +277,18 @@ test('normalize camelCased', function() {
     return env.serializer.normalize(SuperVillain, superVillain_hash, 'superVillain');
   });
 
-  deepEqual(json, {
+  deepEqual({
     firstName: 'Tom',
     lastName: 'Dale',
-    homePlanet: '123',
-    evilMinions: [1,2]
-  });
+    homePlanet: {
+      id: '123',
+      type: 'homePlanets'
+    },
+    evilMinions: {
+      ids: [1,2],
+      type: 'evilMinions'
+    }
+  }, json);
 });
 
 test('normalize links camelized', function() {
@@ -278,7 +304,7 @@ test('normalize links camelized', function() {
     return env.serializer.normalize(HomePlanet, homePlanet, 'homePlanet');
   });
 
-  equal(json.superVillains,  '/api/super_villians/1', 'normalize links');
+  equal(json.links.superVillains,  '/api/super_villians/1', 'normalize links');
 });
 
 test('extractSingle snake_case', function() {
@@ -323,29 +349,35 @@ test('extractSingle camelCase', function() {
   env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
-    home_planet:   {
+    data:   {
       id: '1',
       name: 'Umber',
       links: {
-        super_villains: [1]
-      }
-    },
-    linked: {
-      super_villains:  [{
-        id: '1',
-        firstName: 'Tom',
-        lastName: 'Dale',
-        links: {
-          homePlanet: '1'
+        super_villains: {
+          ids: ['1'],
+          type: 'super_villains'
         }
-      }]
-    }
+      },
+      type: 'home_planets'
+    },
+    linked: [{
+      id: '1',
+      firstName: 'Tom',
+      lastName: 'Dale',
+      links: {
+        homePlanet: {
+          id: '1',
+          type: 'homePlanets'
+        }
+      },
+      type: 'super_villains'
+    }]
   };
-
+console.log('here');
   Ember.run(function() {
     return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
   });
-
+  console.log('here2');
   env.store.find('superVillain', 1).then(function(minion){
     equal(minion.get('firstName'), 'Tom');
   });

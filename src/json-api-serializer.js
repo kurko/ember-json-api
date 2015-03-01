@@ -70,13 +70,13 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "data" containing a single primary data
    */
   extractArrayData: function(data, payload) {
-    var type = data.length > 0 ? data[0].type : null;
+    var type = data.length > 0 ? data[0].type : null, serializer = this;
     data.forEach(function(item) {
       if(item.links) {
-        this.extractLinks(item.links, item);
+        serializer.extractLinks(item.links, item);
         //delete data.links;
       }
-    }.bind(this));
+    });
 
     payload[type] = data;
   },

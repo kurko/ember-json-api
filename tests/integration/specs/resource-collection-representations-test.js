@@ -39,6 +39,8 @@ asyncTest('GET /posts', function() {
     var post1 = record.get("firstObject"),
         post2 = record.get("lastObject");
 
+    equal(record.get('length'), 2, 'length is correct');
+
     equal(post1.get('id'), '1', 'id is correct');
     equal(post1.get('title'), 'Rails is Omakase', 'title is correct');
 

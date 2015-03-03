@@ -19,7 +19,8 @@ define("json-api-adapter",
        */
       buildURL: function(typeName, id, record) {
         // TODO: this basically only works in the simplest of scenarios
-        var route = DS._routes[typeName];
+        var routeName = (id) ? typeName + '.' + id : typeName,
+            route = DS._routes[routeName] || DS._routes[typeName];
         if(!route) {
           return this._super(typeName, id, record);
         }
@@ -33,7 +34,7 @@ define("json-api-adapter",
           if (param.test(route)) {
             url.push(route.replace(param, id));
           } else {
-            url.push(route, id);
+            url.push(route);
           }
         } else {
           url.push(route.replace(param, ''));
@@ -304,14 +305,16 @@ define("json-api-adapter",
               route = route.substr(1);
             }
 
-            DS._routes[link] = route;
+            linkKey  = (id) ? link + '.' + id : link;
+            DS._routes[linkKey] = route;
             linkEntry = {};
-            linkEntry[link] = route;
+            linkEntry[linkKey] = route;
             extractedLinks.push(linkEntry)
           }
-          resource[link] = id;
+          if(id) {
+              resource[link] = id;
+          }
         }
-
         return extractedLinks;
       },
 

@@ -20,16 +20,14 @@ module('integration/specs/multiple-resource-links-test', {
                         }
                     }
                 }, {
-                    data: {
-                        type: 'posts',
-                        id: '2',
-                        title: 'TDD Is Dead lol',
-                        links: {
-                            author: {
-                                resource: '/authors/1',
-                                type: 'authors',
-                                id: '1'
-                            }
+                    type: 'posts',
+                    id: '2',
+                    title: 'TDD Is Dead lol',
+                    links: {
+                        author: {
+                            resource: '/authors/1',
+                            type: 'authors',
+                            id: '1'
                         }
                     }
                 }]
@@ -74,25 +72,20 @@ asyncTest('GET /posts/1 calls later GET /posts/1/comments when Posts has async c
     Em.run(function() {
         env.store.find('post').then(function(records) {
             equal(records.get('length'), 2, 'there are 2 posts');
-            /*
+
              var post1 = records.objectAt(0);
              var post2 = records.objectAt(1);
              var promises = [];
              promises.push(post1.get('author').then(function(author) {
-             equal(author.get('name'), 'dhh', 'post1 author');
-             start();
+                equal(author.get('name'), 'dhh', 'post1 author');
              }));
              promises.push(post2.get('author').then(function(author) {
-             equal(author.get('name'), 'ado', 'post2 author');
-             start();
+                 equal(author.get('name'), 'ado', 'post2 author');
              }));
 
              Ember.RSVP.all(promises).then(function() {
-             start();
+                start();
              });
-             */
-
-           start();
         });
     });
 });

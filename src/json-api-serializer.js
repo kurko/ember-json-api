@@ -142,14 +142,16 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
           route = route.substr(1);
         }
 
-        DS._routes[link] = route;
+        linkKey  = (id) ? link + '.' + id : link;
+        DS._routes[linkKey] = route;
         linkEntry = {};
-        linkEntry[link] = route;
+        linkEntry[linkKey] = route;
         extractedLinks.push(linkEntry)
       }
-      resource[link] = id;
+      if(id) {
+          resource[link] = id;
+      }
     }
-
     return extractedLinks;
   },
 

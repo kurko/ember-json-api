@@ -15,7 +15,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   buildURL: function(typeName, id, record) {
     // TODO: this basically only works in the simplest of scenarios
-    var route = DS._routes[typeName];
+    var routeName = (id) ? typeName + '.' + id : typeName,
+        route = DS._routes[routeName] || DS._routes[typeName];
     if(!route) {
       return this._super(typeName, id, record);
     }
@@ -29,7 +30,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       if (param.test(route)) {
         url.push(route.replace(param, id));
       } else {
-        url.push(route, id);
+        url.push(route);
       }
     } else {
       url.push(route.replace(param, ''));

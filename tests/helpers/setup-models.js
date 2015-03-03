@@ -25,7 +25,7 @@ function setModels(params) {
 
   Comment = DS.Model.extend({
     title: DS.attr('string'),
-    body:  DS.attr('string')
+    body:  DS.attr('string'),
   });
 
   SomeResource = DS.Model.extend({

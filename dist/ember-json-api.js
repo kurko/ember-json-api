@@ -75,11 +75,7 @@ define("json-api-adapter",
 
         return url;
       },
-    /*
-      findBelongsTo: function(store, type, owner) {
-        return this.ajax(this.buildURL(type, null, owner), 'GET');
-      },
-    */
+
       /**
        * Fix query URL.
        */
@@ -167,7 +163,7 @@ define("json-api-adapter",
           type = type.constructor.typeKey;
         }
         decamelized = Ember.String.decamelize(type);
-        return Ember.String.pluralize(decamelized);
+        return Ember.String.pluralize(decamelized).replace(/_/g, '-');
       }
     });
 

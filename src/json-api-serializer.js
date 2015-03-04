@@ -2,6 +2,9 @@ var get = Ember.get;
 var isNone = Ember.isNone;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
+
+  primaryRecord: 'data',
+
   keyForRelationship: function(key) {
     return key;
   },
@@ -29,14 +32,14 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
-    var data = payload.data;
+    var data = payload[this.primaryRecord];
     if (data) {
       if(Ember.isArray(data)) {
         this.extractArrayData(data, payload);
       } else {
         this.extractSingleData(data, payload);
       }
-      delete payload.data;
+      delete payload[this.primaryRecord];
     }
     if (payload.meta) {
       this.extractMeta(payload.meta);

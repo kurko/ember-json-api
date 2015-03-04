@@ -103,7 +103,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Parse the top-level "links" object.
    */
   extractLinks: function(links, resource) {
-    var link, association, id, route, linkKey;
+    var link, association, id, route, selfLink, cleanedRoute, linkKey, hasReplacement;
     // Used in unit test
     var extractedLinks = [], linkEntry;
 
@@ -122,9 +122,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
           route = null;
           id = association;
         }
+        selfLink = null;
       } else {
         route = association.resource || association.self;
         id = association.id || association.ids;
+        selfLink = association.self;
       }
 
       if (route) {
@@ -133,26 +135,41 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
         resource.links[link] = route;
 
-        // strip base url
-        if (route.substr(0, 4).toLowerCase() === 'http') {
-          route = route.split('//').pop().split('/').slice(1).join('/');
-        }
-        // strip prefix slash
-        if (route.charAt(0) === '/') {
-          route = route.substr(1);
-        }
-
-        linkKey  = (id) ? link + '.' + id : link;
-        DS._routes[linkKey] = route;
         linkEntry = {};
-        linkEntry[linkKey] = route;
-        extractedLinks.push(linkEntry)
+        // If there is a placeholder for the id (i.e. /resource/{id}), don't include the ID in the key
+        hasReplacement = route.indexOf('{') > -1;
+        linkKey  = (id && !hasReplacement) ? link + '.' + id : link;
+        cleanedRoute = cleanRoute(route);
+        DS._routes[linkKey] = cleanedRoute;
+        linkEntry[linkKey] = cleanedRoute;
+        if(selfLink) {
+          linkKey = this.buildSelfKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
+          cleanedRoute = cleanRoute(selfLink);
+          DS._routes[linkKey] = cleanedRoute;
+          linkEntry[linkKey] = cleanedRoute;
+        }
+        extractedLinks.push(linkEntry);
       }
       if(id) {
           resource[link] = id;
       }
     }
     return extractedLinks;
+  },
+
+  buildSelfKey: function(parentType, parentId, link, id) {
+    var keys = [];
+    if(parentType) {
+      keys.push(Ember.String.pluralize(parentType));
+      if(parentId) {
+        keys.push(parentId);
+      }
+    }
+    keys.push(link);
+    if(id) {
+      keys.push(id);
+    }
+    return keys.join('.') + '--self';
   },
 
   // SERIALIZATION
@@ -216,6 +233,19 @@ function hasManyLink(key, type, record, attr) {
     };
   }
   return link;
+}
+
+function cleanRoute(route) {
+  var cleaned = route;
+  // strip base url
+  if (cleaned.substr(0, 4).toLowerCase() === 'http') {
+    cleaned = cleaned.split('//').pop().split('/').slice(1).join('/');
+  }
+  // strip prefix slash
+  if (cleaned.charAt(0) === '/') {
+    cleaned = cleaned.substr(1);
+  }
+  return cleaned;
 }
 
 export default DS.JsonApiSerializer;

@@ -10,13 +10,41 @@ DS._routes = Ember.create(null);
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
+
+  getSelfRoute: function(typeName, id, record) {
+    if(!this.serializer || !this.serializer.buildSelfKey) { return null; }
+    var route;
+    if(record) {
+      route = DS._routes[this.serializer.buildSelfKey(record.type, record.id, typeName, id)]
+        || DS._routes[this.serializer.buildSelfKey(record.type, null, typeName, null)];
+      if(route) { return route; }
+    }
+    return DS._routes[this.serializer.buildSelfKey(null, null, typeName, id)]
+      || DS._routes[this.serializer.buildSelfKey(null, null, typeName, null)];
+  },
+
+  getResourceRoute: function(typeName, id) {
+    var routeName = (id) ? typeName + '.' + id : typeName;
+    return DS._routes[routeName] || DS._routes[typeName];
+  },
+
+  getRoute: function(typeName, id, record) {
+    var route;
+    if(record) {
+      route = this.getSelfRoute(typeName, id, record);
+      if(route) { return route; }
+    }
+    return this.getResourceRoute(typeName, id);
+  },
+
   /**
    * Look up routes based on top-level links.
    */
   buildURL: function(typeName, id, record) {
+    // FIXME If there is a record, try and look up the self link
+    // - Need to use the function from the serializer to build the self key
     // TODO: this basically only works in the simplest of scenarios
-    var routeName = (id) ? typeName + '.' + id : typeName,
-        route = DS._routes[routeName] || DS._routes[typeName];
+    var route = this.getRoute(typeName, id, record);
     if(!route) {
       return this._super(typeName, id, record);
     }
@@ -42,10 +70,6 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     if (!host && url) { url = '/' + url; }
 
     return url;
-  },
-
-  findBelongsTo: function(store, type, owner) {
-    return this.ajax(this.buildURL(type, null, owner), 'GET');
   },
 
   /**
@@ -76,7 +100,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     var data = this._serializeData(store, type, record),
       id = get(record, 'id');
 
-    return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
+    return this.ajax(this.buildURL(type.typeKey, id, record), 'PUT', {
       data: data
     });
   },
@@ -135,7 +159,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       type = type.constructor.typeKey;
     }
     decamelized = Ember.String.decamelize(type);
-    return Ember.String.pluralize(decamelized);
+    return Ember.String.pluralize(decamelized).replace(/_/g, '-');
   }
 });
 

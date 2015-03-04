@@ -14,13 +14,41 @@ define("json-api-adapter",
 
     DS.JsonApiAdapter = DS.RESTAdapter.extend({
       defaultSerializer: 'DS/jsonApi',
+
+      getSelfRoute: function(typeName, id, record) {
+        if(!this.serializer || !this.serializer.buildSelfKey) { return null; }
+        var route;
+        if(record) {
+          route = DS._routes[this.serializer.buildSelfKey(record.type, record.id, typeName, id)]
+            || DS._routes[this.serializer.buildSelfKey(record.type, null, typeName, null)];
+          if(route) { return route; }
+        }
+        return DS._routes[this.serializer.buildSelfKey(null, null, typeName, id)]
+          || DS._routes[this.serializer.buildSelfKey(null, null, typeName, null)];
+      },
+
+      getResourceRoute: function(typeName, id) {
+        var routeName = (id) ? typeName + '.' + id : typeName;
+        return DS._routes[routeName] || DS._routes[typeName];
+      },
+
+      getRoute: function(typeName, id, record) {
+        var route;
+        if(record) {
+          route = this.getSelfRoute(typeName, id, record);
+          if(route) { return route; }
+        }
+        return this.getResourceRoute(typeName, id);
+      },
+
       /**
        * Look up routes based on top-level links.
        */
       buildURL: function(typeName, id, record) {
+        // FIXME If there is a record, try and look up the self link
+        // - Need to use the function from the serializer to build the self key
         // TODO: this basically only works in the simplest of scenarios
-        var routeName = (id) ? typeName + '.' + id : typeName,
-            route = DS._routes[routeName] || DS._routes[typeName];
+        var route = this.getRoute(typeName, id, record);
         if(!route) {
           return this._super(typeName, id, record);
         }
@@ -47,11 +75,11 @@ define("json-api-adapter",
 
         return url;
       },
-
+    /*
       findBelongsTo: function(store, type, owner) {
         return this.ajax(this.buildURL(type, null, owner), 'GET');
       },
-
+    */
       /**
        * Fix query URL.
        */
@@ -80,7 +108,7 @@ define("json-api-adapter",
         var data = this._serializeData(store, type, record),
           id = get(record, 'id');
 
-        return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
+        return this.ajax(this.buildURL(type.typeKey, id, record), 'PUT', {
           data: data
         });
       },
@@ -266,7 +294,7 @@ define("json-api-adapter",
        * Parse the top-level "links" object.
        */
       extractLinks: function(links, resource) {
-        var link, association, id, route, linkKey;
+        var link, association, id, route, selfLink, cleanedRoute, linkKey, hasReplacement;
         // Used in unit test
         var extractedLinks = [], linkEntry;
 
@@ -285,9 +313,11 @@ define("json-api-adapter",
               route = null;
               id = association;
             }
+            selfLink = null;
           } else {
             route = association.resource || association.self;
             id = association.id || association.ids;
+            selfLink = association.self;
           }
 
           if (route) {
@@ -296,26 +326,41 @@ define("json-api-adapter",
             }
             resource.links[link] = route;
 
-            // strip base url
-            if (route.substr(0, 4).toLowerCase() === 'http') {
-              route = route.split('//').pop().split('/').slice(1).join('/');
-            }
-            // strip prefix slash
-            if (route.charAt(0) === '/') {
-              route = route.substr(1);
-            }
-
-            linkKey  = (id) ? link + '.' + id : link;
-            DS._routes[linkKey] = route;
             linkEntry = {};
-            linkEntry[linkKey] = route;
-            extractedLinks.push(linkEntry)
+            // If there is a placeholder for the id (i.e. /resource/{id}), don't include the ID in the key
+            hasReplacement = route.indexOf('{') > -1;
+            linkKey  = (id && !hasReplacement) ? link + '.' + id : link;
+            cleanedRoute = cleanRoute(route);
+            DS._routes[linkKey] = cleanedRoute;
+            linkEntry[linkKey] = cleanedRoute;
+            if(selfLink) {
+              linkKey = this.buildSelfKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
+              cleanedRoute = cleanRoute(selfLink);
+              DS._routes[linkKey] = cleanedRoute;
+              linkEntry[linkKey] = cleanedRoute;
+            }
+            extractedLinks.push(linkEntry);
           }
           if(id) {
               resource[link] = id;
           }
         }
         return extractedLinks;
+      },
+
+      buildSelfKey: function(parentType, parentId, link, id) {
+        var keys = [];
+        if(parentType) {
+          keys.push(Ember.String.pluralize(parentType));
+          if(parentId) {
+            keys.push(parentId);
+          }
+        }
+        keys.push(link);
+        if(id) {
+          keys.push(id);
+        }
+        return keys.join('.') + '--self';
       },
 
       // SERIALIZATION
@@ -379,6 +424,19 @@ define("json-api-adapter",
         };
       }
       return link;
+    }
+
+    function cleanRoute(route) {
+      var cleaned = route;
+      // strip base url
+      if (cleaned.substr(0, 4).toLowerCase() === 'http') {
+        cleaned = cleaned.split('//').pop().split('/').slice(1).join('/');
+      }
+      // strip prefix slash
+      if (cleaned.charAt(0) === '/') {
+        cleaned = cleaned.substr(1);
+      }
+      return cleaned;
     }
 
     __exports__["default"] = DS.JsonApiSerializer;

@@ -189,6 +189,9 @@ define("json-api-adapter",
     var isNone = Ember.isNone;
 
     DS.JsonApiSerializer = DS.RESTSerializer.extend({
+
+      primaryRecord: 'data',
+
       keyForRelationship: function(key) {
         return key;
       },
@@ -216,14 +219,15 @@ define("json-api-adapter",
        * Extract top-level "meta" & "links" before normalizing.
        */
       normalizePayload: function(payload) {
-        var data = payload.data;
+        if(!payload) { return; }
+        var data = payload[this.primaryRecord];
         if (data) {
           if(Ember.isArray(data)) {
             this.extractArrayData(data, payload);
           } else {
             this.extractSingleData(data, payload);
           }
-          delete payload.data;
+          delete payload[this.primaryRecord];
         }
         if (payload.meta) {
           this.extractMeta(payload.meta);

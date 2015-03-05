@@ -32,6 +32,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
+    if(!payload) { return; }
     var data = payload[this.primaryRecord];
     if (data) {
       if(Ember.isArray(data)) {

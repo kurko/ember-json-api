@@ -87,13 +87,13 @@ asyncTest('GET /posts/1 calls later GET /comments/2,3 when Posts has async comme
   });
 });
 
-asyncTest('GET /some_resource, not camelCase', function() {
+asyncTest('GET /some-resource, not camelCase, dasherized', function() {
   var models = setModels({
     commentAsync: true
   });
   env = setupStore(models);
 
-  fakeServer.get('/some_resources/1', responses.underscore_resource);
+  fakeServer.get('/some-resources/1', responses.underscore_resource);
 
   Em.run(function() {
     env.store.find('someResource', '1').then(function(record) {

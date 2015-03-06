@@ -10,44 +10,79 @@ DS._routes = Ember.create(null);
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
+
+  getSelfRoute: function(typeName, id, record) {
+    if(!this.serializer || !this.serializer.buildSelfKey) { return null; }
+    var route;
+    if(record) {
+      route = DS._routes[this.serializer.buildSelfKey(record.type, record.id, typeName, id)]
+        || DS._routes[this.serializer.buildSelfKey(record.type, null, typeName, null)];
+      if(route) { return route; }
+    }
+    return DS._routes[this.serializer.buildSelfKey(null, null, typeName, id)]
+      || DS._routes[this.serializer.buildSelfKey(null, null, typeName, null)];
+  },
+
+  getResourceRoute: function(typeName, id) {
+    var routeName = (id) ? typeName + '.' + id : typeName;
+    return DS._routes[routeName] || DS._routes[typeName];
+  },
+
+  getRoute: function(typeName, id, record) {
+    var route;
+    if(record) {
+      route = this.getSelfRoute(typeName, id, record);
+      if(route) { return route; }
+    }
+    return this.getResourceRoute(typeName, id);
+  },
+
   /**
    * Look up routes based on top-level links.
    */
-  buildURL: function(typeName, id) {
+  buildURL: function(typeName, id, record) {
+    // FIXME If there is a record, try and look up the self link
+    // - Need to use the function from the serializer to build the self key
     // TODO: this basically only works in the simplest of scenarios
-    var route = DS._routes[typeName];
-    if (!!route) {
-      var url = [];
-      var host = get(this, 'host');
-      var prefix = this.urlPrefix();
-      var param = /\{(.*?)\}/g;
-
-      if (id) {
-        if (param.test(route)) {
-          url.push(route.replace(param, id));
-        } else {
-          url.push(route, id);
-        }
-      } else {
-        url.push(route.replace(param, ''));
-      }
-
-      if (prefix) { url.unshift(prefix); }
-
-      url = url.join('/');
-      if (!host && url) { url = '/' + url; }
-
-      return url;
+    var route = this.getRoute(typeName, id, record);
+    if(!route) {
+      return this._super(typeName, id, record);
     }
 
-    return this._super(typeName, id);
+    var url = [];
+    var host = get(this, 'host');
+    var prefix = this.urlPrefix();
+    var param = /\{(.*?)\}/g;
+
+    if (id) {
+      if (param.test(route)) {
+        url.push(route.replace(param, id));
+      } else {
+        url.push(route);
+      }
+    } else {
+      url.push(route.replace(param, ''));
+    }
+
+    if (prefix) { url.unshift(prefix); }
+
+    url = url.join('/');
+    if (!host && url) { url = '/' + url; }
+
+    return url;
+  },
+
+  /** FIXME This is making unnecessary calls **/
+  findBelongsTo: function(/*store, record, url, relationship*/) {
+    return;
   },
 
   /**
    * Fix query URL.
    */
   findMany: function(store, type, ids, owner) {
-    return this.ajax(this.buildURL(type.typeKey, ids.join(',')), 'GET');
+    var id = ids ? ids.join(',') : null;
+    return this.ajax(this.buildURL(type, id, owner), 'GET');
   },
 
   /**
@@ -70,7 +105,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     var data = this._serializeData(store, type, record),
       id = get(record, 'id');
 
-    return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
+    return this.ajax(this.buildURL(type.typeKey, id, record), 'PUT', {
       data: data
     });
   },
@@ -122,24 +157,14 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       return error;
     }
   },
-  /**
-    Underscores the JSON root keys when serializing.
-
-    @method serializeIntoHash
-    @param {Object} hash
-    @param {subclass of DS.Model} type
-    @param {DS.Model} record
-    @param {Object} options
-    */
-  serializeIntoHash: function(data, type, record, options) {
-    var root = underscore(decamelize(type.typeKey));
-    var snapshot = record._createSnapshot();
-    data[root] = this.serialize(snapshot, options);
-  },
 
   pathForType: function(type) {
-    var decamelized = Ember.String.decamelize(type);
-    return Ember.String.pluralize(decamelized);
+    var decamelized;
+    if(typeof type === 'object') {
+      type = type.constructor.typeKey;
+    }
+    decamelized = Ember.String.decamelize(type);
+    return Ember.String.pluralize(decamelized).replace(/_/g, '-');
   }
 });
 

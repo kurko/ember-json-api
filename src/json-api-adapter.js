@@ -72,6 +72,11 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     return url;
   },
 
+  /** FIXME This is making unnecessary calls **/
+  findBelongsTo: function(/*store, record, url, relationship*/) {
+    return;
+  },
+
   /**
    * Fix query URL.
    */

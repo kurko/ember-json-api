@@ -1,5 +1,6 @@
 var stubServer = function() {
   var pretender = new Pretender();
+  DS._routes = Ember.create(null);
 
   pretender.unhandledRequest = function(verb, path, request) {
     var string = "Pretender: non-existing "+verb+" "+path, request
@@ -119,4 +120,5 @@ var stubServer = function() {
 
 var shutdownFakeServer = function(fakeServer) {
   fakeServer.pretender.shutdown();
+  DS._routes = Ember.create(null);
 }

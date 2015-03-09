@@ -15,19 +15,19 @@ define("json-api-adapter",
     DS.JsonApiAdapter = DS.RESTAdapter.extend({
       defaultSerializer: 'DS/jsonApi',
 
-      getSelfRoute: function(typeName, id, record) {
-        if(!this.serializer || !this.serializer.buildSelfKey) { return null; }
+      getRelationshipRoute: function(typeName, id, record) {
+        if(!this.serializer || !this.serializer.buildRelationshipKey) { return null; }
         var route;
         if(record) {
-          route = DS._routes[this.serializer.buildSelfKey(record.type, record.id, typeName, id)]
-            || DS._routes[this.serializer.buildSelfKey(record.type, null, typeName, null)];
+          route = DS._routes[this.serializer.buildRelationshipKey(record.type, record.id, typeName, id)]
+            || DS._routes[this.serializer.buildRelationshipKey(record.type, null, typeName, null)];
           if(route) { return route; }
         }
-        return DS._routes[this.serializer.buildSelfKey(null, null, typeName, id)]
-          || DS._routes[this.serializer.buildSelfKey(null, null, typeName, null)];
+        return DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, id)]
+          || DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, null)];
       },
 
-      getResourceRoute: function(typeName, id) {
+      getRelatedResourceRoute: function(typeName, id) {
         var routeName = (id) ? typeName + '.' + id : typeName;
         return DS._routes[routeName] || DS._routes[typeName];
       },
@@ -35,10 +35,10 @@ define("json-api-adapter",
       getRoute: function(typeName, id, record) {
         var route;
         if(record) {
-          route = this.getSelfRoute(typeName, id, record);
+          route = this.getRelationshipRoute(typeName, id, record);
           if(route) { return route; }
         }
-        return this.getResourceRoute(typeName, id);
+        return this.getRelatedResourceRoute(typeName, id);
       },
 
       /**
@@ -195,7 +195,10 @@ define("json-api-adapter",
 
     DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
-      primaryRecord: 'data',
+      primaryRecordKey: 'data',
+      sideloadedRecordsKey: 'included',
+      relationshipKey: 'self',
+      relatedResourceKey: 'related',
 
       keyForRelationship: function(key) {
         return key;
@@ -225,26 +228,26 @@ define("json-api-adapter",
        */
       normalizePayload: function(payload) {
         if(!payload) { return; }
-        var data = payload[this.primaryRecord];
+        var data = payload[this.primaryRecordKey];
         if (data) {
           if(Ember.isArray(data)) {
             this.extractArrayData(data, payload);
           } else {
             this.extractSingleData(data, payload);
           }
-          delete payload[this.primaryRecord];
+          delete payload[this.primaryRecordKey];
         }
         if (payload.meta) {
           this.extractMeta(payload.meta);
           delete payload.meta;
         }
         if (payload.links) {
-          this.extractLinks(payload.links, payload);
+          this.extractRelationships(payload.links, payload);
           delete data.links;
         }
-        if (payload.linked) {
-          this.extractLinked(payload.linked);
-          delete payload.linked;
+        if (payload[this.sideloadedRecordsKey]) {
+          this.extractSideloaded(payload[this.sideloadedRecordsKey]);
+          delete payload[this.sideloadedRecordsKey];
         }
 
         return payload;
@@ -255,7 +258,7 @@ define("json-api-adapter",
        */
       extractSingleData: function(data, payload) {
         if(data.links) {
-          this.extractLinks(data.links, data);
+          this.extractRelationships(data.links, data);
           //delete data.links;
         }
         payload[data.type] = data;
@@ -269,7 +272,7 @@ define("json-api-adapter",
         var type = data.length > 0 ? data[0].type : null, serializer = this;
         data.forEach(function(item) {
           if(item.links) {
-            serializer.extractLinks(item.links, item);
+            serializer.extractRelationships(item.links, item);
             //delete data.links;
           }
         });
@@ -278,12 +281,12 @@ define("json-api-adapter",
       },
 
       /**
-       * Extract top-level "linked" containing associated objects
+       * Extract top-level "included" containing associated objects
        */
-      extractLinked: function(linked) {
+      extractSideloaded: function(sideloaded) {
         var store = get(this, 'store'), models = {};
 
-        linked.forEach(function(link) {
+        sideloaded.forEach(function(link) {
           var type = link.type;
           delete link.type;
           if(!models[type]) {
@@ -298,8 +301,8 @@ define("json-api-adapter",
       /**
        * Parse the top-level "links" object.
        */
-      extractLinks: function(links, resource) {
-        var link, association, id, route, selfLink, cleanedRoute, linkKey, hasReplacement;
+      extractRelationships: function(links, resource) {
+        var link, association, id, route, relationshipLink, cleanedRoute, linkKey, hasReplacement;
         // Used in unit test
         var extractedLinks = [], linkEntry;
 
@@ -318,11 +321,11 @@ define("json-api-adapter",
               route = null;
               id = association;
             }
-            selfLink = null;
+            relationshipLink = null;
           } else {
-            route = association.resource || association.self;
+            route = association[this.relatedResourceKey] || association[this.relationshipKey];
             id = association.id || association.ids;
-            selfLink = association.self;
+            relationshipLink =  association[this.relationshipKey];
           }
 
           if (route) {
@@ -338,9 +341,9 @@ define("json-api-adapter",
             cleanedRoute = cleanRoute(route);
             DS._routes[linkKey] = cleanedRoute;
             linkEntry[linkKey] = cleanedRoute;
-            if(selfLink) {
-              linkKey = this.buildSelfKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
-              cleanedRoute = cleanRoute(selfLink);
+            if(relationshipLink) {
+              linkKey = this.buildRelationshipKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
+              cleanedRoute = cleanRoute(relationshipLink);
               DS._routes[linkKey] = cleanedRoute;
               linkEntry[linkKey] = cleanedRoute;
             }
@@ -353,7 +356,7 @@ define("json-api-adapter",
         return extractedLinks;
       },
 
-      buildSelfKey: function(parentType, parentId, link, id) {
+      buildRelationshipKey: function(parentType, parentId, link, id) {
         var keys = [];
         if(parentType) {
           keys.push(Ember.String.pluralize(parentType));
@@ -365,7 +368,7 @@ define("json-api-adapter",
         if(id) {
           keys.push(id);
         }
-        return keys.join('.') + '--self';
+        return keys.join('.') + '--' + this.relationshipKey;
       },
 
       // SERIALIZATION

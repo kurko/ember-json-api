@@ -9,7 +9,7 @@ and JSON API are both works in progress, use with caution.
 **Important:** this is under heavy development. For the latest stable release,
 check the latest tag.
 
-This follows JSONAPI v1.0 rc2.
+This follows [JSONAPI v1.0 rc3](https://github.com/json-api/json-api/blob/c143bca7844a7e1e6deb8da0696547a1ab21d12a/format/index.md), with a primary `data` root, resources linked with `related` property, and side loaded data in an `included` array at the root.
 
 ### Specification coverage
 

@@ -49,7 +49,7 @@ module('integration/specs/to-many-relationships', {
   }
 });
 
-asyncTest('GET /posts/1 with async linked resources', function() {
+asyncTest('GET /posts/1 with async included resources', function() {
   var models = setModels({
     commentAsync: true
   });
@@ -80,7 +80,7 @@ asyncTest('GET /posts/1 with async linked resources', function() {
   });
 });
 
-asyncTest('GET /posts/1 with sync linked resources', function() {
+asyncTest('GET /posts/1 with sync included resources', function() {
   var models = setModels({
     commentAsync: false
   });

@@ -14,7 +14,7 @@ module('integration/specs/multiple-resource-links-test', {
                     title: 'Rails is Omakase',
                     links: {
                         author: {
-                            resource: '/authors/2',
+                            related: '/posts/1/author',
                             type: 'authors',
                             id: '2'
                         }
@@ -25,7 +25,7 @@ module('integration/specs/multiple-resource-links-test', {
                     title: 'TDD Is Dead lol',
                     links: {
                         author: {
-                            resource: '/authors/1',
+                            related: '/posts/2/author',
                             type: 'authors',
                             id: '1'
                         }
@@ -51,6 +51,7 @@ module('integration/specs/multiple-resource-links-test', {
         env = setupStore(setModels());
         env.store.modelFor('post');
         env.store.modelFor('comment');
+        env.store.modelFor('author');
     },
 
     teardown: function() {
@@ -66,8 +67,8 @@ asyncTest('GET /posts/1 calls later GET /posts/1/comments when Posts has async c
     env = setupStore(models);
 
     fakeServer.get('/posts', responses.posts_not_compound);
-    fakeServer.get('/authors/1', responses.post_2_author);
-    fakeServer.get('/authors/2', responses.post_1_author);
+    fakeServer.get('/posts/1/author', responses.post_1_author);
+    fakeServer.get('/posts/2/author', responses.post_2_author);
 
     Em.run(function() {
         env.store.find('post').then(function(records) {

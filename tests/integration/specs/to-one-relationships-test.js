@@ -41,7 +41,7 @@ module('integration/specs/to-one-relationships', {
   }
 });
 
-asyncTest('GET /posts/1 with async linked resources', function() {
+asyncTest('GET /posts/1 with async included resources', function() {
   var models = setModels({
     authorAsync: true
   });
@@ -64,7 +64,7 @@ asyncTest('GET /posts/1 with async linked resources', function() {
   });
 });
 
-asyncTest("GET /posts/1 with sync linked resources won't work", function() {
+asyncTest("GET /posts/1 with sync included resources won't work", function() {
   var models = setModels({
     authorAsync: false
   });

@@ -23,7 +23,7 @@ module('integration/specs/compound-documents', {
             }
           }
         },
-        linked: [{
+        included: [{
           type: 'comments',
           id: '2',
           title: 'good article',
@@ -52,7 +52,7 @@ module('integration/specs/compound-documents', {
   }
 });
 
-asyncTest('Post with sync comments uses linked resources', function() {
+asyncTest('Post with sync comments uses included resources', function() {
   var models = setModels({
     commentAsync: false,
     authorAsync: false
@@ -84,7 +84,7 @@ asyncTest('Post with sync comments uses linked resources', function() {
   });
 });
 
-asyncTest('Post with async comments uses linked resources', function() {
+asyncTest('Post with async comments uses included resources', function() {
   var models = setModels({
     commentAsync: true,
     authorAsync: true

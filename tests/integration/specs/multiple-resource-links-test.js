@@ -51,6 +51,7 @@ module('integration/specs/multiple-resource-links-test', {
         env = setupStore(setModels());
         env.store.modelFor('post');
         env.store.modelFor('comment');
+        env.store.modelFor('author');
     },
 
     teardown: function() {

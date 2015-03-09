@@ -14,7 +14,7 @@ module('unit/ember-json-api-adapter - serializer - extract-links-test', {
 });
 
 test("no links", function() {
-  var links = serializer.extractLinks({
+  var links = serializer.extractRelationships({
 
   }, {});
 
@@ -22,7 +22,7 @@ test("no links", function() {
 });
 
 test("basic", function() {
-  var links = serializer.extractLinks({
+  var links = serializer.extractRelationships({
     "posts.comments": "http://example.com/posts/{posts.id}/comments"
   }, {});
 
@@ -32,7 +32,7 @@ test("basic", function() {
 });
 
 test("exploding", function() {
-  var links = serializer.extractLinks({
+  var links = serializer.extractRelationships({
     "posts.comments": "http://example.com/comments/{posts.comments}"
   }, {});
 
@@ -42,7 +42,7 @@ test("exploding", function() {
 });
 
 test("self link", function() {
-  var links = serializer.extractLinks({
+  var links = serializer.extractRelationships({
     "author": {
       "self": "http://example.com/posts/1/author/1",
       "id": "1",
@@ -57,7 +57,7 @@ test("self link", function() {
 });
 
 test("self link with replacement", function() {
-  var links = serializer.extractLinks({
+  var links = serializer.extractRelationships({
     "author": {
       "self": "http://example.com/posts/{post.id}/author/{author.id}",
       "id": "1",
@@ -71,10 +71,10 @@ test("self link with replacement", function() {
   }]);
 });
 
-test("resource link", function() {
-  var links = serializer.extractLinks({
+test("related link", function() {
+  var links = serializer.extractRelationships({
     "author": {
-      "resource": "http://example.com/authors/1",
+      "related": "http://example.com/authors/1",
       "id": "1",
       "type": "authors"
     }
@@ -85,26 +85,26 @@ test("resource link", function() {
   }]);
 });
 
-test("resource link with replacement", function() {
-  var links = serializer.extractLinks({
+test("related link with replacement", function() {
+  var links = serializer.extractRelationships({
     "author": {
-      "resource": "http://example.com/authors/{author.id}",
+      "related": "http://example.com/authors/{author.id}",
       "id": "1",
       "type": "authors"
     }
   }, { id:1, type:'posts' });
-  console.log('links', links);
+
   deepEqual(links, [{
     "author": "authors/{author.id}"
   }]);
 });
 
 
-test("self and resource link", function() {
-  var links = serializer.extractLinks({
+test("self and related link", function() {
+  var links = serializer.extractRelationships({
     "author": {
       "self": "http://example.com/posts/1/author/1",
-      "resource": "http://example.com/authors/1",
+      "related": "http://example.com/authors/1",
       "id": "1",
       "type": "authors"
     }

@@ -3,7 +3,10 @@ var isNone = Ember.isNone;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
-  primaryRecord: 'data',
+  primaryRecordKey: 'data',
+  sideloadedRecordsKey: 'included',
+  relationshipKey: 'self',
+  relatedResourceKey: 'related',
 
   keyForRelationship: function(key) {
     return key;
@@ -33,26 +36,26 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   normalizePayload: function(payload) {
     if(!payload) { return; }
-    var data = payload[this.primaryRecord];
+    var data = payload[this.primaryRecordKey];
     if (data) {
       if(Ember.isArray(data)) {
         this.extractArrayData(data, payload);
       } else {
         this.extractSingleData(data, payload);
       }
-      delete payload[this.primaryRecord];
+      delete payload[this.primaryRecordKey];
     }
     if (payload.meta) {
       this.extractMeta(payload.meta);
       delete payload.meta;
     }
     if (payload.links) {
-      this.extractLinks(payload.links, payload);
+      this.extractRelationships(payload.links, payload);
       delete data.links;
     }
-    if (payload.linked) {
-      this.extractLinked(payload.linked);
-      delete payload.linked;
+    if (payload[this.sideloadedRecordsKey]) {
+      this.extractSideloaded(payload[this.sideloadedRecordsKey]);
+      delete payload[this.sideloadedRecordsKey];
     }
 
     return payload;
@@ -63,7 +66,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   extractSingleData: function(data, payload) {
     if(data.links) {
-      this.extractLinks(data.links, data);
+      this.extractRelationships(data.links, data);
       //delete data.links;
     }
     payload[data.type] = data;
@@ -77,7 +80,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var type = data.length > 0 ? data[0].type : null, serializer = this;
     data.forEach(function(item) {
       if(item.links) {
-        serializer.extractLinks(item.links, item);
+        serializer.extractRelationships(item.links, item);
         //delete data.links;
       }
     });
@@ -86,12 +89,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   },
 
   /**
-   * Extract top-level "linked" containing associated objects
+   * Extract top-level "included" containing associated objects
    */
-  extractLinked: function(linked) {
+  extractSideloaded: function(sideloaded) {
     var store = get(this, 'store'), models = {};
 
-    linked.forEach(function(link) {
+    sideloaded.forEach(function(link) {
       var type = link.type;
       delete link.type;
       if(!models[type]) {
@@ -106,8 +109,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   /**
    * Parse the top-level "links" object.
    */
-  extractLinks: function(links, resource) {
-    var link, association, id, route, selfLink, cleanedRoute, linkKey, hasReplacement;
+  extractRelationships: function(links, resource) {
+    var link, association, id, route, relationshipLink, cleanedRoute, linkKey, hasReplacement;
     // Used in unit test
     var extractedLinks = [], linkEntry;
 
@@ -126,11 +129,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
           route = null;
           id = association;
         }
-        selfLink = null;
+        relationshipLink = null;
       } else {
-        route = association.resource || association.self;
+        route = association[this.relatedResourceKey] || association[this.relationshipKey];
         id = association.id || association.ids;
-        selfLink = association.self;
+        relationshipLink =  association[this.relationshipKey];
       }
 
       if (route) {
@@ -146,9 +149,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         cleanedRoute = cleanRoute(route);
         DS._routes[linkKey] = cleanedRoute;
         linkEntry[linkKey] = cleanedRoute;
-        if(selfLink) {
-          linkKey = this.buildSelfKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
-          cleanedRoute = cleanRoute(selfLink);
+        if(relationshipLink) {
+          linkKey = this.buildRelationshipKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
+          cleanedRoute = cleanRoute(relationshipLink);
           DS._routes[linkKey] = cleanedRoute;
           linkEntry[linkKey] = cleanedRoute;
         }
@@ -161,7 +164,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     return extractedLinks;
   },
 
-  buildSelfKey: function(parentType, parentId, link, id) {
+  buildRelationshipKey: function(parentType, parentId, link, id) {
     var keys = [];
     if(parentType) {
       keys.push(Ember.String.pluralize(parentType));
@@ -173,7 +176,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     if(id) {
       keys.push(id);
     }
-    return keys.join('.') + '--self';
+    return keys.join('.') + '--' + this.relationshipKey;
   },
 
   // SERIALIZATION

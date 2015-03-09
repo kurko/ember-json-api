@@ -11,19 +11,19 @@ DS._routes = Ember.create(null);
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
 
-  getSelfRoute: function(typeName, id, record) {
-    if(!this.serializer || !this.serializer.buildSelfKey) { return null; }
+  getRelationshipRoute: function(typeName, id, record) {
+    if(!this.serializer || !this.serializer.buildRelationshipKey) { return null; }
     var route;
     if(record) {
-      route = DS._routes[this.serializer.buildSelfKey(record.type, record.id, typeName, id)]
-        || DS._routes[this.serializer.buildSelfKey(record.type, null, typeName, null)];
+      route = DS._routes[this.serializer.buildRelationshipKey(record.type, record.id, typeName, id)]
+        || DS._routes[this.serializer.buildRelationshipKey(record.type, null, typeName, null)];
       if(route) { return route; }
     }
-    return DS._routes[this.serializer.buildSelfKey(null, null, typeName, id)]
-      || DS._routes[this.serializer.buildSelfKey(null, null, typeName, null)];
+    return DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, id)]
+      || DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, null)];
   },
 
-  getResourceRoute: function(typeName, id) {
+  getRelatedResourceRoute: function(typeName, id) {
     var routeName = (id) ? typeName + '.' + id : typeName;
     return DS._routes[routeName] || DS._routes[typeName];
   },
@@ -31,10 +31,10 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   getRoute: function(typeName, id, record) {
     var route;
     if(record) {
-      route = this.getSelfRoute(typeName, id, record);
+      route = this.getRelationshipRoute(typeName, id, record);
       if(route) { return route; }
     }
-    return this.getResourceRoute(typeName, id);
+    return this.getRelatedResourceRoute(typeName, id);
   },
 
   /**

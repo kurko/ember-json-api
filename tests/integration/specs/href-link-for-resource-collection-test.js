@@ -15,7 +15,7 @@ module('integration/specs/href-link-for-resource-collection-test', {
           links: {
             comments: {
               self: '/posts/1/links/comments',
-              resource: '/posts/1/comments',
+              related: '/posts/1/comments',
               type: 'comments',
               ids: ['1', '2']
             }
@@ -94,7 +94,7 @@ asyncTest('GET /posts/1 calls later GET /posts/1/some_resources when Posts has a
       title: 'Rails is Omakase',
       links: {
         'some_resources': {
-          resource: '/posts/1/some_resources'
+          related: '/posts/1/some_resources'
         }
       }
     }

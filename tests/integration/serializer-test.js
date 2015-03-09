@@ -331,7 +331,7 @@ test('extractSingle snake_case', function() {
       },
       type: 'home_planets'
     },
-    linked: [{
+    included: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
@@ -374,7 +374,7 @@ test('extractSingle camelCase', function() {
       },
       type: 'home_planets'
     },
-    linked: [{
+    included: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
@@ -409,7 +409,7 @@ test('extractArray snake_case', function() {
       },
       type: 'home_planets'
     }],
-    linked: [{
+    included: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
@@ -453,7 +453,7 @@ test('extractArray', function() {
       },
       type: 'home_planets'
     }],
-    linked: [{
+    included: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',
@@ -496,7 +496,7 @@ test('looking up a belongsTo association', function() {
       },
       type: 'home_planets'
     }],
-    linked: [{
+    included: [{
       id: '1',
       first_name: 'Tom',
       last_name: 'Dale',

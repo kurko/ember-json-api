@@ -159,11 +159,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   },
 
   pathForType: function(type) {
-    var decamelized;
-    if(typeof type === 'object') {
-      type = type.constructor.typeKey;
-    }
-    decamelized = Ember.String.decamelize(type);
+    var decamelized = Ember.String.decamelize(type);
     return Ember.String.pluralize(decamelized).replace(/_/g, '-');
   }
 });

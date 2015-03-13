@@ -342,7 +342,7 @@ define("json-api-adapter",
             if (!resource.links) {
               resource.links = {};
             }
-            resource.links[link] = route;
+            resource.links[link] = this.removeHost(route);
 
             linkEntry = {};
             // If there is a placeholder for the id (i.e. /resource/{id}), don't include the ID in the key
@@ -364,6 +364,10 @@ define("json-api-adapter",
           }
         }
         return extractedLinks;
+      },
+
+      removeHost: function(url) {
+        return '/' + cleanRoute(url);
       },
 
       buildRelatedKey: function(parentType, parentId, link, id) {

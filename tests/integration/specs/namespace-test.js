@@ -7,7 +7,7 @@ module('integration/specs/namespace', {
     fakeServer = stubServer();
 
     responses = {
-      posts_id: {
+      posts1_id: {
         data: {
           type: 'posts',
           id: '1',
@@ -19,12 +19,29 @@ module('integration/specs/namespace', {
             },
             comments: {
               type: 'comments',
-              id: ['2', '3']
+              id: ['2']
             }
           }
         }
       },
-      posts_related: {
+      posts2_id: {
+        data: {
+          type: 'posts',
+          id: '2',
+          title: 'TDD Is Dead lol',
+          links: {
+            author: {
+              type: 'authors',
+              id: '2'
+            },
+            comments: {
+              type: 'comments',
+              id: ['3']
+            }
+          }
+        }
+      },
+      posts1_related: {
         data: {
           type: 'posts',
           id: '1',
@@ -42,6 +59,24 @@ module('integration/specs/namespace', {
           }
         }
       },
+      posts2_related: {
+        data: {
+          type: 'posts',
+          id: '2',
+          title: 'TDD Is Dead lol',
+          links: {
+            author: {
+              related: '/api/posts/2/author',
+              type: 'authors',
+              id: '2'
+            },
+            comments: {
+              related: '/api/posts/2/comments',
+              type: 'comments'
+            }
+          }
+        }
+      },
       author: {
         data: {
           type: 'authors',
@@ -49,13 +84,16 @@ module('integration/specs/namespace', {
           name: 'dhh'
         }
       },
-      comments: {
+      post1_comments: {
         data: [{
           type: 'comments',
           'id': '2',
           'title': 'good article',
           'body': 'ideal for my startup'
-        }, {
+        }]
+      },
+      post2_comments: {
+        data: [{
           type: 'comments',
           id: '3',
           title: 'bad article',
@@ -100,43 +138,72 @@ module('integration/specs/namespace', {
 });
 
 asyncTest('GET /api/posts/1 calls with type and id to comments', function() {
-  fakeServer.get('/api/posts/1', responses.posts_id);
+  fakeServer.get('/api/posts/1', responses.posts1_id);
+  fakeServer.get('/api/posts/2', responses.posts2_id);
   fakeServer.get('/api/authors/2', responses.author);
   fakeServer.get('/api/comments/2', responses.comments_2);
   fakeServer.get('/api/comments/3', responses.comments_3);
-  testPost();
+
+  runTests();
 });
 
 asyncTest('GET /api/posts/1 calls with related URLs', function() {
-  fakeServer.get('/api/posts/1', responses.posts_related);
+  fakeServer.get('/api/posts/1', responses.posts1_related);
+  fakeServer.get('/api/posts/2', responses.posts2_related);
   fakeServer.get('/api/posts/1/author', responses.author);
-  fakeServer.get('/api/posts/1/comments', responses.comments);
-  testPost();
+  fakeServer.get('/api/posts/2/author', responses.author);
+  fakeServer.get('/api/posts/1/comments', responses.post1_comments);
+  fakeServer.get('/api/posts/2/comments', responses.post2_comments);
+  runTests();
 });
 
-function testPost() {
+function runTests() {
   Em.run(function() {
-    env.store.find('post', '1').then(function(record) {
-      equal(record.get('id'), '1', 'id is correct');
-      equal(record.get('title'), 'Rails is Omakase', 'title is correct');
+    var promises = [];
+    promises.push(testPost1());
+    promises.push(testPost2());
 
-      record.get('author').then(function(author) {
-        equal(author.get('id'), '2', 'author id is correct');
-        equal(author.get('name'), 'dhh', 'author name is correct');
+    Ember.RSVP.all(promises).then(start);
+  });
+}
 
-        record.get('comments').then(function(comments) {
-          var comment1 = comments.objectAt(0);
-          var comment2 = comments.objectAt(1);
+function testPost1() {
+  return env.store.find('post', '1').then(function(record) {
+    equal(record.get('id'), '1', 'id is correct');
+    equal(record.get('title'), 'Rails is Omakase', 'title is correct');
 
-          equal(comments.get('length'), 2, 'there are 2 comments');
+    record.get('author').then(function(author) {
+      equal(author.get('id'), '2', 'author id is correct');
+      equal(author.get('name'), 'dhh', 'author name is correct');
 
-          equal(comment1.get('title'), 'good article', 'comment1 title');
-          equal(comment1.get('body'), 'ideal for my startup', 'comment1 body');
+      record.get('comments').then(function(comments) {
+        var comment = comments.objectAt(0);
 
-          equal(comment2.get('title'), 'bad article', 'comment2 title');
-          equal(comment2.get('body'), "doesn't run Crysis", 'comment2 body');
-          start();
-        });
+        equal(comments.get('length'), 1, 'there is 1 comment');
+
+        equal(comment.get('title'), 'good article', 'comment1 title');
+        equal(comment.get('body'), 'ideal for my startup', 'comment1 body');
+      });
+    });
+  });
+}
+
+function testPost2() {
+  return env.store.find('post', '2').then(function(record) {
+    equal(record.get('id'), '2', 'id is correct');
+    equal(record.get('title'), 'TDD Is Dead lol', 'title is correct');
+
+    record.get('author').then(function(author) {
+      equal(author.get('id'), '2', 'author id is correct');
+      equal(author.get('name'), 'dhh', 'author name is correct');
+
+      record.get('comments').then(function(comments) {
+        var comment = comments.objectAt(0);
+
+        equal(comments.get('length'), 1, 'there is 1 comment');
+
+        equal(comment.get('title'), 'bad article', 'comment2 title');
+        equal(comment.get('body'), "doesn't run Crysis", 'comment2 body');
       });
     });
   });

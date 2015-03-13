@@ -44,15 +44,15 @@ test("exploding", function() {
 test("self link", function() {
   var links = serializer.extractRelationships({
     "author": {
-      "self": "http://example.com/posts/1/author/1",
+      "self": "http://example.com/links/posts/1/author",
       "id": "1",
       "type": "authors"
     }
   }, { id:1, type:'posts' });
 
   deepEqual(links, [{
-    "author.1": "posts/1/author/1",
-    "posts.1.author.1--self": "posts/1/author/1"
+    "posts.1.author.1": "links/posts/1/author",
+    "posts.1.author.1--self": "links/posts/1/author"
   }]);
 });
 
@@ -66,7 +66,7 @@ test("self link with replacement", function() {
   }, { id:1, type:'posts' });
 
   deepEqual(links, [{
-    "author": "posts/{post.id}/author/{author.id}",
+    "posts.author": "posts/{post.id}/author/{author.id}",
     "posts.author--self": "posts/{post.id}/author/{author.id}"
   }]);
 });
@@ -81,7 +81,7 @@ test("related link", function() {
   }, { id:1, type:'posts' });
 
   deepEqual(links, [{
-    "author.1": "authors/1"
+    "posts.1.author.1": "authors/1"
   }]);
 });
 
@@ -95,7 +95,7 @@ test("related link with replacement", function() {
   }, { id:1, type:'posts' });
 
   deepEqual(links, [{
-    "author": "authors/{author.id}"
+    "posts.author": "authors/{author.id}"
   }]);
 });
 
@@ -103,15 +103,15 @@ test("related link with replacement", function() {
 test("self and related link", function() {
   var links = serializer.extractRelationships({
     "author": {
-      "self": "http://example.com/posts/1/author/1",
-      "related": "http://example.com/authors/1",
+      "self": "http://example.com/links/posts/1/author",
+      "related": "http://example.com/posts/1/author",
       "id": "1",
       "type": "authors"
     }
   }, { id:'1', type:'post' });
 
   deepEqual(links, [{
-    "author.1": "authors/1",
-    "posts.1.author.1--self": "posts/1/author/1"
+    "posts.1.author.1": "posts/1/author",
+    "posts.1.author.1--self": "links/posts/1/author"
   }]);
 });

@@ -16,20 +16,30 @@ define("json-api-adapter",
       defaultSerializer: 'DS/jsonApi',
 
       getRelationshipRoute: function(typeName, id, record) {
-        if(!this.serializer || !this.serializer.buildRelationshipKey) { return null; }
-        var route;
-        if(record) {
-          route = DS._routes[this.serializer.buildRelationshipKey(record.type, record.id, typeName, id)]
-            || DS._routes[this.serializer.buildRelationshipKey(record.type, null, typeName, null)];
-          if(route) { return route; }
-        }
-        return DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, id)]
-          || DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, null)];
+        var serializer = (record) ? get(record, 'store').serializerFor(typeName) : null;
+        if(!serializer || !serializer.buildRelationshipKey) { return null; }
+
+        return DS._routes[serializer.buildRelationshipKey(record.constructor.typeKey, record.id, typeName, id)]
+          || DS._routes[serializer.buildRelationshipKey(record.type, null, typeName, null)]
+          || DS._routes[serializer.buildRelationshipKey(null, null, typeName, id)]
+          || DS._routes[serializer.buildRelationshipKey(null, null, typeName, null)];
       },
 
-      getRelatedResourceRoute: function(typeName, id) {
-        var routeName = (id) ? typeName + '.' + id : typeName;
-        return DS._routes[routeName] || DS._routes[typeName];
+      getRelatedResourceRoute: function(typeName, id, record) {
+        var routeName = (id) ? typeName + '.' + id : typeName,
+          serializer = (record) ? get(record, 'store').serializerFor(typeName) : null,
+          route = null;
+
+        if(serializer && serializer.buildRelatedKey) {
+          route = DS._routes[serializer.buildRelatedKey(record.constructor.typeKey, record.id, typeName, id)]
+            || DS._routes[serializer.buildRelatedKey(record.type, null, typeName, null)]
+            || DS._routes[serializer.buildRelatedKey(null, null, typeName, id)]
+            || DS._routes[serializer.buildRelatedKey(null, null, typeName, null)];
+        }
+
+        return route
+          || DS._routes[routeName]
+          || DS._routes[typeName];
       },
 
       getRoute: function(typeName, id, record) {
@@ -38,7 +48,7 @@ define("json-api-adapter",
           route = this.getRelationshipRoute(typeName, id, record);
           if(route) { return route; }
         }
-        return this.getRelatedResourceRoute(typeName, id);
+        return this.getRelatedResourceRoute(typeName, id, record);
       },
 
       /**
@@ -77,8 +87,12 @@ define("json-api-adapter",
       },
 
       /** FIXME This is making unnecessary calls **/
-      findBelongsTo: function(/*store, record, url, relationship*/) {
-        return;
+      findBelongsTo: function(store, record, url, relationship) {
+        var related = record[relationship.key];
+        if(related) {
+          return related;
+        }
+        return this.ajax(url, 'GET');
       },
 
       /**
@@ -333,12 +347,12 @@ define("json-api-adapter",
             linkEntry = {};
             // If there is a placeholder for the id (i.e. /resource/{id}), don't include the ID in the key
             hasReplacement = route.indexOf('{') > -1;
-            linkKey  = (id && !hasReplacement) ? link + '.' + id : link;
+            linkKey = this.buildRelatedKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
             cleanedRoute = cleanRoute(route);
             DS._routes[linkKey] = cleanedRoute;
             linkEntry[linkKey] = cleanedRoute;
             if(relationshipLink) {
-              linkKey = this.buildRelationshipKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
+              linkKey = this.buildRelationshipKey(linkKey);
               cleanedRoute = cleanRoute(relationshipLink);
               DS._routes[linkKey] = cleanedRoute;
               linkEntry[linkKey] = cleanedRoute;
@@ -352,7 +366,7 @@ define("json-api-adapter",
         return extractedLinks;
       },
 
-      buildRelationshipKey: function(parentType, parentId, link, id) {
+      buildRelatedKey: function(parentType, parentId, link, id) {
         var keys = [];
         if(parentType) {
           keys.push(Ember.String.pluralize(parentType));
@@ -364,7 +378,11 @@ define("json-api-adapter",
         if(id) {
           keys.push(id);
         }
-        return keys.join('.') + '--' + this.relationshipKey;
+        return keys.join('.');
+      },
+      buildRelationshipKey: function(parentType, parentId, link, id) {
+        var relatedKey = (arguments.length === 1) ? arguments[0] : this.buildRelatedKey(parentType, parentId, link, id);
+        return relatedKey + '--' + this.relationshipKey;
       },
 
       // SERIALIZATION

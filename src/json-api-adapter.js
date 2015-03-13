@@ -12,20 +12,30 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
 
   getRelationshipRoute: function(typeName, id, record) {
-    if(!this.serializer || !this.serializer.buildRelationshipKey) { return null; }
-    var route;
-    if(record) {
-      route = DS._routes[this.serializer.buildRelationshipKey(record.type, record.id, typeName, id)]
-        || DS._routes[this.serializer.buildRelationshipKey(record.type, null, typeName, null)];
-      if(route) { return route; }
-    }
-    return DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, id)]
-      || DS._routes[this.serializer.buildRelationshipKey(null, null, typeName, null)];
+    var serializer = (record) ? get(record, 'store').serializerFor(typeName) : null;
+    if(!serializer || !serializer.buildRelationshipKey) { return null; }
+
+    return DS._routes[serializer.buildRelationshipKey(record.constructor.typeKey, record.id, typeName, id)]
+      || DS._routes[serializer.buildRelationshipKey(record.type, null, typeName, null)]
+      || DS._routes[serializer.buildRelationshipKey(null, null, typeName, id)]
+      || DS._routes[serializer.buildRelationshipKey(null, null, typeName, null)];
   },
 
-  getRelatedResourceRoute: function(typeName, id) {
-    var routeName = (id) ? typeName + '.' + id : typeName;
-    return DS._routes[routeName] || DS._routes[typeName];
+  getRelatedResourceRoute: function(typeName, id, record) {
+    var routeName = (id) ? typeName + '.' + id : typeName,
+      serializer = (record) ? get(record, 'store').serializerFor(typeName) : null,
+      route = null;
+
+    if(serializer && serializer.buildRelatedKey) {
+      route = DS._routes[serializer.buildRelatedKey(record.constructor.typeKey, record.id, typeName, id)]
+        || DS._routes[serializer.buildRelatedKey(record.type, null, typeName, null)]
+        || DS._routes[serializer.buildRelatedKey(null, null, typeName, id)]
+        || DS._routes[serializer.buildRelatedKey(null, null, typeName, null)];
+    }
+
+    return route
+      || DS._routes[routeName]
+      || DS._routes[typeName];
   },
 
   getRoute: function(typeName, id, record) {
@@ -34,7 +44,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       route = this.getRelationshipRoute(typeName, id, record);
       if(route) { return route; }
     }
-    return this.getRelatedResourceRoute(typeName, id);
+    return this.getRelatedResourceRoute(typeName, id, record);
   },
 
   /**
@@ -73,8 +83,12 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   },
 
   /** FIXME This is making unnecessary calls **/
-  findBelongsTo: function(/*store, record, url, relationship*/) {
-    return;
+  findBelongsTo: function(store, record, url, relationship) {
+    var related = record[relationship.key];
+    if(related) {
+      return related;
+    }
+    return this.ajax(url, 'GET');
   },
 
   /**

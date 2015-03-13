@@ -77,6 +77,7 @@ asyncTest('GET /posts/1 calls later GET /posts/1/comments when Posts has async c
              var post1 = records.objectAt(0);
              var post2 = records.objectAt(1);
              var promises = [];
+
              promises.push(post1.get('author').then(function(author) {
                 equal(author.get('name'), 'dhh', 'post1 author');
              }));
@@ -84,9 +85,7 @@ asyncTest('GET /posts/1 calls later GET /posts/1/comments when Posts has async c
                  equal(author.get('name'), 'ado', 'post2 author');
              }));
 
-             Ember.RSVP.all(promises).then(function() {
-                start();
-             });
+             Ember.RSVP.all(promises).then(start);
         });
     });
 });

@@ -86,7 +86,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   findBelongsTo: function(store, record, url, relationship) {
     var related = record[relationship.key];
     if(related) {
-      return related;
+      return;
     }
     return this.ajax(url, 'GET');
   },

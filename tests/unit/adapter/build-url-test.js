@@ -26,10 +26,17 @@ test("simple replacement", function() {
 test("use self link", function() {
   var resourceUrl = "authors/1",
     selfUrl = "posts/1/author/1";
+
+  var env = setupStore(setModels());
+  env.store.modelFor('post');
+  env.store.modelFor('author');
+
   DS._routes["author.1"] = resourceUrl;
   DS._routes["posts.1.author.1--self"] = selfUrl;
-  adapter.serializer = DS.JsonApiSerializer.create();
-  equal(adapter.buildURL('author', 1, { type:'post', id:'1' }), '/' + selfUrl);
+  Em.run(function() {
+    var post = env.store.createRecord('post', {id: '1'});
+    equal(adapter.buildURL('author', 1, post), '/' + selfUrl);
+  });
 });
 
 // TODO, actually support this

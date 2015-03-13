@@ -145,12 +145,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         linkEntry = {};
         // If there is a placeholder for the id (i.e. /resource/{id}), don't include the ID in the key
         hasReplacement = route.indexOf('{') > -1;
-        linkKey  = (id && !hasReplacement) ? link + '.' + id : link;
+        linkKey = this.buildRelatedKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
         cleanedRoute = cleanRoute(route);
         DS._routes[linkKey] = cleanedRoute;
         linkEntry[linkKey] = cleanedRoute;
         if(relationshipLink) {
-          linkKey = this.buildRelationshipKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
+          linkKey = this.buildRelationshipKey(linkKey);
           cleanedRoute = cleanRoute(relationshipLink);
           DS._routes[linkKey] = cleanedRoute;
           linkEntry[linkKey] = cleanedRoute;
@@ -164,7 +164,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     return extractedLinks;
   },
 
-  buildRelationshipKey: function(parentType, parentId, link, id) {
+  buildRelatedKey: function(parentType, parentId, link, id) {
     var keys = [];
     if(parentType) {
       keys.push(Ember.String.pluralize(parentType));
@@ -176,7 +176,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     if(id) {
       keys.push(id);
     }
-    return keys.join('.') + '--' + this.relationshipKey;
+    return keys.join('.');
+  },
+  buildRelationshipKey: function(parentType, parentId, link, id) {
+    var relatedKey = (arguments.length === 1) ? arguments[0] : this.buildRelatedKey(parentType, parentId, link, id);
+    return relatedKey + '--' + this.relationshipKey;
   },
 
   // SERIALIZATION

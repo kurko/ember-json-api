@@ -110,12 +110,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Parse the top-level "links" object.
    */
   extractRelationships: function(links, resource) {
-    var link, association, id, route, relationshipLink, cleanedRoute, linkKey, hasReplacement;
+    var link, association, id, route, relationshipLink, cleanedRoute, linkKey, includeId;
     // Used in unit test
     var extractedLinks = [], linkEntry;
 
     // Clear the old format
-    delete resource.links;
+    resource.links = {};
 
     for (link in links) {
       association = links[link];
@@ -137,54 +137,17 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       }
 
       if (route) {
-        if (!resource.links) {
-          resource.links = {};
-        }
         resource.links[link] = this.removeHost(route);
-
-        linkEntry = {};
-        // If there is a placeholder for the id (i.e. /resource/{id}), don't include the ID in the key
-        hasReplacement = route.indexOf('{') > -1;
-        linkKey = this.buildRelatedKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
-        cleanedRoute = cleanRoute(route);
-        DS._routes[linkKey] = cleanedRoute;
-        linkEntry[linkKey] = cleanedRoute;
-        if(relationshipLink) {
-          linkKey = this.buildRelationshipKey(linkKey);
-          cleanedRoute = cleanRoute(relationshipLink);
-          DS._routes[linkKey] = cleanedRoute;
-          linkEntry[linkKey] = cleanedRoute;
-        }
-        extractedLinks.push(linkEntry);
       }
       if(id) {
           resource[link] = id;
       }
     }
-    return extractedLinks;
+    return resource.links;
   },
 
   removeHost: function(url) {
     return '/' + cleanRoute(url);
-  },
-
-  buildRelatedKey: function(parentType, parentId, link, id) {
-    var keys = [];
-    if(parentType) {
-      keys.push(Ember.String.pluralize(parentType));
-      if(parentId) {
-        keys.push(parentId);
-      }
-    }
-    keys.push(link);
-    if(id) {
-      keys.push(id);
-    }
-    return keys.join('.');
-  },
-  buildRelationshipKey: function(parentType, parentId, link, id) {
-    var relatedKey = (arguments.length === 1) ? arguments[0] : this.buildRelatedKey(parentType, parentId, link, id);
-    return relatedKey + '--' + this.relationshipKey;
   },
 
   // SERIALIZATION

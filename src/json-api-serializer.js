@@ -1,5 +1,6 @@
 var get = Ember.get;
 var isNone = Ember.isNone;
+var HOST = /(^https?:\/\/.*?)(\/.*)/;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
@@ -110,9 +111,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Parse the top-level "links" object.
    */
   extractRelationships: function(links, resource) {
-    var link, association, id, route, relationshipLink, cleanedRoute, linkKey, includeId;
-    // Used in unit test
-    var extractedLinks = [], linkEntry;
+    var link, association, id, route, relationshipLink, cleanedRoute, linkKey;
 
     // Clear the old format
     resource.links = {};
@@ -131,23 +130,28 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
         relationshipLink = null;
       } else {
-        route = association[this.relatedResourceKey] || association[this.relationshipKey];
-        id = association.id || association.ids;
         relationshipLink =  association[this.relationshipKey];
+        route = association[this.relatedResourceKey] || relationshipLink;
+        id = association.id || association.ids;
       }
 
       if (route) {
-        resource.links[link] = this.removeHost(route);
+        cleanedRoute = this.removeHost(route);
+        resource.links[link] = cleanedRoute;
+
+        // Need clarification on how this is used
+        linkKey = (id && cleanedRoute.indexOf('{') < 0) ? link + '.' + id : link;
+        DS._routes[linkKey] = cleanedRoute.replace(/^\//, '');
       }
       if(id) {
-          resource[link] = id;
+        resource[link] = id;
       }
     }
     return resource.links;
   },
 
   removeHost: function(url) {
-    return '/' + cleanRoute(url);
+    return url.replace(HOST, '$2');
   },
 
   // SERIALIZATION
@@ -211,19 +215,6 @@ function hasManyLink(key, type, record, attr) {
     };
   }
   return link;
-}
-
-function cleanRoute(route) {
-  var cleaned = route;
-  // strip base url
-  if (cleaned.substr(0, 4).toLowerCase() === 'http') {
-    cleaned = cleaned.split('//').pop().split('/').slice(1).join('/');
-  }
-  // strip prefix slash
-  if (cleaned.charAt(0) === '/') {
-    cleaned = cleaned.substr(1);
-  }
-  return cleaned;
 }
 
 export default DS.JsonApiSerializer;

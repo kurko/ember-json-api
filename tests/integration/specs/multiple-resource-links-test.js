@@ -15,8 +15,10 @@ module('integration/specs/multiple-resource-links-test', {
                     links: {
                         author: {
                             related: '/posts/1/author',
-                            type: 'authors',
-                            id: '2'
+                            linkage: {
+                                type: 'authors',
+                                id: '2'
+                            }
                         }
                     }
                 }, {
@@ -26,8 +28,10 @@ module('integration/specs/multiple-resource-links-test', {
                     links: {
                         author: {
                             related: '/posts/2/author',
-                            type: 'authors',
-                            id: '1'
+                            linkage: {
+                                type: 'authors',
+                                id: '1'
+                            }
                         }
                     }
                 }]

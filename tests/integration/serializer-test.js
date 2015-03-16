@@ -86,12 +86,13 @@ test('serialize camelcase', function() {
     lastName: 'Dale',
     links: {
       evilMinions: {
-        ids: [],
-        type: 'evilMinions'
+        linkage: []
       },
       homePlanet: {
-        id: get(league, 'id'),
-        type: 'homePlanets'
+        linkage: {
+          id: get(league, 'id'),
+          type: 'homePlanets'
+        }
       }
     }
   });
@@ -131,12 +132,13 @@ test('serialize into snake_case', function() {
     last_name: 'Dale',
     links: {
       evil_minions: {
-        ids: [],
-        type: 'evil_minions'
+        linkage: [],
       },
       home_planet: {
-        id: get(league, 'id'),
-        type: 'home_planets'
+        linkage: {
+          id: get(league, 'id'),
+          type: 'home_planets'
+        }
       }
     }
   });
@@ -160,8 +162,7 @@ test('serializeIntoHash', function() {
       name: 'Umber',
       links: {
         superVillains: {
-          ids: [],
-          type: 'superVillains'
+          linkage: []
         }
       },
       type: 'homePlanets'
@@ -188,8 +189,7 @@ test('serializeIntoHash with decamelized types', function() {
       name: 'Umber',
       links: {
         superVillains: {
-          ids: [],
-          type: 'superVillains'
+          linkage: []
         }
       },
       type: 'homePlanets'
@@ -229,8 +229,13 @@ test('serialize has many relationships', function() {
     lastName: 'Evil',
     links: {
       minions: {
-        ids: ['123', '345'],
-        type: 'blueMinions'
+        linkage: [{
+          id: '123',
+          type: 'blueMinions'
+        }, {
+          id: '345',
+          type: 'blueMinions'
+        }]
       }
     }
   });
@@ -256,8 +261,10 @@ test('serialize belongs to relationships', function() {
   deepEqual(json, {
     links: {
       husband: {
-        id: '2',
-        type: 'maleMinions'
+        linkage: {
+          id: '2',
+          type: 'maleMinions'
+        }
       }
     }
   });
@@ -269,12 +276,20 @@ test('normalize camelCased', function() {
     lastName: 'Dale',
     links: {
       homePlanet: {
-        id: '123',
-        type: 'homePlanets'
+        linkage: {
+          id: '123',
+          type: 'homePlanets'
+        }
       },
       evilMinions: {
-        ids: [1,2],
-        type: 'evilMinions'
+        linkage: [{
+          id: 1,
+          type: 'evilMinions'
+        },
+        {
+          id: 2,
+            type: 'evilMinions'
+        }]
       }
     }
   };
@@ -288,12 +303,19 @@ test('normalize camelCased', function() {
     lastName: 'Dale',
     links: {
       homePlanet: {
-        id: '123',
-        type: 'homePlanets'
+        linkage: {
+          id: '123',
+          type: 'homePlanets'
+        }
       },
       evilMinions: {
-        ids: [1, 2],
-        type: 'evilMinions'
+        linkage: [{
+          id: 1,
+          type: 'evilMinions'
+        }, {
+          id: 2,
+          type: 'evilMinions'
+        }]
       }
     }
   });
@@ -325,8 +347,10 @@ test('extractSingle snake_case', function() {
       name: 'Umber',
       links: {
         super_villains: {
-          ids: [1],
-          type: 'super_villains'
+          linkage: [{
+            id: 1,
+            type: 'super_villains'
+          }]
         }
       },
       type: 'home_planets'
@@ -336,7 +360,12 @@ test('extractSingle snake_case', function() {
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
-        home_planet: '1'
+        home_planet: {
+          linkage: {
+            id: '1',
+            type: 'home_planets'
+          }
+        }
       },
       type: 'super_villains'
     }]
@@ -368,8 +397,10 @@ test('extractSingle camelCase', function() {
       name: 'Umber',
       links: {
         super_villains: {
-          ids: [1],
-          type: 'super_villains'
+          linkage: [{
+            id: 1,
+            type: 'super_villains'
+          }]
         }
       },
       type: 'home_planets'
@@ -379,7 +410,12 @@ test('extractSingle camelCase', function() {
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
-        home_planet: '1'
+        home_planet: {
+          linkage: {
+            id: '1',
+            type: 'home_planets'
+          }
+        }
       },
       type: 'super_villains'
     }]
@@ -403,8 +439,10 @@ test('extractArray snake_case', function() {
       name: 'Umber',
       links: {
         super_villains: {
-          ids: [1],
-          type: 'super_villains'
+          linkage: [{
+            id: 1,
+            type: 'super_villains'
+          }]
         }
       },
       type: 'home_planets'
@@ -414,7 +452,12 @@ test('extractArray snake_case', function() {
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
-        home_planet: '1'
+        home_planet: {
+          linkage: {
+            id: '1',
+            type: 'home_planet'
+          }
+        }
       },
       type: 'super_villains'
     }]
@@ -447,8 +490,10 @@ test('extractArray', function() {
       name: 'Umber',
       links: {
         super_villains: {
-          ids: [1],
-          type: 'super_villains'
+          linkage: [{
+            id: 1,
+            type: 'super_villains'
+          }]
         }
       },
       type: 'home_planets'
@@ -458,7 +503,12 @@ test('extractArray', function() {
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
-        home_planet: '1'
+        home_planet: {
+          linkage: {
+            id: '1',
+            type: 'home_planets'
+          }
+        }
       },
       type: 'super_villains'
     }]
@@ -490,8 +540,10 @@ test('looking up a belongsTo association', function() {
       name: 'Umber',
       links: {
         super_villains: {
-          ids: [1],
-          type: 'super_villains'
+          linkage: [{
+            id: 1,
+            type: 'super_villains'
+          }]
         }
       },
       type: 'home_planets'
@@ -501,7 +553,12 @@ test('looking up a belongsTo association', function() {
       first_name: 'Tom',
       last_name: 'Dale',
       links: {
-        home_planet: '1'
+        home_planet: {
+          linkage: {
+            id: '1',
+            type: 'home_planets'
+          }
+        }
       },
       type: 'super_villains'
     }]

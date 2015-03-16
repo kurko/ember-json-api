@@ -36,11 +36,10 @@ asyncTest("POST /posts/1 won't push an array", function() {
       postSummary: null,
       links: {
         comments: {
-          ids: [],
-          type: 'comments'
+          linkage: []
         }
       },
-      type: 'posts',
+      type: 'posts'
     }
   };
 
@@ -48,12 +47,10 @@ asyncTest("POST /posts/1 won't push an array", function() {
 
   Em.run(function() {
     var post = env.store.createRecord(models.post, { title: 'Rails is Omakase' });
-
     post.save().then(function(record) {
       equal(record.get('id'), '1', 'id is correct');
       equal(record.get('title'), 'Rails is Omakase', 'title is correct');
       equal(record.get('postSummary'), 'summary', 'summary is correct');
-
       start();
     });
   });

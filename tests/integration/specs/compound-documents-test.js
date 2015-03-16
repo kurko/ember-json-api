@@ -14,12 +14,19 @@ module('integration/specs/compound-documents', {
           title: 'Rails is Omakase',
           links: {
             comments: {
-              type: 'comments',
-              ids: ['2', '3']
+              linkage: [{
+                type: 'comments',
+                id: '2'
+              },{
+                type: 'comments',
+                id: '3'
+              }]
             },
             author: {
-              type: 'authors',
-              id: '4'
+              linkage: {
+                type: 'authors',
+                id: '4'
+              }
             }
           }
         },

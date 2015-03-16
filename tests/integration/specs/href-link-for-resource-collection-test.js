@@ -16,8 +16,13 @@ module('integration/specs/href-link-for-resource-collection-test', {
             comments: {
               self: '/posts/1/links/comments',
               related: '/posts/1/comments',
-              type: 'comments',
-              ids: ['1', '2']
+              linkage: [{
+                type: 'comments',
+                id: '1'
+              },{
+                type: 'comments',
+                id: '2'
+              }]
             }
           }
         }

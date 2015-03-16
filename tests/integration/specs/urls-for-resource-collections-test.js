@@ -14,8 +14,13 @@ module('integration/specs/urls-for-resource-collections', {
           title: 'Rails is Omakase',
           links: {
             comments: {
-              type: 'comments',
-              ids: ['2', '3']
+              linkage: [{
+                type: 'comments',
+                id: '2'
+              },{
+                type: 'comments',
+                id: '3'
+              }]
             }
           }
         }

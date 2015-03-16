@@ -51,8 +51,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       delete payload.meta;
     }
     if (payload.links) {
-      this.extractRelationships(payload.links, payload);
-      delete data.links;
+      //this.extractRelationships(payload.links, payload);
+      delete payload.links;
     }
     if (payload[this.sideloadedRecordsKey]) {
       this.extractSideloaded(payload[this.sideloadedRecordsKey]);
@@ -124,7 +124,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         if (association.indexOf('/') > -1) {
           route = association;
           id = null;
-        } else {
+        } else { // This is no longer valid in JSON API. Potentially remove.
           route = null;
           id = association;
         }
@@ -132,7 +132,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       } else {
         relationshipLink =  association[this.relationshipKey];
         route = association[this.relatedResourceKey] || relationshipLink;
-        id = association.id || association.ids;
+        id = getLinkageId(association.linkage);
       }
 
       if (route) {
@@ -195,26 +195,43 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   }
 });
 
-function belongsToLink(key, type, value) {
-  var link = value;
-  if (link) {
-    link = {
-      id: link,
+function belongsToLink(key, type, id) {
+  if(!id) { return {}; }
+
+  return {
+    linkage: {
+      id: id,
       type: Ember.String.pluralize(type)
-    };
-  }
-  return link;
+    }
+  };
 }
 
 function hasManyLink(key, type, record, attr) {
-  var link = record.hasMany(attr).mapBy('id');
-  if (link) {
-    link = {
-      ids: link,
-      type: Ember.String.pluralize(type)
-    };
+  var links = record.hasMany(attr).mapBy('id') || [],
+    typeName = Ember.String.pluralize(type),
+    linkages = [], index, total;
+
+  for(index=0, total=links.length; index<total; ++index) {
+    linkages.push({
+      id: links[index],
+      type: typeName
+    });
   }
-  return link;
+
+  return { linkage: linkages };
+}
+
+function getLinkageId(linkage) {
+  if(Ember.isEmpty(linkage)) { return null; }
+  return (Ember.isArray(linkage)) ? getLinkageIds(linkage) : linkage.id;
+}
+function getLinkageIds(linkage) {
+  if(Ember.isEmpty(linkage)) { return null; }
+  var ids = [], index, total;
+  for(index=0, total=linkage.length; index<total; ++index) {
+    ids.push(linkage[index].id);
+  }
+  return ids;
 }
 
 export default DS.JsonApiSerializer;

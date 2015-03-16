@@ -14,12 +14,16 @@ module('integration/specs/namespace', {
           title: 'Rails is Omakase',
           links: {
             author: {
-              type: 'authors',
-              id: '2'
+              linkage: {
+                type: 'authors',
+                id: '2'
+              }
             },
             comments: {
-              type: 'comments',
-              id: ['2']
+              linkage: [{
+                type: 'comments',
+                id: '2'
+              }]
             }
           }
         }
@@ -31,12 +35,16 @@ module('integration/specs/namespace', {
           title: 'TDD Is Dead lol',
           links: {
             author: {
-              type: 'authors',
-              id: '2'
+              linkage: {
+                type: 'authors',
+                id: '2'
+              }
             },
             comments: {
-              type: 'comments',
-              id: ['3']
+              linkage: [{
+                type: 'comments',
+                id: '3'
+              }]
             }
           }
         }
@@ -49,12 +57,13 @@ module('integration/specs/namespace', {
           links: {
             author: {
               related: '/api/posts/1/author',
-              type: 'authors',
-              id: '2'
+              linkage: {
+                type: 'authors',
+                id: '2'
+              }
             },
             comments: {
-              related: '/api/posts/1/comments',
-              type: 'comments'
+              related: '/api/posts/1/comments'
             }
           }
         }
@@ -67,12 +76,13 @@ module('integration/specs/namespace', {
           links: {
             author: {
               related: '/api/posts/2/author',
-              type: 'authors',
-              id: '2'
+              linkage: {
+                type: 'authors',
+                id: '2'
+              }
             },
             comments: {
-              related: '/api/posts/2/comments',
-              type: 'comments'
+              related: '/api/posts/2/comments'
             }
           }
         }

@@ -44,8 +44,7 @@ asyncTest("PUT /posts/1 won't push an array", function() {
       postSummary: null,
       links: {
         comments: {
-          ids: [],
-          type: 'comments'
+          linkage: []
         }
       },
       type: 'posts'

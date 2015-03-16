@@ -14,8 +14,13 @@ module('integration/specs/to-many-relationships', {
           title: 'Rails is Omakase',
           links: {
             comments: {
-              type: 'comments',
-              ids: ['2', '3']
+              linkage: [{
+                id: '2',
+                type: 'comments'
+              }, {
+                id: '3',
+                type: 'comments'
+              }]
             }
           }
         }

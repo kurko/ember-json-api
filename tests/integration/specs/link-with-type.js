@@ -14,12 +14,19 @@ module('integration/specs/link-with-type', {
           title: 'Rails is Omakase',
           links: {
             observations: {
-              ids: ['2', '3'],
-              type: 'comments'
+              linkage: [{
+                id: '2',
+                type: 'comments'
+              },{
+                id: '3',
+                type: 'comments'
+              }]
             },
             writer: {
-              id: '1',
-              type: 'authors'
+              linkage: {
+                id: '1',
+                type: 'authors'
+              }
             }
           }
         }

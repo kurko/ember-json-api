@@ -14,8 +14,10 @@ module('integration/specs/to-one-relationships', {
           title: 'Rails is Omakase',
           links: {
             author: {
-              type: 'authors',
-              id: '2'
+              linkage: {
+                type: 'authors',
+                id: '2'
+              }
             }
           }
         }

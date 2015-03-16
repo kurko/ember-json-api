@@ -66,7 +66,6 @@ define("json-api-adapter",
        */
       findMany: function(store, type, ids, owner) {
         var id = ids ? ids.join(',') : null;
-        console.log('findMany', arguments);
         return this.ajax(this.buildURL(type, id, owner), 'GET');
       },
 
@@ -220,8 +219,8 @@ define("json-api-adapter",
           delete payload.meta;
         }
         if (payload.links) {
-          this.extractRelationships(payload.links, payload);
-          delete data.links;
+          //this.extractRelationships(payload.links, payload);
+          delete payload.links;
         }
         if (payload[this.sideloadedRecordsKey]) {
           this.extractSideloaded(payload[this.sideloadedRecordsKey]);
@@ -293,7 +292,7 @@ define("json-api-adapter",
             if (association.indexOf('/') > -1) {
               route = association;
               id = null;
-            } else {
+            } else { // This is no longer valid in JSON API. Potentially remove.
               route = null;
               id = association;
             }
@@ -301,7 +300,7 @@ define("json-api-adapter",
           } else {
             relationshipLink =  association[this.relationshipKey];
             route = association[this.relatedResourceKey] || relationshipLink;
-            id = association.id || association.ids;
+            id = getLinkageId(association.linkage);
           }
 
           if (route) {
@@ -364,26 +363,43 @@ define("json-api-adapter",
       }
     });
 
-    function belongsToLink(key, type, value) {
-      var link = value;
-      if (link) {
-        link = {
-          id: link,
+    function belongsToLink(key, type, id) {
+      if(!id) { return {}; }
+
+      return {
+        linkage: {
+          id: id,
           type: Ember.String.pluralize(type)
-        };
-      }
-      return link;
+        }
+      };
     }
 
     function hasManyLink(key, type, record, attr) {
-      var link = record.hasMany(attr).mapBy('id');
-      if (link) {
-        link = {
-          ids: link,
-          type: Ember.String.pluralize(type)
-        };
+      var links = record.hasMany(attr).mapBy('id') || [],
+        typeName = Ember.String.pluralize(type),
+        linkages = [], index, total;
+
+      for(index=0, total=links.length; index<total; ++index) {
+        linkages.push({
+          id: links[index],
+          type: typeName
+        });
       }
-      return link;
+
+      return { linkage: linkages };
+    }
+
+    function getLinkageId(linkage) {
+      if(Ember.isEmpty(linkage)) { return null; }
+      return (Ember.isArray(linkage)) ? getLinkageIds(linkage) : linkage.id;
+    }
+    function getLinkageIds(linkage) {
+      if(Ember.isEmpty(linkage)) { return null; }
+      var ids = [], index, total;
+      for(index=0, total=linkage.length; index<total; ++index) {
+        ids.push(linkage[index].id);
+      }
+      return ids;
     }
 
     __exports__["default"] = DS.JsonApiSerializer;

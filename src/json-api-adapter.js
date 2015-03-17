@@ -11,40 +11,9 @@ DS._routes = Ember.create(null);
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
 
-  getRelationshipRoute: function(typeName, id, record) {
-    var serializer = (record) ? get(record, 'store').serializerFor(typeName) : null;
-    if(!serializer || !serializer.buildRelationshipKey) { return null; }
-
-    return DS._routes[serializer.buildRelationshipKey(record.constructor.typeKey, record.id, typeName, id)]
-      || DS._routes[serializer.buildRelationshipKey(record.type, null, typeName, null)]
-      || DS._routes[serializer.buildRelationshipKey(null, null, typeName, id)]
-      || DS._routes[serializer.buildRelationshipKey(null, null, typeName, null)];
-  },
-
-  getRelatedResourceRoute: function(typeName, id, record) {
-    var routeName = (id) ? typeName + '.' + id : typeName,
-      serializer = (record) ? get(record, 'store').serializerFor(typeName) : null,
-      route = null;
-
-    if(serializer && serializer.buildRelatedKey) {
-      route = DS._routes[serializer.buildRelatedKey(record.constructor.typeKey, record.id, typeName, id)]
-        || DS._routes[serializer.buildRelatedKey(record.type, null, typeName, null)]
-        || DS._routes[serializer.buildRelatedKey(null, null, typeName, id)]
-        || DS._routes[serializer.buildRelatedKey(null, null, typeName, null)];
-    }
-
-    return route
-      || DS._routes[routeName]
+  getRoute: function(typeName, id/*, record */) {
+    return DS._routes[typeName + '.' + id]
       || DS._routes[typeName];
-  },
-
-  getRoute: function(typeName, id, record) {
-    var route;
-    if(record) {
-      route = this.getRelationshipRoute(typeName, id, record);
-      if(route) { return route; }
-    }
-    return this.getRelatedResourceRoute(typeName, id, record);
   },
 
   /**
@@ -82,12 +51,10 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     return url;
   },
 
-  /** FIXME This is making unnecessary calls **/
   findBelongsTo: function(store, record, url, relationship) {
     var related = record[relationship.key];
-    if(related) {
-      return;
-    }
+    // FIXME Without this, it was making unnecessary calls, but cannot create test to verify.
+    if(related) { return; }
     return this.ajax(url, 'GET');
   },
 
@@ -96,6 +63,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   findMany: function(store, type, ids, owner) {
     var id = ids ? ids.join(',') : null;
+    console.log('findMany', arguments);
     return this.ajax(this.buildURL(type, id, owner), 'GET');
   },
 

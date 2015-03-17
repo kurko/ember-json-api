@@ -15,40 +15,9 @@ define("json-api-adapter",
     DS.JsonApiAdapter = DS.RESTAdapter.extend({
       defaultSerializer: 'DS/jsonApi',
 
-      getRelationshipRoute: function(typeName, id, record) {
-        var serializer = (record) ? get(record, 'store').serializerFor(typeName) : null;
-        if(!serializer || !serializer.buildRelationshipKey) { return null; }
-
-        return DS._routes[serializer.buildRelationshipKey(record.constructor.typeKey, record.id, typeName, id)]
-          || DS._routes[serializer.buildRelationshipKey(record.type, null, typeName, null)]
-          || DS._routes[serializer.buildRelationshipKey(null, null, typeName, id)]
-          || DS._routes[serializer.buildRelationshipKey(null, null, typeName, null)];
-      },
-
-      getRelatedResourceRoute: function(typeName, id, record) {
-        var routeName = (id) ? typeName + '.' + id : typeName,
-          serializer = (record) ? get(record, 'store').serializerFor(typeName) : null,
-          route = null;
-
-        if(serializer && serializer.buildRelatedKey) {
-          route = DS._routes[serializer.buildRelatedKey(record.constructor.typeKey, record.id, typeName, id)]
-            || DS._routes[serializer.buildRelatedKey(record.type, null, typeName, null)]
-            || DS._routes[serializer.buildRelatedKey(null, null, typeName, id)]
-            || DS._routes[serializer.buildRelatedKey(null, null, typeName, null)];
-        }
-
-        return route
-          || DS._routes[routeName]
+      getRoute: function(typeName, id/*, record */) {
+        return DS._routes[typeName + '.' + id]
           || DS._routes[typeName];
-      },
-
-      getRoute: function(typeName, id, record) {
-        var route;
-        if(record) {
-          route = this.getRelationshipRoute(typeName, id, record);
-          if(route) { return route; }
-        }
-        return this.getRelatedResourceRoute(typeName, id, record);
       },
 
       /**
@@ -86,12 +55,10 @@ define("json-api-adapter",
         return url;
       },
 
-      /** FIXME This is making unnecessary calls **/
       findBelongsTo: function(store, record, url, relationship) {
         var related = record[relationship.key];
-        if(related) {
-          return;
-        }
+        // FIXME Without this, it was making unnecessary calls, but cannot create test to verify.
+        if(related) { return; }
         return this.ajax(url, 'GET');
       },
 
@@ -100,6 +67,7 @@ define("json-api-adapter",
        */
       findMany: function(store, type, ids, owner) {
         var id = ids ? ids.join(',') : null;
+        console.log('findMany', arguments);
         return this.ajax(this.buildURL(type, id, owner), 'GET');
       },
 
@@ -202,6 +170,7 @@ define("json-api-adapter",
     "use strict";
     var get = Ember.get;
     var isNone = Ember.isNone;
+    var HOST = /(^https?:\/\/.*?)(\/.*)/;
 
     DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
@@ -312,12 +281,10 @@ define("json-api-adapter",
        * Parse the top-level "links" object.
        */
       extractRelationships: function(links, resource) {
-        var link, association, id, route, relationshipLink, cleanedRoute, linkKey, hasReplacement;
-        // Used in unit test
-        var extractedLinks = [], linkEntry;
+        var link, association, id, route, relationshipLink, cleanedRoute, linkKey;
 
         // Clear the old format
-        delete resource.links;
+        resource.links = {};
 
         for (link in links) {
           association = links[link];
@@ -333,60 +300,28 @@ define("json-api-adapter",
             }
             relationshipLink = null;
           } else {
-            route = association[this.relatedResourceKey] || association[this.relationshipKey];
-            id = association.id || association.ids;
             relationshipLink =  association[this.relationshipKey];
+            route = association[this.relatedResourceKey] || relationshipLink;
+            id = association.id || association.ids;
           }
 
           if (route) {
-            if (!resource.links) {
-              resource.links = {};
-            }
-            resource.links[link] = this.removeHost(route);
+            cleanedRoute = this.removeHost(route);
+            resource.links[link] = cleanedRoute;
 
-            linkEntry = {};
-            // If there is a placeholder for the id (i.e. /resource/{id}), don't include the ID in the key
-            hasReplacement = route.indexOf('{') > -1;
-            linkKey = this.buildRelatedKey(resource.type, hasReplacement ? null : resource.id, link, (hasReplacement) ? null : id);
-            cleanedRoute = cleanRoute(route);
-            DS._routes[linkKey] = cleanedRoute;
-            linkEntry[linkKey] = cleanedRoute;
-            if(relationshipLink) {
-              linkKey = this.buildRelationshipKey(linkKey);
-              cleanedRoute = cleanRoute(relationshipLink);
-              DS._routes[linkKey] = cleanedRoute;
-              linkEntry[linkKey] = cleanedRoute;
-            }
-            extractedLinks.push(linkEntry);
+            // Need clarification on how this is used
+            linkKey = (id && cleanedRoute.indexOf('{') < 0) ? link + '.' + id : link;
+            DS._routes[linkKey] = cleanedRoute.replace(/^\//, '');
           }
           if(id) {
-              resource[link] = id;
+            resource[link] = id;
           }
         }
-        return extractedLinks;
+        return resource.links;
       },
 
       removeHost: function(url) {
-        return '/' + cleanRoute(url);
-      },
-
-      buildRelatedKey: function(parentType, parentId, link, id) {
-        var keys = [];
-        if(parentType) {
-          keys.push(Ember.String.pluralize(parentType));
-          if(parentId) {
-            keys.push(parentId);
-          }
-        }
-        keys.push(link);
-        if(id) {
-          keys.push(id);
-        }
-        return keys.join('.');
-      },
-      buildRelationshipKey: function(parentType, parentId, link, id) {
-        var relatedKey = (arguments.length === 1) ? arguments[0] : this.buildRelatedKey(parentType, parentId, link, id);
-        return relatedKey + '--' + this.relationshipKey;
+        return url.replace(HOST, '$2');
       },
 
       // SERIALIZATION
@@ -450,19 +385,6 @@ define("json-api-adapter",
         };
       }
       return link;
-    }
-
-    function cleanRoute(route) {
-      var cleaned = route;
-      // strip base url
-      if (cleaned.substr(0, 4).toLowerCase() === 'http') {
-        cleaned = cleaned.split('//').pop().split('/').slice(1).join('/');
-      }
-      // strip prefix slash
-      if (cleaned.charAt(0) === '/') {
-        cleaned = cleaned.substr(1);
-      }
-      return cleaned;
     }
 
     __exports__["default"] = DS.JsonApiSerializer;

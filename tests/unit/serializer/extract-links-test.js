@@ -18,7 +18,7 @@ test("no links", function() {
 
   }, {});
 
-  deepEqual(links, []);
+  deepEqual(links, {});
 });
 
 test("basic", function() {
@@ -26,9 +26,9 @@ test("basic", function() {
     "posts.comments": "http://example.com/posts/{posts.id}/comments"
   }, {});
 
-  deepEqual(links, [{
-    "comments": "posts/{posts.id}/comments"
-  }]);
+  deepEqual(links, {
+    "comments": "/posts/{posts.id}/comments"
+  });
 });
 
 test("exploding", function() {
@@ -36,9 +36,9 @@ test("exploding", function() {
     "posts.comments": "http://example.com/comments/{posts.comments}"
   }, {});
 
-  deepEqual(links, [{
-    "comments": "comments/{posts.comments}"
-  }]);
+  deepEqual(links, {
+    "comments": "/comments/{posts.comments}"
+  });
 });
 
 test("self link", function() {
@@ -50,10 +50,9 @@ test("self link", function() {
     }
   }, { id:1, type:'posts' });
 
-  deepEqual(links, [{
-    "posts.1.author.1": "links/posts/1/author",
-    "posts.1.author.1--self": "links/posts/1/author"
-  }]);
+  deepEqual(links, {
+    "author": "/links/posts/1/author"
+  });
 });
 
 test("self link with replacement", function() {
@@ -65,10 +64,9 @@ test("self link with replacement", function() {
     }
   }, { id:1, type:'posts' });
 
-  deepEqual(links, [{
-    "posts.author": "posts/{post.id}/author/{author.id}",
-    "posts.author--self": "posts/{post.id}/author/{author.id}"
-  }]);
+  deepEqual(links, {
+    "author": "/posts/{post.id}/author/{author.id}"
+  });
 });
 
 test("related link", function() {
@@ -80,9 +78,9 @@ test("related link", function() {
     }
   }, { id:1, type:'posts' });
 
-  deepEqual(links, [{
-    "posts.1.author.1": "authors/1"
-  }]);
+  deepEqual(links, {
+    "author": "/authors/1"
+  });
 });
 
 test("related link with replacement", function() {
@@ -94,9 +92,9 @@ test("related link with replacement", function() {
     }
   }, { id:1, type:'posts' });
 
-  deepEqual(links, [{
-    "posts.author": "authors/{author.id}"
-  }]);
+  deepEqual(links, {
+    "author": "/authors/{author.id}"
+  });
 });
 
 
@@ -110,8 +108,7 @@ test("self and related link", function() {
     }
   }, { id:'1', type:'post' });
 
-  deepEqual(links, [{
-    "posts.1.author.1": "posts/1/author",
-    "posts.1.author.1--self": "links/posts/1/author"
-  }]);
+  deepEqual(links, {
+    "author": "/posts/1/author"
+  });
 });

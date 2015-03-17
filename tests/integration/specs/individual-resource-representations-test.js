@@ -8,13 +8,15 @@ module('integration/specs/individual-resource-representations', {
 
     responses = {
       lone_post_in_singular: {
-        'post': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase'
         }
       },
       lone_post_in_plural: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '2',
           title: 'TDD Is Dead lol'
         }

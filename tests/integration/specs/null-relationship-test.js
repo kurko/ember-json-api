@@ -8,7 +8,8 @@ module('integration/specs/null-relationship', {
 
     responses = {
       posts_1: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
@@ -17,11 +18,12 @@ module('integration/specs/null-relationship', {
         }
       },
       posts_2: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '2',
           title: 'Hello world',
           links: {
-            'author': null
+            author: null
           }
         }
       }

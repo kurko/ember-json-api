@@ -8,10 +8,12 @@ module('integration/specs/resource-collection-representations', {
 
     responses = {
       posts_list: {
-        'posts': [{
+        data: [{
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase'
         }, {
+          type: 'posts',
           id: '2',
           title: 'Ember.js Handlebars'
         }]
@@ -36,6 +38,8 @@ asyncTest('GET /posts', function() {
   env.store.find('post').then(function(record) {
     var post1 = record.get("firstObject"),
         post2 = record.get("lastObject");
+
+    equal(record.get('length'), 2, 'length is correct');
 
     equal(post1.get('id'), '1', 'id is correct');
     equal(post1.get('title'), 'Rails is Omakase', 'title is correct');

@@ -8,29 +8,43 @@ module('integration/specs/compound-documents', {
 
     responses = {
       posts_compound_document: {
-        posts: {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            comments: ['2', '3'],
-            author: '4'
+            comments: {
+              linkage: [{
+                type: 'comments',
+                id: '2'
+              },{
+                type: 'comments',
+                id: '3'
+              }]
+            },
+            author: {
+              linkage: {
+                type: 'authors',
+                id: '4'
+              }
+            }
           }
         },
-        linked: {
-          comments: [{
-            id: '2',
-            title: 'good article',
-            body: 'ideal for my startup'
-          }, {
-            id: '3',
-            title: 'bad article',
-            body: "doesn't run Crysis"
-          }],
-          authors: [{
-            id: '4',
-            name: 'dhh'
-          }]
-        }
+        included: [{
+          type: 'comments',
+          id: '2',
+          title: 'good article',
+          body: 'ideal for my startup'
+        }, {
+          type: 'comments',
+          id: '3',
+          title: 'bad article',
+          body: "doesn't run Crysis"
+        }, {
+          type: 'authors',
+          id: '4',
+          name: 'dhh'
+        }]
       }
     };
 
@@ -45,7 +59,7 @@ module('integration/specs/compound-documents', {
   }
 });
 
-asyncTest('Post with sync comments uses linked resources', function() {
+asyncTest('Post with sync comments uses included resources', function() {
   var models = setModels({
     commentAsync: false,
     authorAsync: false
@@ -77,7 +91,7 @@ asyncTest('Post with sync comments uses linked resources', function() {
   });
 });
 
-asyncTest('Post with async comments uses linked resources', function() {
+asyncTest('Post with async comments uses included resources', function() {
   var models = setModels({
     commentAsync: true,
     authorAsync: true

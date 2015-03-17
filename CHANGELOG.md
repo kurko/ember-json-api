@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### 0.4.0
+
+* updating to RC2 standard of JSON API
+
 ### 0.3.0
 
 * removes deprecation warning because of DS' snapshots

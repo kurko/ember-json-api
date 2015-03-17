@@ -299,7 +299,7 @@ define("json-api-adapter",
             relationshipLink = null;
           } else {
             relationshipLink =  association[this.relationshipKey];
-            route = association[this.relatedResourceKey] || relationshipLink;
+            route = association[this.relatedResourceKey];
             id = getLinkageId(association.linkage);
           }
 
@@ -308,11 +308,15 @@ define("json-api-adapter",
             resource.links[link] = cleanedRoute;
 
             // Need clarification on how this is used
-            linkKey = (id && cleanedRoute.indexOf('{') < 0) ? link + '.' + id : link;
-            DS._routes[linkKey] = cleanedRoute.replace(/^\//, '');
+            if(cleanedRoute.indexOf('{') > -1) {
+              DS._routes[link] = cleanedRoute.replace(/^\//, '');
+            }
           }
           if(id) {
             resource[link] = id;
+          }
+          if(relationshipLink) {
+            resource.links[link + '--self'] = this.removeHost(relationshipLink);
           }
         }
         return resource.links;

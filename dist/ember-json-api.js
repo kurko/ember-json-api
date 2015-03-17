@@ -14,44 +14,61 @@ define("json-api-adapter",
 
     DS.JsonApiAdapter = DS.RESTAdapter.extend({
       defaultSerializer: 'DS/jsonApi',
+
+      getRoute: function(typeName, id/*, record */) {
+        return DS._routes[typeName + '.' + id]
+          || DS._routes[typeName];
+      },
+
       /**
        * Look up routes based on top-level links.
        */
-      buildURL: function(typeName, id) {
+      buildURL: function(typeName, id, record) {
+        // FIXME If there is a record, try and look up the self link
+        // - Need to use the function from the serializer to build the self key
         // TODO: this basically only works in the simplest of scenarios
-        var route = DS._routes[typeName];
-        if (!!route) {
-          var url = [];
-          var host = get(this, 'host');
-          var prefix = this.urlPrefix();
-          var param = /\{(.*?)\}/g;
-
-          if (id) {
-            if (param.test(route)) {
-              url.push(route.replace(param, id));
-            } else {
-              url.push(route, id);
-            }
-          } else {
-            url.push(route.replace(param, ''));
-          }
-
-          if (prefix) { url.unshift(prefix); }
-
-          url = url.join('/');
-          if (!host && url) { url = '/' + url; }
-
-          return url;
+        var route = this.getRoute(typeName, id, record);
+        if(!route) {
+          return this._super(typeName, id, record);
         }
 
-        return this._super(typeName, id);
+        var url = [];
+        var host = get(this, 'host');
+        var prefix = this.urlPrefix();
+        var param = /\{(.*?)\}/g;
+
+        if (id) {
+          if (param.test(route)) {
+            url.push(route.replace(param, id));
+          } else {
+            url.push(route);
+          }
+        } else {
+          url.push(route.replace(param, ''));
+        }
+
+        if (prefix) { url.unshift(prefix); }
+
+        url = url.join('/');
+        if (!host && url) { url = '/' + url; }
+
+        return url;
+      },
+
+      findBelongsTo: function(store, record, url, relationship) {
+        var related = record[relationship.key];
+        // FIXME Without this, it was making unnecessary calls, but cannot create test to verify.
+        if(related) { return; }
+        return this.ajax(url, 'GET');
       },
 
       /**
        * Fix query URL.
        */
       findMany: function(store, type, ids, owner) {
-        return this.ajax(this.buildURL(type.typeKey, ids.join(',')), 'GET');
+        var id = ids ? ids.join(',') : null;
+        console.log('findMany', arguments);
+        return this.ajax(this.buildURL(type, id, owner), 'GET');
       },
 
       /**
@@ -59,12 +76,7 @@ define("json-api-adapter",
        * and match the root key to the route
        */
       createRecord: function(store, type, record) {
-        var data = {};
-
-        var snapshot = record._createSnapshot();
-        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
-          includeId: true
-        });
+        var data = this._serializeData(store, type, record);
 
         return this.ajax(this.buildURL(type.typeKey), 'POST', {
           data: data
@@ -76,17 +88,25 @@ define("json-api-adapter",
        * and match the root key to the route
        */
       updateRecord: function(store, type, record) {
-        var data = {};
-        var snapshot = record._createSnapshot();
-        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
-          includeId: true
-        });
+        var data = this._serializeData(store, type, record),
+          id = get(record, 'id');
 
-        var id = get(record, 'id');
-
-        return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
+        return this.ajax(this.buildURL(type.typeKey, id, record), 'PUT', {
           data: data
         });
+      },
+
+      _serializeData: function(store, type, record) {
+        var serializer = store.serializerFor(type.typeKey),
+          snapshot = record._createSnapshot(),
+          pluralType = Ember.String.pluralize(type.typeKey),
+          json = {};
+
+        json.data = serializer.serialize(snapshot, { includeId: true });
+        if(!json.data.hasOwnProperty('type')) {
+          json.data.type = pluralType;
+        }
+        return json;
       },
 
       _tryParseErrorResponse:  function(responseText) {
@@ -123,24 +143,10 @@ define("json-api-adapter",
           return error;
         }
       },
-      /**
-        Underscores the JSON root keys when serializing.
-
-        @method serializeIntoHash
-        @param {Object} hash
-        @param {subclass of DS.Model} type
-        @param {DS.Model} record
-        @param {Object} options
-        */
-      serializeIntoHash: function(data, type, record, options) {
-        var root = underscore(decamelize(type.typeKey));
-        var snapshot = record._createSnapshot();
-        data[root] = this.serialize(snapshot, options);
-      },
 
       pathForType: function(type) {
         var decamelized = Ember.String.decamelize(type);
-        return Ember.String.pluralize(decamelized);
+        return Ember.String.pluralize(decamelized).replace(/_/g, '-');
       }
     });
 
@@ -164,34 +170,17 @@ define("json-api-adapter",
     "use strict";
     var get = Ember.get;
     var isNone = Ember.isNone;
+    var HOST = /(^https?:\/\/.*?)(\/.*)/;
 
     DS.JsonApiSerializer = DS.RESTSerializer.extend({
+
+      primaryRecordKey: 'data',
+      sideloadedRecordsKey: 'included',
+      relationshipKey: 'self',
+      relatedResourceKey: 'related',
+
       keyForRelationship: function(key) {
         return key;
-      },
-      /**
-       * Patch the extractSingle method, since there are no singular records
-       */
-      extractSingle: function(store, primaryType, payload, recordId, requestType) {
-        var primaryTypeName;
-        if (this.keyForAttribute) {
-          primaryTypeName = this.keyForAttribute(primaryType.typeKey);
-        } else {
-          primaryTypeName = primaryType.typeKey;
-        }
-
-        var json = {};
-
-        for (var key in payload) {
-          var typeName = Ember.String.singularize(key);
-          if (typeName === primaryTypeName &&
-              Ember.isArray(payload[key])) {
-            json[typeName] = payload[key][0];
-          } else {
-            json[key] = payload[key];
-          }
-        }
-        return this._super(store, primaryType, json, recordId, requestType);
       },
 
       /**
@@ -200,24 +189,16 @@ define("json-api-adapter",
       normalize: function(type, hash, prop) {
         var json = {};
         for (var key in hash) {
-          if (key !== 'links') {
-            var camelizedKey = Ember.String.camelize(key);
-            json[camelizedKey] = hash[key];
-          } else if (typeof hash[key] === 'object') {
-            for (var link in hash[key]) {
-              var linkValue = hash[key][link];
-              link = Ember.String.camelize(link);
-              if (linkValue && typeof linkValue === 'object' && linkValue.href) {
-                json.links = json.links || {};
-                json.links[link] = linkValue.href;
-              } else if (linkValue && typeof linkValue === 'object' && linkValue.ids) {
-                json[link] = linkValue.ids;
-              } else {
-                json[link] = linkValue;
-              }
-            }
+          // This is already normalized
+          if (key === 'links') {
+            json[key] = hash[key];
+            continue;
           }
+
+          var camelizedKey = Ember.String.camelize(key);
+          json[camelizedKey] = hash[key];
         }
+
         return this._super(type, json, prop);
       },
 
@@ -225,80 +206,134 @@ define("json-api-adapter",
        * Extract top-level "meta" & "links" before normalizing.
        */
       normalizePayload: function(payload) {
+        if(!payload) { return; }
+        var data = payload[this.primaryRecordKey];
+        if (data) {
+          if(Ember.isArray(data)) {
+            this.extractArrayData(data, payload);
+          } else {
+            this.extractSingleData(data, payload);
+          }
+          delete payload[this.primaryRecordKey];
+        }
         if (payload.meta) {
           this.extractMeta(payload.meta);
           delete payload.meta;
         }
         if (payload.links) {
-          this.extractLinks(payload.links);
-          delete payload.links;
+          this.extractRelationships(payload.links, payload);
+          delete data.links;
         }
-        if (payload.linked) {
-          this.extractLinked(payload.linked);
-          delete payload.linked;
+        if (payload[this.sideloadedRecordsKey]) {
+          this.extractSideloaded(payload[this.sideloadedRecordsKey]);
+          delete payload[this.sideloadedRecordsKey];
         }
+
         return payload;
       },
 
       /**
-       * Extract top-level "linked" containing associated objects
+       * Extract top-level "data" containing a single primary data
        */
-      extractLinked: function(linked) {
-        var link, values, value, relation;
-        var store = get(this, 'store');
-
-        for (link in linked) {
-          values = linked[link];
-          for (var i = values.length - 1; i >= 0; i--) {
-            value = values[i];
-
-            if (value.links) {
-              for (relation in value.links) {
-                value[relation] = value.links[relation];
-              }
-              delete value.links;
-            }
-          }
+      extractSingleData: function(data, payload) {
+        if(data.links) {
+          this.extractRelationships(data.links, data);
+          //delete data.links;
         }
-        this.pushPayload(store, linked);
+        payload[data.type] = data;
+        delete data.type;
+      },
+
+      /**
+       * Extract top-level "data" containing a single primary data
+       */
+      extractArrayData: function(data, payload) {
+        var type = data.length > 0 ? data[0].type : null, serializer = this;
+        data.forEach(function(item) {
+          if(item.links) {
+            serializer.extractRelationships(item.links, item);
+            //delete data.links;
+          }
+        });
+
+        payload[type] = data;
+      },
+
+      /**
+       * Extract top-level "included" containing associated objects
+       */
+      extractSideloaded: function(sideloaded) {
+        var store = get(this, 'store'), models = {};
+
+        sideloaded.forEach(function(link) {
+          var type = link.type;
+          delete link.type;
+          if(!models[type]) {
+            models[type] = [];
+          }
+          models[type].push(link);
+        });
+
+        this.pushPayload(store, models);
       },
 
       /**
        * Parse the top-level "links" object.
        */
-      extractLinks: function(links) {
-        var link, key, value, route;
-        var extracted = [], linkEntry, linkKey;
+      extractRelationships: function(links, resource) {
+        var link, association, id, route, relationshipLink, cleanedRoute, linkKey;
+
+        // Clear the old format
+        resource.links = {};
 
         for (link in links) {
-          key = link.split('.').pop();
-          value = links[link];
-          if (typeof value === 'string') {
-            route = value;
+          association = links[link];
+          link = Ember.String.camelize(link.split('.').pop());
+          if(!association) { continue; }
+          if (typeof association === 'string') {
+            if (association.indexOf('/') > -1) {
+              route = association;
+              id = null;
+            } else {
+              route = null;
+              id = association;
+            }
+            relationshipLink = null;
           } else {
-            key = value.type || key;
-            route = value.href;
+            relationshipLink =  association[this.relationshipKey];
+            route = association[this.relatedResourceKey] || relationshipLink;
+            id = association.id || association.ids;
           }
 
-          // strip base url
-          if (route.substr(0, 4).toLowerCase() === 'http') {
-            route = route.split('//').pop().split('/').slice(1).join('/');
-          }
+          if (route) {
+            cleanedRoute = this.removeHost(route);
+            resource.links[link] = cleanedRoute;
 
-          // strip prefix slash
-          if (route.charAt(0) === '/') {
-            route = route.substr(1);
+            // Need clarification on how this is used
+            linkKey = (id && cleanedRoute.indexOf('{') < 0) ? link + '.' + id : link;
+            DS._routes[linkKey] = cleanedRoute.replace(/^\//, '');
           }
-          linkEntry = { };
-          linkKey = Ember.String.singularize(key);
-          linkEntry[linkKey] = route;
-          extracted.push(linkEntry);
-          DS._routes[linkKey] = route;
+          if(id) {
+            resource[link] = id;
+          }
         }
-        return extracted;
+        return resource.links;
+      },
+
+      removeHost: function(url) {
+        return url.replace(HOST, '$2');
       },
 
       // SERIALIZATION
+
+      serializeIntoHash: function(hash, type, snapshot, options) {
+        var pluralType = Ember.String.pluralize(type.typeKey),
+          data = this.serialize(snapshot, options);
+        if(!data.hasOwnProperty('type')) {
+          data.type = pluralType;
+        }
+        hash[type.typeKey] = data;
+      },
 
       /**
        * Use "links" key, remove support for polymorphic type
@@ -319,9 +354,9 @@ define("json-api-adapter",
        * Use "links" key
        */
       serializeHasMany: function(record, json, relationship) {
-        var attr = relationship.key;
-        var type = this.keyForRelationship(relationship.type.typeKey);
-        var key = this.keyForRelationship(attr);
+        var attr = relationship.key,
+          type = this.keyForRelationship(relationship.type.typeKey),
+          key = this.keyForRelationship(attr);
 
         if (relationship.kind === 'hasMany') {
           json.links = json.links || {};
@@ -332,10 +367,10 @@ define("json-api-adapter",
 
     function belongsToLink(key, type, value) {
       var link = value;
-      if (link && key !== type) {
+      if (link) {
         link = {
           id: link,
-          type: type
+          type: Ember.String.pluralize(type)
         };
       }
       return link;
@@ -343,10 +378,10 @@ define("json-api-adapter",
 
     function hasManyLink(key, type, record, attr) {
       var link = record.hasMany(attr).mapBy('id');
-      if (link && key !== Ember.String.pluralize(type)) {
+      if (link) {
         link = {
           ids: link,
-          type: type
+          type: Ember.String.pluralize(type)
         };
       }
       return link;

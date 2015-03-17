@@ -10,44 +10,61 @@ DS._routes = Ember.create(null);
 
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
+
+  getRoute: function(typeName, id/*, record */) {
+    return DS._routes[typeName + '.' + id]
+      || DS._routes[typeName];
+  },
+
   /**
    * Look up routes based on top-level links.
    */
-  buildURL: function(typeName, id) {
+  buildURL: function(typeName, id, record) {
+    // FIXME If there is a record, try and look up the self link
+    // - Need to use the function from the serializer to build the self key
     // TODO: this basically only works in the simplest of scenarios
-    var route = DS._routes[typeName];
-    if (!!route) {
-      var url = [];
-      var host = get(this, 'host');
-      var prefix = this.urlPrefix();
-      var param = /\{(.*?)\}/g;
-
-      if (id) {
-        if (param.test(route)) {
-          url.push(route.replace(param, id));
-        } else {
-          url.push(route, id);
-        }
-      } else {
-        url.push(route.replace(param, ''));
-      }
-
-      if (prefix) { url.unshift(prefix); }
-
-      url = url.join('/');
-      if (!host && url) { url = '/' + url; }
-
-      return url;
+    var route = this.getRoute(typeName, id, record);
+    if(!route) {
+      return this._super(typeName, id, record);
     }
 
-    return this._super(typeName, id);
+    var url = [];
+    var host = get(this, 'host');
+    var prefix = this.urlPrefix();
+    var param = /\{(.*?)\}/g;
+
+    if (id) {
+      if (param.test(route)) {
+        url.push(route.replace(param, id));
+      } else {
+        url.push(route);
+      }
+    } else {
+      url.push(route.replace(param, ''));
+    }
+
+    if (prefix) { url.unshift(prefix); }
+
+    url = url.join('/');
+    if (!host && url) { url = '/' + url; }
+
+    return url;
+  },
+
+  findBelongsTo: function(store, record, url, relationship) {
+    var related = record[relationship.key];
+    // FIXME Without this, it was making unnecessary calls, but cannot create test to verify.
+    if(related) { return; }
+    return this.ajax(url, 'GET');
   },
 
   /**
    * Fix query URL.
    */
   findMany: function(store, type, ids, owner) {
-    return this.ajax(this.buildURL(type.typeKey, ids.join(',')), 'GET');
+    var id = ids ? ids.join(',') : null;
+    console.log('findMany', arguments);
+    return this.ajax(this.buildURL(type, id, owner), 'GET');
   },
 
   /**
@@ -55,12 +72,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * and match the root key to the route
    */
   createRecord: function(store, type, record) {
-    var data = {};
-
-    var snapshot = record._createSnapshot();
-    data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
-      includeId: true
-    });
+    var data = this._serializeData(store, type, record);
 
     return this.ajax(this.buildURL(type.typeKey), 'POST', {
       data: data
@@ -72,17 +84,25 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * and match the root key to the route
    */
   updateRecord: function(store, type, record) {
-    var data = {};
-    var snapshot = record._createSnapshot();
-    data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
-      includeId: true
-    });
+    var data = this._serializeData(store, type, record),
+      id = get(record, 'id');
 
-    var id = get(record, 'id');
-
-    return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
+    return this.ajax(this.buildURL(type.typeKey, id, record), 'PUT', {
       data: data
     });
+  },
+
+  _serializeData: function(store, type, record) {
+    var serializer = store.serializerFor(type.typeKey),
+      snapshot = record._createSnapshot(),
+      pluralType = Ember.String.pluralize(type.typeKey),
+      json = {};
+
+    json.data = serializer.serialize(snapshot, { includeId: true });
+    if(!json.data.hasOwnProperty('type')) {
+      json.data.type = pluralType;
+    }
+    return json;
   },
 
   _tryParseErrorResponse:  function(responseText) {
@@ -119,24 +139,10 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       return error;
     }
   },
-  /**
-    Underscores the JSON root keys when serializing.
-
-    @method serializeIntoHash
-    @param {Object} hash
-    @param {subclass of DS.Model} type
-    @param {DS.Model} record
-    @param {Object} options
-    */
-  serializeIntoHash: function(data, type, record, options) {
-    var root = underscore(decamelize(type.typeKey));
-    var snapshot = record._createSnapshot();
-    data[root] = this.serialize(snapshot, options);
-  },
 
   pathForType: function(type) {
     var decamelized = Ember.String.decamelize(type);
-    return Ember.String.pluralize(decamelized);
+    return Ember.String.pluralize(decamelized).replace(/_/g, '-');
   }
 });
 

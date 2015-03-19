@@ -1,7 +1,7 @@
 {
   "name": "ember-json-api",
   "description": "Ember Data adapter for JSON API.",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "homepage": "http://github.com/kurko/ember-json-api",
   "author": "Dali Zheng",
   "contributors": [

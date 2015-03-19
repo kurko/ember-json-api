@@ -93,10 +93,13 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "included" containing associated objects
    */
   extractSideloaded: function(sideloaded) {
-    var store = get(this, 'store'), models = {};
+    var store = get(this, 'store'), models = {}, serializer = this;
 
     sideloaded.forEach(function(link) {
       var type = link.type;
+      if(link.links) {
+        serializer.extractRelationships(link.links, link);
+      }
       delete link.type;
       if(!models[type]) {
         models[type] = [];

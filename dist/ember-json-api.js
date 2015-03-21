@@ -15,6 +15,21 @@ define("json-api-adapter",
     DS.JsonApiAdapter = DS.RESTAdapter.extend({
       defaultSerializer: 'DS/jsonApi',
 
+      contentType: 'application/vnd.api+json; charset=utf-8',
+      accepts: 'application/vnd.api+json, application/json, text/javascript, */*; q=0.01',
+
+      ajaxOptions: function(url, type, options) {
+        var hash = this._super(url, type, options);
+        if (hash.data && type !== 'GET') {
+          hash.contentType = this.contentType;
+        }
+        // Does not work
+        //hash.accepts = this.accepts;
+        if(!hash.hasOwnProperty('headers')) { hash.headers = {}; }
+        hash.headers.Accept = this.accepts;
+        return hash;
+      },
+
       getRoute: function(typeName, id/*, record */) {
         return DS._routes[typeName];
       },
@@ -204,7 +219,7 @@ define("json-api-adapter",
        * Extract top-level "meta" & "links" before normalizing.
        */
       normalizePayload: function(payload) {
-        if(!payload) { return; }
+        if(!payload) { return {}; }
         var data = payload[this.primaryRecordKey];
         if (data) {
           if(Ember.isArray(data)) {
@@ -219,6 +234,7 @@ define("json-api-adapter",
           delete payload.meta;
         }
         if (payload.links) {
+          // FIXME Need to handle top level links, like pagination
           //this.extractRelationships(payload.links, payload);
           delete payload.links;
         }
@@ -228,6 +244,11 @@ define("json-api-adapter",
         }
 
         return payload;
+      },
+
+      extractArray: function(store, type, arrayPayload, id, requestType) {
+        if(Ember.isEmpty(arrayPayload[this.primaryRecordKey])) { return Ember.A(); }
+        return this._super(store, type, arrayPayload, id, requestType);
       },
 
       /**

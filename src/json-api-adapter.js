@@ -65,13 +65,6 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     return url;
   },
 
-  findBelongsTo: function(store, record, url, relationship) {
-    var related = record[relationship.key];
-    // FIXME Without this, it was making unnecessary calls, but cannot create test to verify.
-    if(related) { return; }
-    return this.ajax(url, 'GET');
-  },
-
   /**
    * Fix query URL.
    */

@@ -36,7 +36,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
-    if(!payload) { return; }
+    if(!payload) { return {}; }
     var data = payload[this.primaryRecordKey];
     if (data) {
       if(Ember.isArray(data)) {
@@ -51,6 +51,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       delete payload.meta;
     }
     if (payload.links) {
+      // FIXME Need to handle top level links, like pagination
       //this.extractRelationships(payload.links, payload);
       delete payload.links;
     }
@@ -60,6 +61,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     }
 
     return payload;
+  },
+
+  extractArray: function(store, type, arrayPayload, id, requestType) {
+    if(Ember.isEmpty(arrayPayload[this.primaryRecordKey])) { return Ember.A(); }
+    return this._super(store, type, arrayPayload, id, requestType);
   },
 
   /**

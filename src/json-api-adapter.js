@@ -11,6 +11,21 @@ DS._routes = Ember.create(null);
 DS.JsonApiAdapter = DS.RESTAdapter.extend({
   defaultSerializer: 'DS/jsonApi',
 
+  contentType: 'application/vnd.api+json; charset=utf-8',
+  accepts: 'application/vnd.api+json, application/json, text/javascript, */*; q=0.01',
+
+  ajaxOptions: function(url, type, options) {
+    var hash = this._super(url, type, options);
+    if (hash.data && type !== 'GET') {
+      hash.contentType = this.contentType;
+    }
+    // Does not work
+    //hash.accepts = this.accepts;
+    if(!hash.hasOwnProperty('headers')) { hash.headers = {}; }
+    hash.headers.Accept = this.accepts;
+    return hash;
+  },
+
   getRoute: function(typeName, id/*, record */) {
     return DS._routes[typeName];
   },
@@ -48,13 +63,6 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     if (!host && url) { url = '/' + url; }
 
     return url;
-  },
-
-  findBelongsTo: function(store, record, url, relationship) {
-    var related = record[relationship.key];
-    // FIXME Without this, it was making unnecessary calls, but cannot create test to verify.
-    if(related) { return; }
-    return this.ajax(url, 'GET');
   },
 
   /**

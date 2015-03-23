@@ -134,6 +134,18 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     return extracted;
   },
 
+  extractErrors: function(store, type, payload) {
+    var errors = {};
+    Ember.makeArray(payload.errors).forEach(function(error) {
+      Ember.makeArray(error.paths).forEach(function(path) {
+        path = camelize(path).replace(/^\//, '');
+        errors[path] = error[path] || [];
+        errors[path].push(error.code);
+      });
+    });
+    return errors;
+  },
+
   // SERIALIZATION
 
   /**

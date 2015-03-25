@@ -37,13 +37,13 @@ define("json-api-adapter",
       /**
        * Look up routes based on top-level links.
        */
-      buildURL: function(typeName, id, record) {
+      buildURL: function(typeName, id, snapshot) {
         // FIXME If there is a record, try and look up the self link
         // - Need to use the function from the serializer to build the self key
         // TODO: this basically only works in the simplest of scenarios
-        var route = this.getRoute(typeName, id, record);
+        var route = this.getRoute(typeName, id, snapshot);
         if(!route) {
-          return this._super(typeName, id, record);
+          return this._super(typeName, id, snapshot);
         }
 
         var url = [];
@@ -81,8 +81,8 @@ define("json-api-adapter",
        * Cast individual record to array,
        * and match the root key to the route
        */
-      createRecord: function(store, type, record) {
-        var data = this._serializeData(store, type, record);
+      createRecord: function(store, type, snapshot) {
+        var data = this._serializeData(store, type, snapshot);
 
         return this.ajax(this.buildURL(type.typeKey), 'POST', {
           data: data
@@ -90,21 +90,43 @@ define("json-api-adapter",
       },
 
       /**
+       * Suppress additional API calls if the relationship was already loaded via an `included` section
+       */
+      findBelongsTo: function(store, snapshot, url, relationship) {
+        var belongsTo = snapshot.belongsTo(relationship.key),
+          belongsToLoaded = belongsTo && !belongsTo.record.get('currentState.isEmpty');
+
+        if(belongsToLoaded) { return; }
+
+        return this._super(store, snapshot, url, relationship);
+      },
+
+      /**
+       * Suppress additional API calls if the relationship was already loaded via an `included` section
+       */
+      findHasMany: function(store, snapshot, url, relationship) {
+        var hasManyLoaded = snapshot.hasMany(relationship.key).filter(function(item) { return !item.record.get('currentState.isEmpty'); });
+
+        if(hasManyLoaded.get('length')) { return new Ember.RSVP.Promise(function (resolve, reject) { reject(); }); }
+
+        return this._super(store, snapshot, url, relationship);
+      },
+
+      /**
        * Cast individual record to array,
        * and match the root key to the route
        */
-      updateRecord: function(store, type, record) {
-        var data = this._serializeData(store, type, record),
-          id = get(record, 'id');
+      updateRecord: function(store, type, snapshot) {
+        var data = this._serializeData(store, type, snapshot),
+          id = get(snapshot, 'id');
 
-        return this.ajax(this.buildURL(type.typeKey, id, record), 'PUT', {
+        return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PUT', {
           data: data
         });
       },
 
-      _serializeData: function(store, type, record) {
+      _serializeData: function(store, type, snapshot) {
         var serializer = store.serializerFor(type.typeKey),
-          snapshot = record._createSnapshot(),
           pluralType = Ember.String.pluralize(type.typeKey),
           json = {};
 

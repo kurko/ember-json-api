@@ -234,15 +234,25 @@ function hasManyLink(key, type, record, attr) {
   return { linkage: linkages };
 }
 
+function getIdObject(linkage) {
+  if (linkage.id && linkage.type) {
+    return {
+      id: linkage.id,
+      type: Ember.String.camelize(linkage.type.singularize())
+    };
+  } else {
+    return linkage.id;
+  }
+}
 function getLinkageId(linkage) {
   if(Ember.isEmpty(linkage)) { return null; }
-  return (Ember.isArray(linkage)) ? getLinkageIds(linkage) : linkage.id;
+  return (Ember.isArray(linkage)) ? getLinkageIds(linkage) : getIdObject(linkage);
 }
 function getLinkageIds(linkage) {
   if(Ember.isEmpty(linkage)) { return null; }
   var ids = [], index, total;
   for(index=0, total=linkage.length; index<total; ++index) {
-    ids.push(linkage[index].id);
+    ids.push(getIdObject(linkage[index]));
   }
   return ids;
 }

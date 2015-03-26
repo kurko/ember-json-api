@@ -50,18 +50,17 @@ define("json-api-adapter",
       /**
        * Fix query URL.
        */
-      findMany: function(store, type, ids, owner) {
-        return this.ajax(this.buildURL(type.typeKey, ids.join(',')), 'GET');
+      findMany: function(store, type, ids, snapshots) {
+        return this.ajax(this.buildURL(type.typeKey, ids.join(','), snapshots, 'findMany'), 'GET');
       },
 
       /**
        * Cast individual record to array,
        * and match the root key to the route
        */
-      createRecord: function(store, type, record) {
+      createRecord: function(store, type, snapshot) {
         var data = {};
 
-        var snapshot = record._createSnapshot();
         data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
           includeId: true
         });
@@ -75,16 +74,14 @@ define("json-api-adapter",
        * Cast individual record to array,
        * and match the root key to the route
        */
-      updateRecord: function(store, type, record) {
+      updateRecord: function(store, type, snapshot) {
         var data = {};
-        var snapshot = record._createSnapshot();
+
         data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
           includeId: true
         });
 
-        var id = get(record, 'id');
-
-        return this.ajax(this.buildURL(type.typeKey, id), 'PUT', {
+        return this.ajax(this.buildURL(type.typeKey, snapshot.id), 'PUT', {
           data: data
         });
       },

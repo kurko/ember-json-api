@@ -1,5 +1,5 @@
 var get = Ember.get, set = Ember.set;
-var HomePlanet, league, SuperVillain, superVillain, EvilMinion, YellowMinion, MaleMinion, FemaleMinion, env;
+var HomePlanet, league, SuperVillain, superVillain, Minion, EvilMinion, YellowMinion, MaleMinion, FemaleMinion, env;
 module('integration/ember-json-api-adapter - serializer', {
   setup: function() {
     SuperVillain = DS.Model.extend({
@@ -12,7 +12,7 @@ module('integration/ember-json-api-adapter - serializer', {
     MegaVillain = DS.Model.extend({
       firstName:     DS.attr('string'),
       lastName:      DS.attr('string'),
-      minions:   DS.hasMany('blueMinion'),
+      minions:   DS.hasMany('blueMinion')
     });
 
     HomePlanet = DS.Model.extend({
@@ -20,9 +20,12 @@ module('integration/ember-json-api-adapter - serializer', {
       superVillains: DS.hasMany('superVillain', { async: true })
     });
 
-    EvilMinion = DS.Model.extend({
-      superVillain: DS.belongsTo('superVillain'),
+    Minion = DS.Model.extend({
       name:         DS.attr('string')
+    });
+
+    EvilMinion = Minion.extend({
+      superVillain: DS.belongsTo('superVillain')
     });
 
     YellowMinion = EvilMinion.extend();
@@ -30,18 +33,20 @@ module('integration/ember-json-api-adapter - serializer', {
       superVillain: DS.belongsTo('megaVillain')
     });
 
-    MaleMinion = DS.Model.extend({
-      wife: DS.belongsTo('femaleMinion')
+    MaleMinion = Minion.extend({
+      wife: DS.belongsTo('femaleMinion', {inverse: 'husband'}),
+      spouse: DS.belongsTo('minion', {polymorphic: true})
     });
 
-    FemaleMinion = DS.Model.extend({
-      husband: DS.belongsTo('maleMinion')
+    FemaleMinion = Minion.extend({
+      husband: DS.belongsTo('maleMinion', {inverse: 'wife'})
     });
 
     env = setupStore({
       superVillain:   SuperVillain,
       megaVillain:    MegaVillain,
       homePlanet:     HomePlanet,
+      minion:         Minion,
       evilMinion:     EvilMinion,
       yellowMinion:   YellowMinion,
       blueMinion:     BlueMinion,
@@ -120,6 +125,10 @@ test('serialize into snake_case', function() {
 
   env.serializer.keyForRelationship = function(key, relationshipKind) {
     return Ember.String.decamelize(key);
+  };
+
+  env.serializer.keyForSnapshot = function(snapshot) {
+    return Ember.String.decamelize(snapshot.typeKey);
   };
 
   var json = Ember.run(function() {
@@ -246,7 +255,9 @@ test('serialize belongs to relationships', function() {
 
   Ember.run(function() {
     // Of course they belong to each other
-    female = env.store.createRecord(FemaleMinion);
+    female = env.store.createRecord(FemaleMinion, {
+      name: 'Bobbie Sue'
+    });
     male = env.store.createRecord(MaleMinion, {
       id: 2,
       wife: female
@@ -266,7 +277,42 @@ test('serialize belongs to relationships', function() {
           type: 'maleMinions'
         }
       }
-    }
+    },
+    name: 'Bobbie Sue'
+  });
+});
+
+test('serialize polymorphic belongs to relationships', function() {
+  var male, female;
+
+  Ember.run(function() {
+    // Of course they belong to each other
+    female = env.store.createRecord(FemaleMinion, {
+      id: 1,
+      name: 'Bobbie Sue'
+    });
+    male = env.store.createRecord(MaleMinion, {
+      id: 2,
+      spouse: female,
+      name: 'Billy Joe'
+    });
+  });
+
+  var json = Ember.run(function(){
+    var snapshot = male._createSnapshot();
+    return env.serializer.serialize(snapshot);
+  });
+
+  deepEqual(json, {
+    links: {
+      spouse: {
+        linkage: {
+          id: '1',
+          type: 'femaleMinions'
+        }
+      }
+    },
+    name: 'Billy Joe'
   });
 });
 

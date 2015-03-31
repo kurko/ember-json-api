@@ -89,8 +89,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Suppress additional API calls if the relationship was already loaded via an `included` section
    */
   findBelongsTo: function(store, snapshot, url, relationship) {
-    var belongsTo = snapshot.belongsTo(relationship.key),
-      belongsToLoaded = belongsTo && !belongsTo.record.get('currentState.isEmpty');
+    var belongsTo = snapshot.belongsTo(relationship.key);
+    var belongsToLoaded = belongsTo && !belongsTo.record.get('currentState.isEmpty');
 
     if(belongsToLoaded) { return; }
 
@@ -113,8 +113,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * and match the root key to the route
    */
   updateRecord: function(store, type, snapshot) {
-    var data = this._serializeData(store, type, snapshot),
-      id = get(snapshot, 'id');
+    var data = this._serializeData(store, type, snapshot);
+    var id = get(snapshot, 'id');
 
     return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PUT', {
       data: data
@@ -122,9 +122,9 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   },
 
   _serializeData: function(store, type, snapshot) {
-    var serializer = store.serializerFor(type.typeKey),
-      pluralType = Ember.String.pluralize(type.typeKey),
-      json = {};
+    var serializer = store.serializerFor(type.typeKey);
+    var pluralType = Ember.String.pluralize(type.typeKey);
+    var json = {};
 
     json.data = serializer.serialize(snapshot, { includeId: true });
     if(!json.data.hasOwnProperty('type')) {
@@ -170,7 +170,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   pathForType: function(type) {
     var decamelized = Ember.String.decamelize(type);
-    return Ember.String.pluralize(decamelized).replace(/_/g, '-');
+    return Ember.String.pluralize(decamelized);
   }
 });
 

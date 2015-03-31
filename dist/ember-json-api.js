@@ -432,15 +432,22 @@ define("json-api-adapter",
       return { linkage: linkages };
     }
 
+    function normalizeLinkage(linkage) {
+      if(!linkage.type) { return linkage.id; }
+      return {
+        id: linkage.id,
+        type: Ember.String.camelize(linkage.type.singularize())
+      };
+    }
     function getLinkageId(linkage) {
       if(Ember.isEmpty(linkage)) { return null; }
-      return (Ember.isArray(linkage)) ? getLinkageIds(linkage) : linkage.id;
+      return (Ember.isArray(linkage)) ? getLinkageIds(linkage) : normalizeLinkage(linkage);
     }
     function getLinkageIds(linkage) {
       if(Ember.isEmpty(linkage)) { return null; }
       var ids = [], index, total;
       for(index=0, total=linkage.length; index<total; ++index) {
-        ids.push(linkage[index].id);
+        ids.push(normalizeLinkage(linkage[index]));
       }
       return ids;
     }

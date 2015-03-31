@@ -85,6 +85,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   extractArrayData: function(data, payload) {
     var type = data.length > 0 ? data[0].type : null;
+    var serializer = this;
     data.forEach(function(item) {
       if(item.links) {
         this.extractRelationships(item.links, item);
@@ -101,6 +102,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   extractSideloaded: function(sideloaded) {
     var store = get(this, 'store');
     var models = {};
+    var serializer = this;
 
     sideloaded.forEach(function(link) {
       var type = link.type;
@@ -185,7 +187,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   serializeBelongsTo: function(record, json, relationship) {
     var attr = relationship.key;
     var belongsTo = record.belongsTo(attr);
-    var type = this.keyForRelationship(relationship.type.typeKey);
+    var type = (belongsTo) ? this.keyForRelationship(belongsTo.typeKey) : null;
     var key = this.keyForRelationship(attr);
 
     if (isNone(belongsTo)) return;
@@ -209,12 +211,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   }
 });
 
-function belongsToLink(key, type, id) {
-  if(!id) { return {}; }
+function belongsToLink(key, type, value) {
+  if(!value) { return value; }
 
   return {
     linkage: {
-      id: id,
+      id: value,
       type: Ember.String.pluralize(type)
     }
   };

@@ -72,9 +72,8 @@ define("json-api-adapter",
       /**
        * Fix query URL.
        */
-      findMany: function(store, type, ids, owner) {
-        var id = ids ? ids.join(',') : null;
-        return this.ajax(this.buildURL(type, id, owner), 'GET');
+      findMany: function(store, type, ids, snapshots) {
+        return this.ajax(this.buildURL(type.typeKey, ids.join(','), snapshots, 'findMany'), 'GET');
       },
 
       /**
@@ -283,6 +282,7 @@ define("json-api-adapter",
        */
       extractArrayData: function(data, payload) {
         var type = data.length > 0 ? data[0].type : null;
+        var serializer = this;
         data.forEach(function(item) {
           if(item.links) {
             this.extractRelationships(item.links, item);
@@ -299,6 +299,7 @@ define("json-api-adapter",
       extractSideloaded: function(sideloaded) {
         var store = get(this, 'store');
         var models = {};
+        var serializer = this;
 
         sideloaded.forEach(function(link) {
           var type = link.type;
@@ -383,7 +384,7 @@ define("json-api-adapter",
       serializeBelongsTo: function(record, json, relationship) {
         var attr = relationship.key;
         var belongsTo = record.belongsTo(attr);
-        var type = this.keyForRelationship(relationship.type.typeKey);
+        var type = (belongsTo) ? this.keyForRelationship(belongsTo.typeKey) : null;
         var key = this.keyForRelationship(attr);
 
         if (isNone(belongsTo)) return;
@@ -407,12 +408,12 @@ define("json-api-adapter",
       }
     });
 
-    function belongsToLink(key, type, id) {
-      if(!id) { return {}; }
+    function belongsToLink(key, type, value) {
+      if(!value) { return value; }
 
       return {
         linkage: {
-          id: id,
+          id: value,
           type: Ember.String.pluralize(type)
         }
       };

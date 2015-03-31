@@ -285,10 +285,10 @@ define("json-api-adapter",
         var serializer = this;
         data.forEach(function(item) {
           if(item.links) {
-            this.extractRelationships(item.links, item);
+            serializer.extractRelationships(item.links, item);
             //delete data.links;
           }
-        }.bind(this));
+        });
 
         payload[type] = data;
       },
@@ -304,14 +304,14 @@ define("json-api-adapter",
         sideloaded.forEach(function(link) {
           var type = link.type;
           if(link.links) {
-            this.extractRelationships(link.links, link);
+            serializer.extractRelationships(link.links, link);
           }
           delete link.type;
           if(!models[type]) {
             models[type] = [];
           }
           models[type].push(link);
-        }.bind(this));
+        });
 
         this.pushPayload(store, models);
       },

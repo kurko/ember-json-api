@@ -282,12 +282,13 @@ define("json-api-adapter",
        */
       extractArrayData: function(data, payload) {
         var type = data.length > 0 ? data[0].type : null;
+        var serializer = this;
         data.forEach(function(item) {
           if(item.links) {
-            this.extractRelationships(item.links, item);
+            serializer.extractRelationships(item.links, item);
             //delete data.links;
           }
-        }.bind(this));
+        });
 
         payload[type] = data;
       },
@@ -298,18 +299,19 @@ define("json-api-adapter",
       extractSideloaded: function(sideloaded) {
         var store = get(this, 'store');
         var models = {};
+        var serializer = this;
 
         sideloaded.forEach(function(link) {
           var type = link.type;
           if(link.links) {
-            this.extractRelationships(link.links, link);
+            serializer.extractRelationships(link.links, link);
           }
           delete link.type;
           if(!models[type]) {
             models[type] = [];
           }
           models[type].push(link);
-        }.bind(this));
+        });
 
         this.pushPayload(store, models);
       },

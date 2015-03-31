@@ -65,7 +65,7 @@ asyncTest('GET /owners/1 with sync included resources', function() {
     env.store.find('owner', '1').then(function(record) {
 
       equal(record.get('id'), '1', 'id is correct');
-      equal(record.get('name'), 'Isaac', 'name is correct');
+      equal(record.get('name'), 'Luke', 'name is correct');
 
       var cat = record.get('pets.firstObject');
       var dog = record.get('pets.lastObject');

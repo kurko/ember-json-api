@@ -1,8 +1,17 @@
 ## CHANGELOG
 
+### 0.4.2
+
+* updating to [JSON API RC3](https://github.com/json-api/json-api/blob/827ba3c1130408fdb406d9faab645b0db7dd4fe4/index.md) with the usage of the consistent linkage format.
+* Added polymorphic support.
+
+### 0.4.1
+
+* keeping up with JSON API RC2+ to change linked to included and resource to related.
+
 ### 0.4.0
 
-* updating to RC2 standard of JSON API
+* updating to JSON API RC2
 
 ### 0.3.0
 

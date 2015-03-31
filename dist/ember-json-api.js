@@ -81,11 +81,7 @@ define("json-api-adapter",
        * and match the root key to the route
        */
       createRecord: function(store, type, snapshot) {
-        var data = {};
-
-        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
-          includeId: true
-        });
+        var data = this._serializeData(store, type, snapshot);
 
         return this.ajax(this.buildURL(type.typeKey), 'POST', {
           data: data
@@ -120,13 +116,10 @@ define("json-api-adapter",
        * and match the root key to the route
        */
       updateRecord: function(store, type, snapshot) {
-        var data = {};
+        var data = this._serializeData(store, type, snapshot);
+        var id = get(snapshot, 'id');
 
-        data[this.pathForType(type.typeKey)] = store.serializerFor(type.typeKey).serialize(snapshot, {
-          includeId: true
-        });
-
-        return this.ajax(this.buildURL(type.typeKey, snapshot.id), 'PUT', {
+        return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PUT', {
           data: data
         });
       },

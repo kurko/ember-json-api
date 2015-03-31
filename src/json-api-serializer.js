@@ -3,22 +3,6 @@ var isNone = Ember.isNone;
 var HOST = /(^https?:\/\/.*?)(\/.*)/;
 
 DS.JsonApiSerializer = DS.RESTSerializer.extend({
-  keyForRelationship: function(key) {
-    return key;
-  },
-  keyForSnapshot: function(snapshot) {
-    return snapshot.typeKey;
-  },
-  /**
-   * Patch the extractSingle method, since there are no singular records
-   */
-  extractSingle: function(store, primaryType, payload, recordId, requestType) {
-    var primaryTypeName;
-    if (this.keyForAttribute) {
-      primaryTypeName = this.keyForAttribute(primaryType.typeKey);
-    } else {
-      primaryTypeName = primaryType.typeKey;
-    }
 
   primaryRecordKey: 'data',
   sideloadedRecordsKey: 'included',
@@ -203,11 +187,10 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   serializeBelongsTo: function(record, json, relationship) {
     var attr = relationship.key;
     var belongsTo = record.belongsTo(attr);
+    var type = (belongsTo) ? this.keyForRelationship(belongsTo.typeKey) : null;
+    var key = this.keyForRelationship(attr);
 
     if (isNone(belongsTo)) return;
-
-    var type = this.keyForSnapshot(belongsTo);
-    var key = this.keyForRelationship(attr);
 
     json.links = json.links || {};
     json.links[key] = belongsToLink(key, type, get(belongsTo, 'id'));

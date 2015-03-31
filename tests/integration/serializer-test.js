@@ -25,7 +25,7 @@ module('integration/ember-json-api-adapter - serializer', {
     });
 
     EvilMinion = Minion.extend({
-      superVillain: DS.belongsTo('superVillain'),
+      superVillain: DS.belongsTo('superVillain')
     });
 
     YellowMinion = EvilMinion.extend();
@@ -306,8 +306,10 @@ test('serialize polymorphic belongs to relationships', function() {
   deepEqual(json, {
     links: {
       spouse: {
-        id: '1',
-        type: 'femaleMinion'
+        linkage: {
+          id: '1',
+          type: 'femaleMinions'
+        }
       }
     },
     name: 'Billy Joe'

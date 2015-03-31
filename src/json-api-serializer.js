@@ -12,6 +12,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   keyForRelationship: function(key) {
     return key;
   },
+  keyForSnapshot: function(snapshot) {
+    return snapshot.typeKey;
+  },
 
   /**
    * Flatten links
@@ -187,10 +190,12 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
   serializeBelongsTo: function(record, json, relationship) {
     var attr = relationship.key;
     var belongsTo = record.belongsTo(attr);
-    var type = (belongsTo) ? this.keyForRelationship(belongsTo.typeKey) : null;
-    var key = this.keyForRelationship(attr);
+    var type, key;
 
     if (isNone(belongsTo)) return;
+
+    type = this.keyForSnapshot(belongsTo);
+    key = this.keyForRelationship(attr);
 
     json.links = json.links || {};
     json.links[key] = belongsToLink(key, type, get(belongsTo, 'id'));

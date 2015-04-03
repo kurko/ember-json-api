@@ -126,13 +126,11 @@ define("json-api-adapter",
 
       _serializeData: function(store, type, snapshot) {
         var serializer = store.serializerFor(type.typeKey);
-        var pluralType = Ember.String.pluralize(type.typeKey);
-        var json = {};
+        var fn = Ember.isArray(snapshot) ? 'serializeArray' : 'serialize';
+        var json = {
+          data: serializer[fn](snapshot, { includeId:true, type:type.typeKey })
+        };
 
-        json.data = serializer.serialize(snapshot, { includeId: true });
-        if(!json.data.hasOwnProperty('type')) {
-          json.data.type = pluralType;
-        }
         return json;
       },
 
@@ -371,6 +369,24 @@ define("json-api-adapter",
       },
 
       // SERIALIZATION
+
+      serialize: function(snapshot, options) {
+        var data = this._super(snapshot, options);
+        if(!data.hasOwnProperty('type') && options && options.type) {
+          data.type = Ember.String.pluralize(options.type);
+        }
+        return data;
+      },
+
+      serializeArray: function(snapshots, options) {
+        var data = Ember.A();
+        var serializer = this;
+        if(!snapshots) { return data; }
+        snapshots.forEach(function(snapshot) {
+          data.push(serializer.serialize(snapshot, options));
+        });
+        return data;
+      },
 
       serializeIntoHash: function(hash, type, snapshot, options) {
         var pluralType = Ember.String.pluralize(type.typeKey);

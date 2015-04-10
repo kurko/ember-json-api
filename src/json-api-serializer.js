@@ -1,3 +1,4 @@
+/* global Ember,DS */
 var get = Ember.get;
 var isNone = Ember.isNone;
 var HOST = /(^https?:\/\/.*?)(\/.*)/;
@@ -210,7 +211,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var belongsTo = record.belongsTo(attr);
     var type, key;
 
-    if (isNone(belongsTo)) return;
+    if (isNone(belongsTo)) { return; }
 
     type = this.keyForSnapshot(belongsTo);
     key = this.keyForRelationship(attr);
@@ -246,7 +247,7 @@ function belongsToLink(key, type, value) {
 }
 
 function hasManyLink(key, type, record, attr) {
-  var links = record.hasMany(attr).mapBy('id') || [];
+  var links = Ember.A(record.hasMany(attr)).mapBy('id') || [];
   var typeName = Ember.String.pluralize(type);
   var linkages = [];
   var index, total;
@@ -265,7 +266,7 @@ function normalizeLinkage(linkage) {
   if(!linkage.type) { return linkage.id; }
   return {
     id: linkage.id,
-    type: Ember.String.camelize(linkage.type.singularize())
+    type: Ember.String.camelize(Ember.String.singularize(linkage.type))
   };
 }
 function getLinkageId(linkage) {

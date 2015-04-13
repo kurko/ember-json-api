@@ -14,7 +14,7 @@
       "email": "stefan.penner@gmail.com"
     }
   ],
-  "main": "dist/json-api-adapter.js",
+  "main": "ember-addon-main.js",
   "repository": {
     "type": "git",
     "url": "http://github.com/kurko/ember-json-api"

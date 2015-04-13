@@ -1,7 +1,7 @@
 {
   "name": "ember-json-api",
   "version": "0.3.0",
-  "homepage": "https://github.com/plyfe/ember-json-api",
+  "homepage": "https://github.com/kurko/ember-json-api",
   "authors": [
     "Dali Zheng <dali@series.ac>",
     "Stefan Penner <stefan.penner@gmail.com>"

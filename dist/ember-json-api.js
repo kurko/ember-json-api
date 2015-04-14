@@ -2,6 +2,7 @@ define("json-api-adapter",
   ["exports"],
   function(__exports__) {
     "use strict";
+    /* global Ember, DS */
     var get = Ember.get;
 
     /**
@@ -106,7 +107,9 @@ define("json-api-adapter",
       findHasMany: function(store, snapshot, url, relationship) {
         var hasManyLoaded = snapshot.hasMany(relationship.key).filter(function(item) { return !item.record.get('currentState.isEmpty'); });
 
-        if(hasManyLoaded.get('length')) { return new Ember.RSVP.Promise(function (resolve, reject) { reject(); }); }
+        if(get(hasManyLoaded, 'length')) {
+          return new Ember.RSVP.Promise(function (resolve, reject) { reject(); });
+        }
 
         return this._super(store, snapshot, url, relationship);
       },
@@ -126,13 +129,11 @@ define("json-api-adapter",
 
       _serializeData: function(store, type, snapshot) {
         var serializer = store.serializerFor(type.typeKey);
-        var pluralType = Ember.String.pluralize(type.typeKey);
-        var json = {};
+        var fn = Ember.isArray(snapshot) ? 'serializeArray' : 'serialize';
+        var json = {
+          data: serializer[fn](snapshot, { includeId:true, type:type.typeKey })
+        };
 
-        json.data = serializer.serialize(snapshot, { includeId: true });
-        if(!json.data.hasOwnProperty('type')) {
-          json.data.type = pluralType;
-        }
         return json;
       },
 
@@ -195,6 +196,7 @@ define("json-api-adapter",
   ["exports"],
   function(__exports__) {
     "use strict";
+    /* global Ember,DS */
     var get = Ember.get;
     var isNone = Ember.isNone;
     var HOST = /(^https?:\/\/.*?)(\/.*)/;
@@ -372,6 +374,24 @@ define("json-api-adapter",
 
       // SERIALIZATION
 
+      serialize: function(snapshot, options) {
+        var data = this._super(snapshot, options);
+        if(!data.hasOwnProperty('type') && options && options.type) {
+          data.type = Ember.String.pluralize(options.type);
+        }
+        return data;
+      },
+
+      serializeArray: function(snapshots, options) {
+        var data = Ember.A();
+        var serializer = this;
+        if(!snapshots) { return data; }
+        snapshots.forEach(function(snapshot) {
+          data.push(serializer.serialize(snapshot, options));
+        });
+        return data;
+      },
+
       serializeIntoHash: function(hash, type, snapshot, options) {
         var pluralType = Ember.String.pluralize(type.typeKey);
         var data = this.serialize(snapshot, options);
@@ -389,7 +409,10 @@ define("json-api-adapter",
         var belongsTo = record.belongsTo(attr);
         var type, key;
 
-        if (isNone(belongsTo)) return;
+        if (isNone(belongsTo)) { return; }
+
+        type = this.keyForSnapshot(belongsTo);
+        key = this.keyForRelationship(attr);
 
         type = this.keyForSnapshot(belongsTo);
         key = this.keyForRelationship(attr);
@@ -425,7 +448,7 @@ define("json-api-adapter",
     }
 
     function hasManyLink(key, type, record, attr) {
-      var links = record.hasMany(attr).mapBy('id') || [];
+      var links = Ember.A(record.hasMany(attr)).mapBy('id') || [];
       var typeName = Ember.String.pluralize(type);
       var linkages = [];
       var index, total;
@@ -444,7 +467,7 @@ define("json-api-adapter",
       if(!linkage.type) { return linkage.id; }
       return {
         id: linkage.id,
-        type: Ember.String.camelize(linkage.type.singularize())
+        type: Ember.String.camelize(Ember.String.singularize(linkage.type))
       };
     }
     function getLinkageId(linkage) {

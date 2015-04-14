@@ -1,3 +1,4 @@
+/* global Ember, DS */
 var get = Ember.get;
 
 /**
@@ -102,7 +103,9 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   findHasMany: function(store, snapshot, url, relationship) {
     var hasManyLoaded = snapshot.hasMany(relationship.key).filter(function(item) { return !item.record.get('currentState.isEmpty'); });
 
-    if(hasManyLoaded.get('length')) { return new Ember.RSVP.Promise(function (resolve, reject) { reject(); }); }
+    if(get(hasManyLoaded, 'length')) {
+      return new Ember.RSVP.Promise(function (resolve, reject) { reject(); });
+    }
 
     return this._super(store, snapshot, url, relationship);
   },
@@ -122,13 +125,11 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
   _serializeData: function(store, type, snapshot) {
     var serializer = store.serializerFor(type.typeKey);
-    var pluralType = Ember.String.pluralize(type.typeKey);
-    var json = {};
+    var fn = Ember.isArray(snapshot) ? 'serializeArray' : 'serialize';
+    var json = {
+      data: serializer[fn](snapshot, { includeId:true, type:type.typeKey })
+    };
 
-    json.data = serializer.serialize(snapshot, { includeId: true });
-    if(!json.data.hasOwnProperty('type')) {
-      json.data.type = pluralType;
-    }
     return json;
   },
 

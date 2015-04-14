@@ -1,3 +1,4 @@
+/* global Ember, DS */
 var get = Ember.get;
 
 /**
@@ -102,7 +103,9 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   findHasMany: function(store, snapshot, url, relationship) {
     var hasManyLoaded = snapshot.hasMany(relationship.key).filter(function(item) { return !item.record.get('currentState.isEmpty'); });
 
-    if(hasManyLoaded.get('length')) { return new Ember.RSVP.Promise(function (resolve, reject) { reject(); }); }
+    if(get(hasManyLoaded, 'length')) {
+      return new Ember.RSVP.Promise(function (resolve, reject) { reject(); });
+    }
 
     return this._super(store, snapshot, url, relationship);
   },

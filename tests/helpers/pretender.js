@@ -13,7 +13,7 @@ var stubServer = function() {
 
     availableRequests: {
       'post': [],
-      'put': []
+      'patch': []
     },
 
     get: function(url, response) {
@@ -44,19 +44,19 @@ var stubServer = function() {
       });
     },
 
-    put: function(url, expectedRequest, response) {
+    patch: function(url, expectedRequest, response) {
       var _this = this;
 
-      this.validatePayload(expectedRequest, 'PUT', url);
-      this.validatePayload(response, 'PUT', url);
+      this.validatePayload(expectedRequest, 'PATCH', url);
+      this.validatePayload(response, 'PATCH', url);
 
-      this.availableRequests.put.push({
+      this.availableRequests.patch.push({
         request: expectedRequest,
         response: response
       });
 
-      this.pretender.put(url, function(request){
-        var responseForRequest = _this.responseForRequest('put', request);
+      this.pretender.patch(url, function(request){
+        var responseForRequest = _this.responseForRequest('patch', request);
 
         var string = JSON.stringify(responseForRequest);
         return [200, {"Content-Type": "application/json"}, string]

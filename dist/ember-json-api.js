@@ -122,7 +122,7 @@ define("json-api-adapter",
         var data = this._serializeData(store, type, snapshot);
         var id = get(snapshot, 'id');
 
-        return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PUT', {
+        return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PATCH', {
           data: data
         });
       },
@@ -410,9 +410,6 @@ define("json-api-adapter",
         var type, key;
 
         if (isNone(belongsTo)) { return; }
-
-        type = this.keyForSnapshot(belongsTo);
-        key = this.keyForRelationship(attr);
 
         type = this.keyForSnapshot(belongsTo);
         key = this.keyForRelationship(attr);

@@ -118,7 +118,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     var data = this._serializeData(store, type, snapshot);
     var id = get(snapshot, 'id');
 
-    return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PUT', {
+    return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PATCH', {
       data: data
     });
   },

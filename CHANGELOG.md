@@ -1,5 +1,15 @@
 ## CHANGELOG
 
+### 0.4.3
+
+* Replace PUT verb with PATCH. This is a breaking change for some and can be overridden in the application adapter with the following:
+  * ```
+  ajaxOptions: function(url, type, options) {
+      var methodType = (type === 'PATCH') ? 'PUT' : type;
+      return this._super(url, methodType, options);
+  }
+  ```
+
 ### 0.4.2
 
 * updating to [JSON API RC3](https://github.com/json-api/json-api/blob/827ba3c1130408fdb406d9faab645b0db7dd4fe4/index.md) with the usage of the consistent linkage format.

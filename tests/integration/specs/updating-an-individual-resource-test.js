@@ -71,7 +71,7 @@ module('integration/specs/updating-an-individual-resource', {
   }
 });
 
-asyncTest("PUT /posts/1 won't push an array", function() {
+asyncTest("PATCH /posts/1 won't push an array", function() {
   var request = {
     data: {
       id: '1',
@@ -87,7 +87,7 @@ asyncTest("PUT /posts/1 won't push an array", function() {
   };
 
   fakeServer.get('/posts/1', responses.post);
-  fakeServer.put('/posts/1', request, responses.postAfterUpdate);
+  fakeServer.patch('/posts/1', request, responses.postAfterUpdate);
 
   Em.run(function() {
     env.store.find('post', '1').then(function(post) {
@@ -129,8 +129,8 @@ asyncTest("Update a post with an author", function() {
   fakeServer.get('/authors/1', responses.author);
   // FIXME This call shouldn't have to be made since it already exists
   fakeServer.get('/posts/1/author', responses.author);
-  // FIXME Need a way to PUT to /posts/1/links/author
-  fakeServer.put('/posts/1', request, responses.postAfterUpdateAuthor);
+  // FIXME Need a way to PATCH to /posts/1/links/author
+  fakeServer.patch('/posts/1', request, responses.postAfterUpdateAuthor);
 
   Em.run(function() {
     var findPost = env.store.find('post', '1'),

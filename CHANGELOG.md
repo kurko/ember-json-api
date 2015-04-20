@@ -4,11 +4,11 @@
 
 * Replace PUT verb with PATCH. This is a breaking change for some and can be overridden in the application adapter with the following:
   * ```
-  ajaxOptions: function(url, type, options) {
-      var methodType = (type === 'PATCH') ? 'PUT' : type;
-      return this._super(url, methodType, options);
-  }
-  ```
+    ajaxOptions: function(url, type, options) {
+        var methodType = (type === 'PATCH') ? 'PUT' : type;
+        return this._super(url, methodType, options);
+    }
+```
 
 ### 0.4.2
 

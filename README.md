@@ -61,4 +61,4 @@ maintained the adapter.
 
 ### License
 
-This code abides to the MIT license. http://opensource.org/licenses/MIT
+This code abides to the MIT license: http://opensource.org/licenses/MIT

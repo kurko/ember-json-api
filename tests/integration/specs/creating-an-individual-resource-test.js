@@ -12,7 +12,7 @@ module('integration/specs/creating-an-individual-resource', {
           type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
-          post_summary: 'summary'
+          'post-summary': 'summary'
         }
       }
     };
@@ -33,7 +33,7 @@ asyncTest("POST /posts/1 won't push an array", function() {
   var request = {
     data: {
       title: 'Rails is Omakase',
-      postSummary: null,
+      'post-summary': null,
       links: {
         comments: {
           linkage: []

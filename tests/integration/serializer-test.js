@@ -65,8 +65,58 @@ module('integration/ember-json-api-adapter - serializer', {
   }
 });
 
+test('serialize dasherized', function() {
+  var tom;
+
+  Ember.run(function() {
+    league = env.store.createRecord(HomePlanet, {
+      name: 'Villain League',
+      id: '123'
+    });
+
+    tom = env.store.createRecord(SuperVillain, {
+      firstName: 'Tom',
+      lastName: 'Dale',
+      homePlanet: league
+    });
+  });
+
+  var json = Ember.run(function(){
+    var snapshot = tom._createSnapshot();
+    return env.serializer.serialize(snapshot);
+  });
+
+  deepEqual(json, {
+    'first-name': 'Tom',
+    'last-name': 'Dale',
+    links: {
+      'evil-minions': {
+        linkage: []
+      },
+      'home-planet': {
+        linkage: {
+          id: get(league, 'id'),
+          type: 'home-planets'
+        }
+      }
+    }
+  });
+});
+
 test('serialize camelcase', function() {
   var tom;
+
+  env.serializer.keyForAttribute = function(key) {
+    return Ember.String.camelize(key);
+  };
+
+  env.serializer.keyForRelationship = function(key, relationshipKind) {
+    return Ember.String.camelize(key);
+  };
+
+  env.serializer.keyForSnapshot = function(snapshot) {
+    return Ember.String.camelize(snapshot.typeKey);
+  };
 
   Ember.run(function() {
     league = env.store.createRecord(HomePlanet, {
@@ -167,14 +217,14 @@ test('serializeIntoHash', function() {
   });
 
   deepEqual(json, {
-    homePlanet: {
+    'home-planet': {
       name: 'Umber',
       links: {
-        superVillains: {
+        'super-villains': {
           linkage: []
         }
       },
-      type: 'homePlanets'
+      type: 'home-planets'
     }
   });
 });
@@ -194,14 +244,14 @@ test('serializeIntoHash with decamelized types', function() {
   });
 
   deepEqual(json, {
-    homePlanet: {
+    'home-planet': {
       name: 'Umber',
       links: {
-        superVillains: {
+        'super-villains': {
           linkage: []
         }
       },
-      type: 'homePlanets'
+      type: 'home-planets'
     }
   });
 });
@@ -234,16 +284,16 @@ test('serialize has many relationships', function() {
   });
 
   deepEqual(json, {
-    firstName: 'Dr',
-    lastName: 'Evil',
+    'first-name': 'Dr',
+    'last-name': 'Evil',
     links: {
       minions: {
         linkage: [{
           id: '123',
-          type: 'blueMinions'
+          type: 'blue-minions'
         }, {
           id: '345',
-          type: 'blueMinions'
+          type: 'blue-minions'
         }]
       }
     }
@@ -274,7 +324,7 @@ test('serialize belongs to relationships', function() {
       husband: {
         linkage: {
           id: '2',
-          type: 'maleMinions'
+          type: 'male-minions'
         }
       }
     },
@@ -308,7 +358,7 @@ test('serialize polymorphic belongs to relationships', function() {
       spouse: {
         linkage: {
           id: '1',
-          type: 'femaleMinions'
+          type: 'female-minions'
         }
       }
     },

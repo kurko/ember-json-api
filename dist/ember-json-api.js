@@ -208,11 +208,14 @@ define("json-api-adapter",
       relationshipKey: 'self',
       relatedResourceKey: 'related',
 
+      keyForAttribute: function(key) {
+        return Ember.String.dasherize(key);
+      },
       keyForRelationship: function(key) {
-        return key;
+        return Ember.String.dasherize(key);
       },
       keyForSnapshot: function(snapshot) {
-        return snapshot.typeKey;
+        return Ember.String.dasherize(snapshot.typeKey);
       },
 
       /**
@@ -377,7 +380,7 @@ define("json-api-adapter",
       serialize: function(snapshot, options) {
         var data = this._super(snapshot, options);
         if(!data.hasOwnProperty('type') && options && options.type) {
-          data.type = Ember.String.pluralize(options.type);
+          data.type = Ember.String.pluralize(this.keyForRelationship(options.type));
         }
         return data;
       },
@@ -393,12 +396,11 @@ define("json-api-adapter",
       },
 
       serializeIntoHash: function(hash, type, snapshot, options) {
-        var pluralType = Ember.String.pluralize(type.typeKey);
         var data = this.serialize(snapshot, options);
         if(!data.hasOwnProperty('type')) {
-          data.type = pluralType;
+          data.type = Ember.String.pluralize(this.keyForRelationship(type.typeKey));
         }
-        hash[type.typeKey] = data;
+        hash[this.keyForAttribute(type.typeKey)] = data;
       },
 
       /**

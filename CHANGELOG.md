@@ -18,6 +18,17 @@ export default JsonApiSerializer.extend({
 });
 ```
 
+* Made dasherized the default naming convention for path types. To change, override
+
+```
+export default JsonApiAdapter.extend({
+  pathForType: function(type) {
+    var decamelized = Ember.String.decamelize(type);
+    return Ember.String.pluralize(decamelized);
+  }
+});
+```
+
 ### 0.4.3
 
 * Replace PUT verb with PATCH. This is a breaking change for some and can be overridden in the application adapter with the following:

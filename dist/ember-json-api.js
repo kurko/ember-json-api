@@ -173,8 +173,8 @@ define("json-api-adapter",
       },
 
       pathForType: function(type) {
-        var decamelized = Ember.String.decamelize(type);
-        return Ember.String.pluralize(decamelized);
+        var dasherized = Ember.String.dasherize(type);
+        return Ember.String.pluralize(dasherized);
       }
     });
 

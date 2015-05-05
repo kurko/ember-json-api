@@ -98,7 +98,7 @@ asyncTest('GET /some_resource, not camelCase, dasherized', function() {
   });
   env = setupStore(models);
 
-  fakeServer.get('/some_resources/1', responses.underscore_resource);
+  fakeServer.get('/some-resources/1', responses.underscore_resource);
 
   Em.run(function() {
     env.store.find('someResource', '1').then(function(record) {

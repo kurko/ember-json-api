@@ -33,7 +33,7 @@ module('integration/specs/updating-an-individual-resource', {
           type: 'posts',
           id: '1',
           title: 'TDD Is Dead lol',
-          postSummary: 'summary'
+          'post-summary': 'summary'
         }
       },
       postAfterUpdateAuthor: {
@@ -41,7 +41,7 @@ module('integration/specs/updating-an-individual-resource', {
           type: 'posts',
           id: '1',
           title: 'TDD Is Dead lol',
-          postSummary: 'summary',
+          'post-summary': 'summary',
           links: {
             author: {
               self: '/posts/1/links/author',
@@ -76,7 +76,7 @@ asyncTest("PATCH /posts/1 won't push an array", function() {
     data: {
       id: '1',
       title: 'TDD Is Dead lol',
-      postSummary: null,
+      'post-summary': null,
       links: {
         comments: {
           linkage: []
@@ -109,7 +109,7 @@ asyncTest("Update a post with an author", function() {
     data: {
       id: '1',
       title: 'TDD Is Dead lol',
-      postSummary: null,
+      'post-summary': null,
       links: {
         comments: {
           linkage: []

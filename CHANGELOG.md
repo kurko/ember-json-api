@@ -1,5 +1,34 @@
 ## CHANGELOG
 
+### 0.4.4
+
+* Made dasherized the default naming convention for resource types, attribute names, and association names per [recommended naming conventions](http://jsonapi.org/recommendations/#naming). To override with camelCase or snake_case, override the following:
+
+```
+export default JsonApiSerializer.extend({
+  keyForAttribute: function(key) {
+    return Ember.String.camelize(key);
+  },
+  keyForRelationship: function(key) {
+    return Ember.String.camelize(key);
+  },
+  keyForSnapshot: function(snapshot) {
+    return Ember.String.camelize(snapshot.typeKey);
+  }
+});
+```
+
+* Made dasherized the default naming convention for path types. To change, override
+
+```
+export default JsonApiAdapter.extend({
+  pathForType: function(type) {
+    var decamelized = Ember.String.decamelize(type);
+    return Ember.String.pluralize(decamelized);
+  }
+});
+```
+
 ### 0.4.3
 
 * Replace PUT verb with PATCH. This is a breaking change for some and can be overridden in the application adapter with the following:

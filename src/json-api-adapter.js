@@ -169,8 +169,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   },
 
   pathForType: function(type) {
-    var decamelized = Ember.String.decamelize(type);
-    return Ember.String.pluralize(decamelized);
+    var dasherized = Ember.String.dasherize(type);
+    return Ember.String.pluralize(dasherized);
   }
 });
 

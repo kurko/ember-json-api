@@ -8,26 +8,37 @@ module('integration/specs/to-many-relationships', {
 
     responses = {
       posts_not_compound: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            'comments': ['2', '3']
+            comments: {
+              linkage: [{
+                id: '2',
+                type: 'comments'
+              }, {
+                id: '3',
+                type: 'comments'
+              }]
+            }
           }
         }
       },
       comments_2: {
-        'comments': {
-          'id': '2',
-          'title': 'good article',
-          'body': 'ideal for my startup'
+        data: {
+          type: 'comments',
+          id: '2',
+          title: 'good article',
+          body: 'ideal for my startup'
         }
       },
       comments_3: {
-        'comments': {
-          'id': '3',
-          'title': 'bad article',
-          'body': "doesn't run Crysis"
+        data: {
+          type: 'comments',
+          id: '3',
+          title: 'bad article',
+          body: "doesn't run Crysis"
         }
       }
     };
@@ -43,7 +54,7 @@ module('integration/specs/to-many-relationships', {
   }
 });
 
-asyncTest('GET /posts/1 with async linked resources', function() {
+asyncTest('GET /posts/1 with async included resources', function() {
   var models = setModels({
     commentAsync: true
   });
@@ -74,7 +85,7 @@ asyncTest('GET /posts/1 with async linked resources', function() {
   });
 });
 
-asyncTest('GET /posts/1 with sync linked resources', function() {
+asyncTest('GET /posts/1 with sync included resources', function() {
   var models = setModels({
     commentAsync: false
   });

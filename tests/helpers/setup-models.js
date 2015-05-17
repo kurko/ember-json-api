@@ -10,7 +10,7 @@ function setModels(params) {
   options = {
     authorAsync: params.authorAsync || false,
     commentAsync: params.commentAsync || false
-  }
+  };
 
   Post = DS.Model.extend({
     title:    DS.attr('string'),

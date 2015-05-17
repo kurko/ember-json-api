@@ -1,7 +1,7 @@
 {
   "name": "ember-json-api",
   "description": "Ember Data adapter for JSON API.",
-  "version": "0.3.0",
+  "version": "0.4.4",
   "homepage": "http://github.com/kurko/ember-json-api",
   "author": "Dali Zheng",
   "contributors": [
@@ -12,6 +12,10 @@
     {
       "name": "Stefan Penner",
       "email": "stefan.penner@gmail.com"
+    },
+    {
+      "name": "Eric Neuhauser",
+      "email": "eric.neuhauser@gmail.com"
     }
   ],
   "main": "dist/json-api-adapter.js",

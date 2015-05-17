@@ -2,14 +2,12 @@
 
 ![](https://travis-ci.org/kurko/ember-json-api.svg?branch=master)
 
-This is a [JSON API](http://jsonapi.org) adapter for [Ember Data](http://github.com/emberjs/data)
-1.0 beta 15, that extends the built-in REST adapter. Please note that Ember Data
-and JSON API are both works in progress, use with caution.
+This is a [JSON API](http://jsonapi.org) adapter for [Ember Data](http://github.com/emberjs/data) 1.0 beta 16.1, that extends the built-in REST adapter. Please note that Ember Data and JSON API are both works in progress, use with caution.
 
-**Important:** this is under heavy development. For the lastest stable release,
+**Important:** this is under heavy development. For the latest stable release,
 check the latest tag.
 
-This follows JSONAPI v1.0 rc1.
+This follows [JSONAPI v1.0 rc3](https://github.com/json-api/json-api/blob/827ba3c1130408fdb406d9faab645b0db7dd4fe4/index.md), with a primary `data` root, resources linked with `related` property, side loaded data in an `included` array at the root, and consistent linkage with a `linkage` property for a linked resource.
 
 ### Specification coverage
 

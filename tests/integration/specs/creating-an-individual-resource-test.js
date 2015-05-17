@@ -8,10 +8,11 @@ module('integration/specs/creating-an-individual-resource', {
 
     responses = {
       post: {
-        posts: {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
-          post_summary: 'summary'
+          'post-summary': 'summary'
         }
       }
     };
@@ -30,12 +31,15 @@ module('integration/specs/creating-an-individual-resource', {
 
 asyncTest("POST /posts/1 won't push an array", function() {
   var request = {
-    posts: {
+    data: {
       title: 'Rails is Omakase',
-      postSummary: null,
+      'post-summary': null,
       links: {
-        comments: []
-      }
+        comments: {
+          linkage: []
+        }
+      },
+      type: 'posts'
     }
   };
 
@@ -43,12 +47,10 @@ asyncTest("POST /posts/1 won't push an array", function() {
 
   Em.run(function() {
     var post = env.store.createRecord(models.post, { title: 'Rails is Omakase' });
-
     post.save().then(function(record) {
       equal(record.get('id'), '1', 'id is correct');
       equal(record.get('title'), 'Rails is Omakase', 'title is correct');
       equal(record.get('postSummary'), 'summary', 'summary is correct');
-
       start();
     });
   });

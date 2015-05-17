@@ -34,13 +34,13 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   /**
    * Look up routes based on top-level links.
    */
-  buildURL: function(typeName, id, snapshot) {
+  buildURL: function(typeName, id, snapshot, requestType) {
     // FIXME If there is a record, try and look up the self link
     // - Need to use the function from the serializer to build the self key
     // TODO: this basically only works in the simplest of scenarios
     var route = this.getRoute(typeName, id, snapshot);
     if(!route) {
-      return this._super(typeName, id, snapshot);
+      return this._super(typeName, id, snapshot, requestType);
     }
 
     var url = [];

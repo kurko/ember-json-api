@@ -1,5 +1,5 @@
 var get = Ember.get, set = Ember.set;
-var Post, Comment, Author, env, store;
+var Post, Comment, Author, env;
 var responses, fakeServer;
 
 module('integration/specs/link-with-type', {
@@ -8,35 +8,46 @@ module('integration/specs/link-with-type', {
 
     responses = {
       post: {
-        post: {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
             observations: {
-              ids: ['2', '3'],
-              type: 'comment'
+              linkage: [{
+                id: '2',
+                type: 'comments'
+              },{
+                id: '3',
+                type: 'comments'
+              }]
             },
             writer: {
-              id: '1',
-              type: 'author'
+              linkage: {
+                id: '1',
+                type: 'authors'
+              }
             }
           }
         }
       },
       comments_2: {
-        comments: {
+        data: {
+          type: 'comments',
           id: 2,
           title: 'good article'
         }
       },
       comments_3: {
-        comments: {
+        data: {
+          type: 'comments',
           id: 3,
           title: 'bad article'
         }
       },
       author: {
-        author: {
+        data: {
+          type: 'authors',
           id: 1,
           name: 'Tomster'
         }
@@ -65,14 +76,13 @@ module('integration/specs/link-with-type', {
       author: Author
     });
 
-    store = env.store;
-
-    store.modelFor('post');
-    store.modelFor('comment');
+    env.store.modelFor('post');
+    env.store.modelFor('comment');
+    env.store.modelFor('author');
   },
 
   teardown: function() {
-    Ember.run(store, 'destroy');
+    Ember.run(env.store, 'destroy');
     shutdownFakeServer(fakeServer);
   }
 });
@@ -83,7 +93,7 @@ asyncTest("GET /posts/1 with array of unmatched named relationship", function() 
   fakeServer.get('/comments/3', responses.comments_3);
 
   Em.run(function() {
-    store.find('post', 1).then(function(record) {
+    env.store.find('post', 1).then(function(record) {
       equal(record.get('id'), '1', 'id is correct');
       equal(record.get('title'), 'Rails is Omakase', 'title is correct');
       record.get('observations').then(function(comments) {
@@ -105,7 +115,7 @@ asyncTest("GET /posts/1 with single unmatched named relationship", function() {
   fakeServer.get('/authors/1', responses.author);
 
   Em.run(function() {
-    store.find('post', 1).then(function(record) {
+    env.store.find('post', 1).then(function(record) {
       equal(record.get('id'), '1', 'id is correct');
       equal(record.get('title'), 'Rails is Omakase', 'title is correct');
       record.get('writer').then(function(writer) {

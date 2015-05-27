@@ -8,32 +8,44 @@ module('integration/specs/urls-for-resource-collections', {
 
     responses = {
       posts_not_compound: {
-        'posts': {
+        data: {
+          type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
           links: {
-            'comments': ['2', '3']
+            comments: {
+              linkage: [{
+                type: 'comments',
+                id: '2'
+              },{
+                type: 'comments',
+                id: '3'
+              }]
+            }
           }
         }
       },
       comments_2: {
-        'comments': {
+        data: {
+          type: 'comments',
           'id': '2',
           'title': 'good article',
           'body': 'ideal for my startup'
         }
       },
       comments_3: {
-        'comments': {
-          'id': '3',
-          'title': 'bad article',
-          'body': "doesn't run Crysis"
+        data: {
+          type: 'comments',
+          id: '3',
+          title: 'bad article',
+          body: "doesn't run Crysis"
         }
       },
       underscore_resource: {
-        'some_resource': {
-          'id': '1',
-          'title': 'wow'
+        data: {
+          type: 'some_resource',
+          id: '1',
+          title: 'wow'
         }
       }
     };
@@ -80,13 +92,13 @@ asyncTest('GET /posts/1 calls later GET /comments/2,3 when Posts has async comme
   });
 });
 
-asyncTest('GET /some_resource, not camelCase', function() {
+asyncTest('GET /some_resource, not camelCase, dasherized', function() {
   var models = setModels({
     commentAsync: true
   });
   env = setupStore(models);
 
-  fakeServer.get('/some_resources/1', responses.underscore_resource);
+  fakeServer.get('/some-resources/1', responses.underscore_resource);
 
   Em.run(function() {
     env.store.find('someResource', '1').then(function(record) {

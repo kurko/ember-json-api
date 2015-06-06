@@ -43,6 +43,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       return this._super(typeName, id, snapshot);
     }
 
+
     var url = [];
     var host = get(this, 'host');
     var prefix = this.urlPrefix();
@@ -90,7 +91,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   findBelongsTo: function(store, snapshot, url, relationship) {
     var belongsTo = snapshot.belongsTo(relationship.key);
-    var belongsToLoaded = belongsTo && !belongsTo.record.get('currentState.isEmpty');
+    var belongsToLoaded = belongsTo && !belongsTo.record.get('_internalModel.currentState.isEmpty');
 
     if(belongsToLoaded) { return; }
 
@@ -160,8 +161,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
       if (jqXHR.status === 422) {
         return new DS.InvalidError(errors);
-      } else{
-        return new ServerError(jqXHR.status, response, jqXHR);
+      } else {
+        return new ServerError(jqXHR.status, error.statusText || response, jqXHR);
       }
     } else {
       return error;

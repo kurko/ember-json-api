@@ -17,7 +17,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     return Ember.String.dasherize(key);
   },
   keyForSnapshot: function(snapshot) {
-    return Ember.String.dasherize(snapshot.typeKey);
+    return snapshot.modelName;
   },
 
   /**
@@ -227,7 +227,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    */
   serializeHasMany: function(record, json, relationship) {
     var attr = relationship.key;
-    var type = this.keyForRelationship(relationship.type.typeKey);
+    var type = this.keyForRelationship(relationship.type);
     var key = this.keyForRelationship(attr);
 
     if (relationship.kind === 'hasMany') {

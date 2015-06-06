@@ -47,6 +47,7 @@ define("json-api-adapter",
           return this._super(typeName, id, snapshot);
         }
 
+
         var url = [];
         var host = get(this, 'host');
         var prefix = this.urlPrefix();
@@ -94,9 +95,11 @@ define("json-api-adapter",
        */
       findBelongsTo: function(store, snapshot, url, relationship) {
         var belongsTo = snapshot.belongsTo(relationship.key);
-        var belongsToLoaded = belongsTo && !belongsTo.record.get('currentState.isEmpty');
+        var belongsToLoaded = belongsTo && !belongsTo.record.get('_internalModel.currentState.isEmpty');
 
-        if(belongsToLoaded) { return; }
+        if (belongsToLoaded) {
+          return;
+        }
 
         return this._super(store, snapshot, url, relationship);
       },
@@ -105,10 +108,18 @@ define("json-api-adapter",
        * Suppress additional API calls if the relationship was already loaded via an `included` section
        */
       findHasMany: function(store, snapshot, url, relationship) {
-        var hasManyLoaded = snapshot.hasMany(relationship.key).filter(function(item) { return !item.record.get('currentState.isEmpty'); });
+        var hasManyLoaded = snapshot.hasMany(relationship.key);
 
-        if(get(hasManyLoaded, 'length')) {
-          return new Ember.RSVP.Promise(function (resolve, reject) { reject(); });
+        if (hasManyLoaded) {
+          hasManyLoaded = hasManyLoaded.filter(function(item) {
+            return !item.record.get('_internalModel.currentState.isEmpty');
+          });
+
+          if (get(hasManyLoaded, 'length')) {
+            return new Ember.RSVP.Promise(function(resolve, reject) {
+              reject();
+            });
+          }
         }
 
         return this._super(store, snapshot, url, relationship);
@@ -164,8 +175,8 @@ define("json-api-adapter",
 
           if (jqXHR.status === 422) {
             return new DS.InvalidError(errors);
-          } else{
-            return new ServerError(jqXHR.status, response, jqXHR);
+          } else {
+            return new ServerError(jqXHR.status, error.statusText || response, jqXHR);
           }
         } else {
           return error;
@@ -215,7 +226,7 @@ define("json-api-adapter",
         return Ember.String.dasherize(key);
       },
       keyForSnapshot: function(snapshot) {
-        return Ember.String.dasherize(snapshot.typeKey);
+        return snapshot.modelName;
       },
 
       /**
@@ -425,7 +436,7 @@ define("json-api-adapter",
        */
       serializeHasMany: function(record, json, relationship) {
         var attr = relationship.key;
-        var type = this.keyForRelationship(relationship.type.typeKey);
+        var type = this.keyForRelationship(relationship.type);
         var key = this.keyForRelationship(attr);
 
         if (relationship.kind === 'hasMany') {

@@ -93,7 +93,9 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     var belongsTo = snapshot.belongsTo(relationship.key);
     var belongsToLoaded = belongsTo && !belongsTo.record.get('_internalModel.currentState.isEmpty');
 
-    if(belongsToLoaded) { return; }
+    if (belongsToLoaded) {
+      return;
+    }
 
     return this._super(store, snapshot, url, relationship);
   },
@@ -102,10 +104,18 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Suppress additional API calls if the relationship was already loaded via an `included` section
    */
   findHasMany: function(store, snapshot, url, relationship) {
-    var hasManyLoaded = snapshot.hasMany(relationship.key).filter(function(item) { return !item.record.get('currentState.isEmpty'); });
+    var hasManyLoaded = snapshot.hasMany(relationship.key);
 
-    if(get(hasManyLoaded, 'length')) {
-      return new Ember.RSVP.Promise(function (resolve, reject) { reject(); });
+    if (hasManyLoaded) {
+      hasManyLoaded = hasManyLoaded.filter(function(item) {
+        return !item.record.get('_internalModel.currentState.isEmpty');
+      });
+
+      if (get(hasManyLoaded, 'length')) {
+        return new Ember.RSVP.Promise(function(resolve, reject) {
+          reject();
+        });
+      }
     }
 
     return this._super(store, snapshot, url, relationship);

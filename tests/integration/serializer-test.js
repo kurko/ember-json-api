@@ -178,7 +178,7 @@ test('serialize into snake_case', function() {
   };
 
   env.serializer.keyForSnapshot = function(snapshot) {
-    return Ember.String.decamelize(snapshot.typeKey);
+    return Ember.String.underscore(snapshot.typeKey);
   };
 
   var json = Ember.run(function() {

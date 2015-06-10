@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### 0.5.0
+
+* Updated to ember data v1.0.0.beta-19
+
 ### 0.4.4
 
 * Made dasherized the default naming convention for resource types, attribute names, and association names per [recommended naming conventions](http://jsonapi.org/recommendations/#naming). To override with camelCase or snake_case, override the following:
@@ -32,7 +36,7 @@ export default JsonApiAdapter.extend({
 ### 0.4.3
 
 * Replace PUT verb with PATCH. This is a breaking change for some and can be overridden in the application adapter with the following:
- 
+
 ```
     ajaxOptions: function(url, type, options) {
         var methodType = (type === 'PATCH') ? 'PUT' : type;

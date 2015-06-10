@@ -1,8 +1,15 @@
 window.setupStore = function(options) {
+  var container, registry;
   var env = {};
   options = options || {};
 
-  var container = env.container = new Ember.Container();
+  if (Ember.Registry) {
+    registry = env.registry = new Ember.Registry();
+    container = env.container = registry.container();
+  } else {
+    container = env.container = new Ember.Container();
+    registry = env.registry = container;
+  }
 
   var adapter = env.adapter = options.adapter || DS.JsonApiAdapter;
   var serializer = env.serializer = options.serializer || DS.JsonApiSerializer;
@@ -11,16 +18,17 @@ window.setupStore = function(options) {
   delete options.serializer;
 
   for (var prop in options) {
-    container.register('model:' + prop, options[prop]);
+    registry.register('model:' + Ember.String.dasherize(prop), options[prop]);
   }
 
-  container.register('store:main', DS.Store.extend({
-    adapter: adapter
+  registry.register('adapter:-custom', adapter);
+  registry.register('store:main', DS.Store.extend({
+    adapter: '-custom'
   }));
 
-  container.register('serializer:application', serializer);
+  registry.register('serializer:application', serializer);
 
-  container.injection('serializer', 'store', 'store:main');
+  registry.injection('serializer', 'store', 'store:main');
 
   env.serializer = container.lookup('serializer:application');
   env.store = container.lookup('store:main');

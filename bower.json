@@ -1,6 +1,6 @@
 {
   "name": "ember-json-api",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "homepage": "https://github.com/kurko/ember-json-api",
   "authors": [
     "Dali Zheng <dali@series.ac>",
@@ -15,8 +15,8 @@
     "tests"
   ],
   "dependencies": {
-    "ember-data": "v1.0.0-beta.16.1",
-    "ember": "v1.10.0",
+    "ember-data": "v1.0.0-beta.19",
+    "ember": "v1.12.0",
     "handlebars": "v2.0.0",
     "loader.js": "stefanpenner/loader.js#1.0.1"
   },

@@ -69,19 +69,19 @@ test('serialize dasherized', function() {
   var tom;
 
   Ember.run(function() {
-    league = env.store.createRecord(HomePlanet, {
+    league = env.store.createRecord('homePlanet', {
       name: 'Villain League',
       id: '123'
     });
 
-    tom = env.store.createRecord(SuperVillain, {
+    tom = env.store.createRecord('superVillain', {
       firstName: 'Tom',
       lastName: 'Dale',
       homePlanet: league
     });
   });
 
-  var json = Ember.run(function(){
+  var json = Ember.run(function() {
     var snapshot = tom._createSnapshot();
     return env.serializer.serialize(snapshot);
   });
@@ -115,16 +115,16 @@ test('serialize camelcase', function() {
   };
 
   env.serializer.keyForSnapshot = function(snapshot) {
-    return Ember.String.camelize(snapshot.typeKey);
+    return Ember.String.camelize(snapshot.modelName);
   };
 
   Ember.run(function() {
-    league = env.store.createRecord(HomePlanet, {
+    league = env.store.createRecord('homePlanet', {
       name: 'Villain League',
       id: '123'
     });
 
-    tom = env.store.createRecord(SuperVillain, {
+    tom = env.store.createRecord('superVillain', {
       firstName: 'Tom',
       lastName: 'Dale',
       homePlanet: league
@@ -157,12 +157,12 @@ test('serialize into snake_case', function() {
   var tom;
 
   Ember.run(function() {
-    league = env.store.createRecord(HomePlanet, {
+    league = env.store.createRecord('homePlanet', {
       name: 'Villain League',
       id: '123'
     });
 
-    tom = env.store.createRecord(SuperVillain, {
+    tom = env.store.createRecord('superVillain', {
       firstName: 'Tom',
       lastName: 'Dale',
       homePlanet: league
@@ -178,7 +178,7 @@ test('serialize into snake_case', function() {
   };
 
   env.serializer.keyForSnapshot = function(snapshot) {
-    return Ember.String.decamelize(snapshot.typeKey);
+    return Ember.String.underscore(snapshot.modelName);
   };
 
   var json = Ember.run(function() {
@@ -191,7 +191,7 @@ test('serialize into snake_case', function() {
     last_name: 'Dale',
     links: {
       evil_minions: {
-        linkage: [],
+        linkage: []
       },
       home_planet: {
         linkage: {
@@ -207,7 +207,7 @@ test('serializeIntoHash', function() {
   var json = {};
 
   Ember.run(function(){
-    var league = env.store.createRecord(HomePlanet, {
+    var league = env.store.createRecord('homePlanet', {
       name: 'Umber',
       id: '123'
     });
@@ -230,11 +230,11 @@ test('serializeIntoHash', function() {
 });
 
 test('serializeIntoHash with decamelized types', function() {
-  HomePlanet.typeKey = 'home-planet';
+  HomePlanet.modelName = 'home-planet';
   var json = {};
 
   Ember.run(function() {
-    league = env.store.createRecord(HomePlanet, {
+    league = env.store.createRecord('homePlanet', {
       name: 'Umber',
       id: '123'
     });
@@ -260,25 +260,25 @@ test('serialize has many relationships', function() {
   var minime, minime2, drevil;
 
   Ember.run(function() {
-    drevil = env.store.createRecord(MegaVillain, {
+    drevil = env.store.createRecord('megaVillain', {
       firstName: 'Dr',
       lastName: 'Evil'
     });
 
-    minime = env.store.createRecord(BlueMinion, {
+    minime = env.store.createRecord('blueMinion', {
       id: '123',
       name: 'Mini me',
       superVillain: drevil
     });
 
-    minime2 = env.store.createRecord(BlueMinion, {
+    minime2 = env.store.createRecord('blueMinion', {
       id: '345',
       name: 'Mini me 2',
       superVillain: drevil
     });
   });
 
-  var json = Ember.run(function(){
+  var json = Ember.run(function() {
     var snapshot = drevil._createSnapshot();
     return env.serializer.serialize(snapshot);
   });
@@ -305,16 +305,16 @@ test('serialize belongs to relationships', function() {
 
   Ember.run(function() {
     // Of course they belong to each other
-    female = env.store.createRecord(FemaleMinion, {
+    female = env.store.createRecord('femaleMinion', {
       name: 'Bobbie Sue'
     });
-    male = env.store.createRecord(MaleMinion, {
+    male = env.store.createRecord('maleMinion', {
       id: 2,
       wife: female
     });
   });
 
-  var json = Ember.run(function(){
+  var json = Ember.run(function() {
     var snapshot = female._createSnapshot();
     return env.serializer.serialize(snapshot);
   });
@@ -337,18 +337,18 @@ test('serialize polymorphic belongs to relationships', function() {
 
   Ember.run(function() {
     // Of course they belong to each other
-    female = env.store.createRecord(FemaleMinion, {
+    female = env.store.createRecord('femaleMinion', {
       id: 1,
       name: 'Bobbie Sue'
     });
-    male = env.store.createRecord(MaleMinion, {
+    male = env.store.createRecord('maleMinion', {
       id: 2,
       spouse: female,
       name: 'Billy Joe'
     });
   });
 
-  var json = Ember.run(function(){
+  var json = Ember.run(function() {
     var snapshot = male._createSnapshot();
     return env.serializer.serialize(snapshot);
   });
@@ -384,7 +384,7 @@ test('normalize camelCased', function() {
         },
         {
           id: 2,
-            type: 'evilMinions'
+          type: 'evilMinions'
         }]
       }
     }
@@ -435,7 +435,7 @@ test('normalize links camelized', function() {
 });
 
 test('extractSingle snake_case', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: {
@@ -479,13 +479,13 @@ test('extractSingle snake_case', function() {
     return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
   });
 
-  env.store.find('superVillain', 1).then(function(minion){
+  env.store.find('superVillain', 1).then(function(minion) {
     equal(minion.get('firstName'), 'Tom');
   });
 });
 
 test('extractSingle camelCase', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: {
@@ -521,13 +521,13 @@ test('extractSingle camelCase', function() {
     return env.serializer.extractSingle(env.store, HomePlanet, json_hash);
   });
 
-  env.store.find('superVillain', 1).then(function(minion){
+  env.store.find('superVillain', 1).then(function(minion) {
     equal(minion.get('firstName'), 'Tom');
   });
 });
 
 test('extractArray snake_case', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: [{
@@ -571,14 +571,14 @@ test('extractArray snake_case', function() {
     env.serializer.extractArray(env.store, HomePlanet, json_hash);
   });
 
-  env.store.find('superVillain', 1).then(function(minion){
+  env.store.find('superVillain', 1).then(function(minion) {
     equal(minion.get('firstName'), 'Tom');
   });
 });
 // TODO: test something that utilizes the flattening of links in normalize
 
 test('extractArray', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: [{
@@ -622,13 +622,13 @@ test('extractArray', function() {
     env.serializer.extractArray(env.store, HomePlanet, json_hash);
   });
 
-  env.store.find('superVillain', 1).then(function(minion){
+  env.store.find('superVillain', 1).then(function(minion) {
     equal(minion.get('firstName'), 'Tom');
   });
 });
 
 test('looking up a belongsTo association', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: [{
@@ -673,7 +673,7 @@ test('looking up a belongsTo association', function() {
   });
 
   Ember.run(function() {
-    env.store.find('homePlanet', 1).then(function(planet){
+    env.store.find('homePlanet', 1).then(function(planet) {
       return planet.get('superVillains').then(function(villains) {
         equal(villains.get('firstObject').get('id'), 1);
       });

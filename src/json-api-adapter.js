@@ -20,9 +20,13 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     if (hash.data && type !== 'GET') {
       hash.contentType = this.contentType;
     }
+
     // Does not work
     //hash.accepts = this.accepts;
-    if(!hash.hasOwnProperty('headers')) { hash.headers = {}; }
+    if (!hash.hasOwnProperty('headers')) {
+      hash.headers = {};
+    }
+
     hash.headers.Accept = this.accepts;
     return hash;
   },
@@ -43,6 +47,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       return this._super(typeName, id, snapshot);
     }
 
+
     var url = [];
     var host = get(this, 'host');
     var prefix = this.urlPrefix();
@@ -58,10 +63,15 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
       url.push(route.replace(param, ''));
     }
 
-    if (prefix) { url.unshift(prefix); }
+    if (prefix) {
+      url.unshift(prefix);
+    }
 
     url = url.join('/');
-    if (!host && url) { url = '/' + url; }
+
+    if (!host && url) {
+      url = '/' + url;
+    }
 
     return url;
   },
@@ -70,7 +80,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Fix query URL.
    */
   findMany: function(store, type, ids, snapshots) {
-    return this.ajax(this.buildURL(type.typeKey, ids.join(','), snapshots, 'findMany'), 'GET');
+    return this.ajax(this.buildURL(type.modelName, ids.join(','), snapshots, 'findMany'), 'GET');
   },
 
   /**
@@ -80,7 +90,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   createRecord: function(store, type, snapshot) {
     var data = this._serializeData(store, type, snapshot);
 
-    return this.ajax(this.buildURL(type.typeKey), 'POST', {
+    return this.ajax(this.buildURL(type.modelName), 'POST', {
       data: data
     });
   },
@@ -90,9 +100,11 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   findBelongsTo: function(store, snapshot, url, relationship) {
     var belongsTo = snapshot.belongsTo(relationship.key);
-    var belongsToLoaded = belongsTo && !belongsTo.record.get('currentState.isEmpty');
+    var belongsToLoaded = belongsTo && !belongsTo.record.get('_internalModel.currentState.isEmpty');
 
-    if(belongsToLoaded) { return; }
+    if (belongsToLoaded) {
+      return;
+    }
 
     return this._super(store, snapshot, url, relationship);
   },
@@ -101,10 +113,18 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    * Suppress additional API calls if the relationship was already loaded via an `included` section
    */
   findHasMany: function(store, snapshot, url, relationship) {
-    var hasManyLoaded = snapshot.hasMany(relationship.key).filter(function(item) { return !item.record.get('currentState.isEmpty'); });
+    var hasManyLoaded = snapshot.hasMany(relationship.key);
 
-    if(get(hasManyLoaded, 'length')) {
-      return new Ember.RSVP.Promise(function (resolve, reject) { reject(); });
+    if (hasManyLoaded) {
+      hasManyLoaded = hasManyLoaded.filter(function(item) {
+        return !item.record.get('_internalModel.currentState.isEmpty');
+      });
+
+      if (get(hasManyLoaded, 'length')) {
+        return new Ember.RSVP.Promise(function(resolve, reject) {
+          reject();
+        });
+      }
     }
 
     return this._super(store, snapshot, url, relationship);
@@ -118,16 +138,16 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     var data = this._serializeData(store, type, snapshot);
     var id = get(snapshot, 'id');
 
-    return this.ajax(this.buildURL(type.typeKey, id, snapshot), 'PATCH', {
+    return this.ajax(this.buildURL(type.modelName, id, snapshot), 'PATCH', {
       data: data
     });
   },
 
   _serializeData: function(store, type, snapshot) {
-    var serializer = store.serializerFor(type.typeKey);
+    var serializer = store.serializerFor(type.modelName);
     var fn = Ember.isArray(snapshot) ? 'serializeArray' : 'serialize';
     var json = {
-      data: serializer[fn](snapshot, { includeId:true, type:type.typeKey })
+      data: serializer[fn](snapshot, { includeId: true, type: type.modelName })
     };
 
     return json;
@@ -136,8 +156,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
   _tryParseErrorResponse:  function(responseText) {
     try {
       return Ember.$.parseJSON(responseText);
-    } catch(e) {
-      return "Something went wrong";
+    } catch (e) {
+      return 'Something went wrong';
     }
   },
 
@@ -160,8 +180,8 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
       if (jqXHR.status === 422) {
         return new DS.InvalidError(errors);
-      } else{
-        return new ServerError(jqXHR.status, response, jqXHR);
+      } else {
+        return new ServerError(jqXHR.status, error.statusText || response, jqXHR);
       }
     } else {
       return error;

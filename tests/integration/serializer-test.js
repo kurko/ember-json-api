@@ -115,7 +115,7 @@ test('serialize camelcase', function() {
   };
 
   env.serializer.keyForSnapshot = function(snapshot) {
-    return Ember.String.camelize(snapshot.typeKey);
+    return Ember.String.camelize(snapshot.modelName);
   };
 
   Ember.run(function() {
@@ -178,7 +178,7 @@ test('serialize into snake_case', function() {
   };
 
   env.serializer.keyForSnapshot = function(snapshot) {
-    return Ember.String.underscore(snapshot.typeKey);
+    return Ember.String.underscore(snapshot.modelName);
   };
 
   var json = Ember.run(function() {
@@ -435,7 +435,7 @@ test('normalize links camelized', function() {
 });
 
 test('extractSingle snake_case', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: {
@@ -485,7 +485,7 @@ test('extractSingle snake_case', function() {
 });
 
 test('extractSingle camelCase', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: {
@@ -527,7 +527,7 @@ test('extractSingle camelCase', function() {
 });
 
 test('extractArray snake_case', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: [{
@@ -578,7 +578,7 @@ test('extractArray snake_case', function() {
 // TODO: test something that utilizes the flattening of links in normalize
 
 test('extractArray', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: [{
@@ -628,7 +628,7 @@ test('extractArray', function() {
 });
 
 test('looking up a belongsTo association', function() {
-  env.container.register('adapter:superVillain', DS.ActiveModelAdapter);
+  env.registry.register('adapter:superVillain', DS.ActiveModelAdapter);
 
   var json_hash = {
     data: [{

@@ -1,5 +1,9 @@
 ## CHANGELOG
 
+### 0.5.1
+
+* Updated to JSON API 1.0 Spec
+
 ### 0.5.0
 
 * Updated to ember data v1.0.0.beta-19

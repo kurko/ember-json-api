@@ -10,10 +10,16 @@ module('integration/specs/to-many-polymorphic', {
       data: {
         type: 'owners',
         id: '1',
-        name: 'Luke',
-        links: {
+        attributes: {
+          name: 'Luke'
+        },
+        relationships: {
           pets: {
-            linkage: [
+            links: {
+              self: '/owners/1/relationships/pets',
+              related: '/owners/1/pets'
+            },
+            data: [
               {
                 type: 'cats',
                 id: 'cat_1'
@@ -30,14 +36,18 @@ module('integration/specs/to-many-polymorphic', {
         {
           type: 'cats',
           id: 'cat_1',
-          whiskers: 4,
-          paws: 3
+          attributes: {
+            whiskers: 4,
+            paws: 3
+          }
         },
         {
           type: 'dogs',
           id: 'dog_2',
-          spots: 7,
-          paws: 5
+          attributes: {
+            spots: 7,
+            paws: 5
+          }
         }
       ]
     };

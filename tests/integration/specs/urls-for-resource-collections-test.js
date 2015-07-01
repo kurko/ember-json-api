@@ -11,10 +11,12 @@ module('integration/specs/urls-for-resource-collections', {
         data: {
           type: 'posts',
           id: '1',
-          title: 'Rails is Omakase',
-          links: {
+          attributes: {
+            title: 'Rails is Omakase',
+          },
+          relationships: {
             comments: {
-              linkage: [{
+              data: [{
                 type: 'comments',
                 id: '2'
               },{
@@ -29,23 +31,29 @@ module('integration/specs/urls-for-resource-collections', {
         data: {
           type: 'comments',
           'id': '2',
-          'title': 'good article',
-          'body': 'ideal for my startup'
+          attributes: {
+            'title': 'good article',
+            'body': 'ideal for my startup'
+          }
         }
       },
       comments_3: {
         data: {
           type: 'comments',
           id: '3',
-          title: 'bad article',
-          body: "doesn't run Crysis"
+          attributes: {
+            title: 'bad article',
+            body: "doesn't run Crysis"
+          }
         }
       },
       underscore_resource: {
         data: {
           type: 'some_resource',
           id: '1',
-          title: 'wow'
+          attributes: {
+            title: 'wow'
+          }
         }
       }
     };

@@ -71,18 +71,26 @@ var stubServer = function() {
      * If it doesn't exist, we throw errors (and rocks).
      */
     responseForRequest: function(verb, currentRequest) {
+      var sortString = function(s) {
+        var c = [];
+        var l = s.length;
+        for (var i = 0; i < l; i++) {
+          c.push(s[i]);
+        }
+        return c.sort().join('');
+      };
       var respectiveResponse;
       var availableRequests = this.availableRequests[verb];
-      var actualRequest = JSON.stringify(JSON.parse(currentRequest.requestBody));
+      var actualRequest = sortString(JSON.stringify(JSON.parse(currentRequest.requestBody)));
 
       for (requests in availableRequests) {
         if (!availableRequests.hasOwnProperty(requests))
           continue;
 
-        var request = JSON.stringify(availableRequests[requests].request);
+        var request = sortString(JSON.stringify(availableRequests[requests].request));
         var response = JSON.stringify(availableRequests[requests].response);
 
-        if (actualRequest === request) {
+        if (request === actualRequest) {
           respectiveResponse = availableRequests[requests].response;
           break;
         }
@@ -92,7 +100,7 @@ var stubServer = function() {
         return respectiveResponse;
       } else {
         var error = "No response defined for "+verb+" request";
-        console.error(error, actualRequest);
+        console.error(error, JSON.stringify(JSON.parse(currentRequest.requestBody)));
 
         if (availableRequests.length) {
           console.log("Current defined requests:");

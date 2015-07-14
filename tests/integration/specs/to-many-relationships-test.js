@@ -11,10 +11,12 @@ module('integration/specs/to-many-relationships', {
         data: {
           type: 'posts',
           id: '1',
-          title: 'Rails is Omakase',
-          links: {
+          attributes: {
+            title: 'Rails is Omakase',
+          },
+          relationships: {
             comments: {
-              linkage: [{
+              data: [{
                 id: '2',
                 type: 'comments'
               }, {
@@ -29,16 +31,20 @@ module('integration/specs/to-many-relationships', {
         data: {
           type: 'comments',
           id: '2',
-          title: 'good article',
-          body: 'ideal for my startup'
+          attributes: {
+            title: 'good article',
+            body: 'ideal for my startup'
+          }
         }
       },
       comments_3: {
         data: {
           type: 'comments',
           id: '3',
-          title: 'bad article',
-          body: "doesn't run Crysis"
+          attributes: {
+            title: 'bad article',
+            body: "doesn't run Crysis"
+          }
         }
       }
     };

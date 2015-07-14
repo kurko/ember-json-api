@@ -11,10 +11,12 @@ module('integration/specs/compound-documents', {
         data: {
           type: 'posts',
           id: '1',
-          title: 'Rails is Omakase',
-          links: {
+          attributes: {
+            title: 'Rails is Omakase'
+          },
+          relationships: {
             comments: {
-              linkage: [{
+              data: [{
                 type: 'comments',
                 id: '2'
               },{
@@ -23,7 +25,7 @@ module('integration/specs/compound-documents', {
               }]
             },
             author: {
-              linkage: {
+              data: {
                 type: 'authors',
                 id: '4'
               }
@@ -33,27 +35,35 @@ module('integration/specs/compound-documents', {
         included: [{
           type: 'comments',
           id: '2',
-          title: 'good article',
-          body: 'ideal for my startup'
+          attributes: {
+            title: 'good article',
+            body: 'ideal for my startup'
+          }
         }, {
           type: 'comments',
           id: '3',
-          title: 'bad article',
-          body: "doesn't run Crysis"
+          attributes: {
+            title: 'bad article',
+            body: "doesn't run Crysis"
+          }
         }, {
           type: 'authors',
           id: '4',
-          name: 'dhh'
+          attributes: {
+            name: 'dhh'
+          }
         }]
       },
       posts_nested_compound_document: {
         data: {
           type: 'posts',
             id: '1',
-            title: 'Rails is Omakase',
-            links: {
+            attributes: {
+              title: 'Rails is Omakase'
+            },
+            relationships: {
             comments: {
-              linkage: [{
+              data: [{
                 type: 'comments',
                 id: '2'
               },{
@@ -62,9 +72,9 @@ module('integration/specs/compound-documents', {
               }]
             },
             author: {
-              linkage: {
+              data: {
                 type: 'authors',
-                  id: '4'
+                id: '4'
               }
             }
           }
@@ -72,11 +82,13 @@ module('integration/specs/compound-documents', {
         included: [{
           type: 'comments',
           id: '2',
-          title: 'good article',
-          body: 'ideal for my startup',
-          links: {
+          attributes: {
+            title: 'good article',
+            body: 'ideal for my startup'
+          },
+          relationships: {
             writer: {
-              linkage: {
+              data: {
                 id: 5,
                 type: 'authors'
               }
@@ -85,11 +97,13 @@ module('integration/specs/compound-documents', {
         }, {
           type: 'comments',
           id: '3',
-          title: 'bad article',
-          body: "doesn't run Crysis",
-          links: {
+          attributes: {
+            title: 'bad article',
+            body: "doesn't run Crysis"
+          },
+          relationships: {
             writer: {
-              linkage: {
+              data: {
                 id: 4,
                 type: 'authors'
               }
@@ -98,11 +112,15 @@ module('integration/specs/compound-documents', {
         }, {
           type: 'authors',
           id: '4',
-          name: 'dhh'
+          attributes: {
+            name: 'dhh'
+          }
         }, {
           type: 'authors',
           id: '5',
-          name: 'ado'
+          attributes: {
+            name: 'ado'
+          }
         }]
       }
     };

@@ -11,10 +11,12 @@ module('integration/specs/link-with-type', {
         data: {
           type: 'posts',
           id: '1',
-          title: 'Rails is Omakase',
-          links: {
+          attributes: {
+            title: 'Rails is Omakase',
+          },
+          relationships: {
             observations: {
-              linkage: [{
+              data: [{
                 id: '2',
                 type: 'comments'
               },{
@@ -23,7 +25,7 @@ module('integration/specs/link-with-type', {
               }]
             },
             writer: {
-              linkage: {
+              data: {
                 id: '1',
                 type: 'authors'
               }
@@ -35,21 +37,27 @@ module('integration/specs/link-with-type', {
         data: {
           type: 'comments',
           id: 2,
-          title: 'good article'
+          attributes: {
+            title: 'good article'
+          }
         }
       },
       comments_3: {
         data: {
           type: 'comments',
           id: 3,
-          title: 'bad article'
+          attributes: {
+            title: 'bad article'
+          }
         }
       },
       author: {
         data: {
           type: 'authors',
           id: 1,
-          name: 'Tomster'
+          attributes: {
+            name: 'Tomster'
+          }
         }
       }
     };

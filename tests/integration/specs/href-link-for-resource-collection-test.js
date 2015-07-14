@@ -11,12 +11,16 @@ module('integration/specs/href-link-for-resource-collection-test', {
         data: {
           type: 'posts',
           id: '1',
-          title: 'Rails is Omakase',
-          links: {
+          attributes: {
+            title: 'Rails is Omakase'
+          },
+          relationships: {
             comments: {
-              self: '/posts/1/links/comments',
-              related: '/posts/1/comments',
-              linkage: [{
+              links: {
+                self: '/posts/1/links/comments',
+                related: '/posts/1/comments'
+              },
+              data: [{
                 type: 'comments',
                 id: '1'
               },{
@@ -32,14 +36,18 @@ module('integration/specs/href-link-for-resource-collection-test', {
           {
             type: 'comments',
             id: '1',
-            title: 'good article',
-            body: 'ideal for my startup'
+            attributes: {
+              title: 'good article',
+              body: 'ideal for my startup'
+            }
           },
           {
             type: 'comments',
             id: '2',
-            title: 'bad article',
-            body: 'doesn\'t run Crysis'
+            attributes: {
+              title: 'bad article',
+              body: 'doesn\'t run Crysis'
+            }
           }
         ]
       }
@@ -96,10 +104,14 @@ asyncTest('GET /posts/1 calls later GET /posts/1/some_resources when Posts has a
     data: {
       type: 'posts',
       id: '1',
-      title: 'Rails is Omakase',
-      links: {
+      attributes: {
+        title: 'Rails is Omakase',
+      },
+      relationships: {
         'some_resources': {
-          related: '/posts/1/some_resources'
+          links: {
+            related: '/posts/1/some_resources'
+          }
         }
       }
     }
@@ -110,12 +122,16 @@ asyncTest('GET /posts/1 calls later GET /posts/1/some_resources when Posts has a
       {
         type: 'some_resources',
         id: 1,
-        title: 'Something 1'
+        attributes: {
+          title: 'Something 1'
+        }
       },
       {
         type: 'some_resources',
         id: 2,
-        title: 'Something 2'
+        attributes: {
+          title: 'Something 2'
+        }
       }
     ]
   });

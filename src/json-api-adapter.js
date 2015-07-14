@@ -20,10 +20,9 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     if (hash.data && type !== 'GET') {
       hash.contentType = this.contentType;
     }
-
     // Does not work
     //hash.accepts = this.accepts;
-    if (!hash.hasOwnProperty('headers')) {
+    if(!hash.hasOwnProperty('headers')) {
       hash.headers = {};
     }
 
@@ -46,7 +45,6 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     if(!route) {
       return this._super(typeName, id, snapshot);
     }
-
 
     var url = [];
     var host = get(this, 'host');
@@ -102,7 +100,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     var belongsTo = snapshot.belongsTo(relationship.key);
     var belongsToLoaded = belongsTo && !belongsTo.record.get('_internalModel.currentState.isEmpty');
 
-    if (belongsToLoaded) {
+    if(belongsToLoaded) {
       return;
     }
 
@@ -136,8 +134,10 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
    */
   updateRecord: function(store, type, snapshot) {
     var data = this._serializeData(store, type, snapshot);
+    if (data.data.links) {
+      delete data.data.links;
+    }
     var id = get(snapshot, 'id');
-
     return this.ajax(this.buildURL(type.modelName, id, snapshot), 'PATCH', {
       data: data
     });
@@ -147,7 +147,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
     var serializer = store.serializerFor(type.modelName);
     var fn = Ember.isArray(snapshot) ? 'serializeArray' : 'serialize';
     var json = {
-      data: serializer[fn](snapshot, { includeId: true, type: type.modelName })
+      data: serializer[fn](snapshot, { includeId: true, type:type.modelName })
     };
 
     return json;
@@ -180,7 +180,7 @@ DS.JsonApiAdapter = DS.RESTAdapter.extend({
 
       if (jqXHR.status === 422) {
         return new DS.InvalidError(errors);
-      } else {
+      } else{
         return new ServerError(jqXHR.status, error.statusText || response, jqXHR);
       }
     } else {

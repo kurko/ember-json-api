@@ -27,11 +27,18 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var json = {};
     for (var key in hash) {
       // This is already normalized
-      if (key === 'links') {
+      if (key === 'relationships') {
         json[key] = hash[key];
         continue;
       }
 
+      if (key === 'attributes') {
+        for (var attributeKey in hash[key]) {
+          var camelizedKey = Ember.String.camelize(attributeKey);
+          json[camelizedKey] = hash[key][attributeKey];
+        }
+        continue;
+      }
       var camelizedKey = Ember.String.camelize(key);
       json[camelizedKey] = hash[key];
     }
@@ -43,7 +50,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "meta" & "links" before normalizing.
    */
   normalizePayload: function(payload) {
-    if (!payload) {
+    if(!payload) {
       return {};
     }
 
@@ -62,7 +69,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     }
     if (payload.links) {
       // FIXME Need to handle top level links, like pagination
-      //this.extractRelationships(payload.links, payload);
       delete payload.links;
     }
     if (payload[this.sideloadedRecordsKey]) {
@@ -84,9 +90,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
    * Extract top-level "data" containing a single primary data
    */
   extractSingleData: function(data, payload) {
-    if (data.links) {
-      this.extractRelationships(data.links, data);
-      //delete data.links;
+    if (data.relationships) {
+      this.extractRelationships(data.relationships, data);
     }
     payload[data.type] = data;
     delete data.type;
@@ -99,9 +104,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var type = data.length > 0 ? data[0].type : null;
     var serializer = this;
     data.forEach(function(item) {
-      if (item.links) {
-        serializer.extractRelationships(item.links, item);
-        //delete data.links;
+      if(item.relationships) {
+        serializer.extractRelationships(item.relationships, item);
       }
     });
 
@@ -118,8 +122,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
     sideloaded.forEach(function(link) {
       var type = link.type;
-      if (link.links) {
-        serializer.extractRelationships(link.links, link);
+      if (link.relationships) {
+        serializer.extractRelationships(link.relationships, link);
       }
       delete link.type;
       if (!models[type]) {
@@ -144,7 +148,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       association = links[link];
       link = Ember.String.camelize(link.split('.').pop());
 
-      if (!association) {
+      if(!association) {
         continue;
       }
 
@@ -158,9 +162,11 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
         }
         relationshipLink = null;
       } else {
-        relationshipLink =  association[this.relationshipKey];
-        route = association[this.relatedResourceKey];
-        id = getLinkageId(association.linkage);
+        if (association.links) {
+          relationshipLink =  association.links[this.relationshipKey];
+          route = association.links[this.relatedResourceKey];
+        }
+        id = getLinkageId(association.data);
       }
 
       if (route) {
@@ -175,9 +181,6 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
       if (id) {
         resource[link] = id;
       }
-      if (relationshipLink) {
-        resource.links[link + '--self'] = this.removeHost(relationshipLink);
-      }
     }
     return resource.links;
   },
@@ -190,8 +193,26 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
 
   serialize: function(snapshot, options) {
     var data = this._super(snapshot, options);
-    if (!data.hasOwnProperty('type') && options && options.type) {
-      data.type = Ember.String.pluralize(this.keyForRelationship(options.type));
+    var type = (options ? options.type : null) || snapshot.modelName;
+    data['attributes'] = {};
+    for (var key in data) {
+      if (key === 'links' || key === 'attributes' || key === 'id' || key === 'type' || key === 'relationships') {
+        if (key === 'links') {
+          if (!data.relationships) {
+            data.relationships = {};
+          }
+          for (var k in data[key]) {
+            data.relationships[k] = data[key][k];
+          }
+          delete data.links;
+        }
+        continue;
+      }
+      data['attributes'][key] = data[key];
+      delete data[key];
+    }
+    if (!data.hasOwnProperty('type') && type) {
+      data.type = Ember.String.pluralize(this.keyForRelationship(type));
     }
     return data;
   },
@@ -200,7 +221,7 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var data = Ember.A();
     var serializer = this;
 
-    if (!snapshots) {
+    if(!snapshots) {
       return data;
     }
 
@@ -233,7 +254,9 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     type = this.keyForSnapshot(belongsTo);
     key = this.keyForRelationship(attr);
 
-    json.links = json.links || {};
+    if (!json.links) {
+      json.links = json.relationships || {};
+    }
     json.links[key] = belongsToLink(key, type, get(belongsTo, 'id'));
   },
 
@@ -246,8 +269,8 @@ DS.JsonApiSerializer = DS.RESTSerializer.extend({
     var key = this.keyForRelationship(attr);
 
     if (relationship.kind === 'hasMany') {
-      json.links = json.links || {};
-      json.links[key] = hasManyLink(key, type, record, attr);
+      json.relationships = json.relationships || {};
+      json.relationships[key] = hasManyLink(key, type, record, attr);
     }
   }
 });
@@ -258,7 +281,7 @@ function belongsToLink(key, type, value) {
   }
 
   return {
-    linkage: {
+    data: {
       id: value,
       type: Ember.String.pluralize(type)
     }
@@ -278,7 +301,7 @@ function hasManyLink(key, type, record, attr) {
     });
   }
 
-  return { linkage: linkages };
+  return { data: linkages };
 }
 
 function normalizeLinkage(linkage) {

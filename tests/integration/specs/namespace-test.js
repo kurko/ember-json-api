@@ -12,15 +12,15 @@ module('integration/specs/namespace', {
           type: 'posts',
           id: '1',
           title: 'Rails is Omakase',
-          links: {
+          relationships: {
             author: {
-              linkage: {
+              data: {
                 type: 'authors',
                 id: '2'
               }
             },
             comments: {
-              linkage: [{
+              data: [{
                 type: 'comments',
                 id: '2'
               }]
@@ -32,16 +32,18 @@ module('integration/specs/namespace', {
         data: {
           type: 'posts',
           id: '2',
-          title: 'TDD Is Dead lol',
-          links: {
+          attributes: {
+            title: 'TDD Is Dead lol',
+          },
+          relationships: {
             author: {
-              linkage: {
+              data: {
                 type: 'authors',
                 id: '2'
               }
             },
             comments: {
-              linkage: [{
+              data: [{
                 type: 'comments',
                 id: '3'
               }]
@@ -53,17 +55,23 @@ module('integration/specs/namespace', {
         data: {
           type: 'posts',
           id: '1',
-          title: 'Rails is Omakase',
-          links: {
+          attributes: {
+            title: 'Rails is Omakase',
+          },
+          relationships: {
             author: {
-              related: '/api/posts/1/author',
-              linkage: {
+              links: {
+                related: '/api/posts/1/author'
+              },
+              data: {
                 type: 'authors',
                 id: '2'
               }
             },
             comments: {
-              related: '/api/posts/1/comments'
+              links: {
+                related: '/api/posts/1/comments'
+              }
             }
           }
         }
@@ -72,17 +80,23 @@ module('integration/specs/namespace', {
         data: {
           type: 'posts',
           id: '2',
-          title: 'TDD Is Dead lol',
-          links: {
+          attributes: {
+            title: 'TDD Is Dead lol'
+          },
+          relationships: {
             author: {
-              related: '/api/posts/2/author',
-              linkage: {
+              links: {
+                related: '/api/posts/2/author'
+              },
+              data: {
                 type: 'authors',
                 id: '2'
               }
             },
             comments: {
-              related: '/api/posts/2/comments'
+              links: {
+                related: '/api/posts/2/comments'
+              }
             }
           }
         }
@@ -91,31 +105,39 @@ module('integration/specs/namespace', {
         data: {
           type: 'authors',
           id: '2',
-          name: 'dhh'
+          attributes: {
+            name: 'dhh'
+          }
         }
       },
       post1_comments: {
         data: [{
           type: 'comments',
           'id': '2',
-          'title': 'good article',
-          'body': 'ideal for my startup'
+          attributes: {
+            'title': 'good article',
+            'body': 'ideal for my startup'
+          }
         }]
       },
       post2_comments: {
         data: [{
           type: 'comments',
           id: '3',
-          title: 'bad article',
-          body: "doesn't run Crysis"
+          attributes: {
+            title: 'bad article',
+            body: "doesn't run Crysis"
+          }
         }]
       },
       comments_2: {
         data: {
           type: 'comments',
           'id': '2',
-          'title': 'good article',
-          'body': 'ideal for my startup'
+          attributes: {
+            'title': 'good article',
+            'body': 'ideal for my startup'
+          }
         }
       },
       comments_3: {

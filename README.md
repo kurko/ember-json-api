@@ -4,10 +4,7 @@
 
 This is a [JSON API](http://jsonapi.org) adapter for [Ember Data](http://github.com/emberjs/data) 1.0 beta 19, that extends the built-in REST adapter. Please note that Ember Data and JSON API are both works in progress, use with caution.
 
-**Important:** this is under heavy development. For the latest stable release,
-check the latest tag.
-
-This follows the JSON API v1.0 release.
+This supports JSON API v1.0.
 
 ### Specification coverage
 

@@ -1,5 +1,11 @@
 # ember-json-api
 
+>  **Deprecation Notice:** This addon was developed to add support for JSON API in Ember Data.
+>  With the release of Ember Data v1.13 support for JSON API was built-in, making this addon unnecessary.
+>  Since Ember Data now offers a similar feature set, we have decided to deprecate this addon.
+
+>  For more information on how to use the offical Ember Data solution see the [Ember 1.13 release notes](http://emberjs.com/blog/2015/06/18/ember-data-1-13-released.html).
+
 ![](https://travis-ci.org/kurko/ember-json-api.svg?branch=master)
 
 This is a [JSON API](http://jsonapi.org) adapter for [Ember Data](http://github.com/emberjs/data) 1.0 beta 19, that extends the built-in REST adapter. Please note that Ember Data and JSON API are both works in progress, use with caution.
